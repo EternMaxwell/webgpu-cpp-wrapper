@@ -1,0 +1,12 @@
+﻿# We'll use defaults from the LLVM style, but with 4 columns indentation.
+BasedOnStyle: Google
+IndentWidth: 4
+PointerAlignment: Left
+# NamespaceIndentation: All
+ColumnLimit: 120
+AllowAllArgumentsOnNextLine: true
+AllowShortBlocksOnASingleLine: Empty
+AlignAfterOpenBracket: Align
+BinPackParameters: false
+AlignConsecutiveAssignments: Consecutive
+ 
