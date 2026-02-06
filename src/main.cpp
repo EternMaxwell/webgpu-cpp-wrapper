@@ -1502,6 +1502,7 @@ void generate_webgpu_cpp(const WebGpuApiCpp& api_cpp, const TemplateMeta& templa
                                 std::views::reverse | std::ranges::to<std::string>();
         includes_text += std::format("#include <webgpu/{}>\n", file_name);
     }
+    includes_text += "\n#define WEBGPU_CPP_NAMESPACE " + namespace_name + "\n";
     output = std::regex_replace(output, std::regex(R"(\{\{webgpu_includes\}\})"), includes_text);
 
     // {{enums}}
@@ -1587,7 +1588,13 @@ void generate_webgpu_cpp(const WebGpuApiCpp& api_cpp, const TemplateMeta& templa
     // {{structs}}
     std::string structs_def_text;
     structs_def_text += nextInChainHelper;
-    for (const auto& struct_cpp : api_cpp.structs) {
+    for (auto struct_cpp : api_cpp.structs) {
+        for (auto&& [name, injects] : template_meta.injections.members) {
+            if (name == struct_cpp.name) {
+                struct_cpp.methods_decl.push_back(
+                    "\n" + (injects | std::views::join_with(std::string("\n")) | std::ranges::to<std::string>()));
+            }
+        }
         structs_def_text += struct_cpp.gen_definition() + "\n\n";
     }
     output = std::regex_replace(output, std::regex(R"(\{\{structs\}\})"),
@@ -1622,7 +1629,13 @@ void generate_webgpu_cpp(const WebGpuApiCpp& api_cpp, const TemplateMeta& templa
 
     // {{handles}}
     std::string handles_def_text;
-    for (const auto& handle_cpp : api_cpp.handles) {
+    for (auto handle_cpp : api_cpp.handles) {
+        for (auto&& [name, injects] : template_meta.injections.members) {
+            if (name == handle_cpp.name) {
+                handle_cpp.methods_decl.push_back(
+                    "\n" + (injects | std::views::join_with(std::string("\n")) | std::ranges::to<std::string>()));
+            }
+        }
         handles_def_text += handle_cpp.gen_definition() + "\n\n";
     }
     if (parser.contains("--use-raii")) {
@@ -1699,6 +1712,8 @@ void generate_webgpu_cpp(const WebGpuApiCpp& api_cpp, const TemplateMeta& templa
     }
     output = std::regex_replace(output, std::regex(R"(\{\{functions_impl\}\})"),
                                 std::format("namespace {} {{\n{}\n}}", namespace_name, functions_impl_text));
+
+    output += "#undef WEBGPU_CPP_NAMESPACE";
 
     // remove all non used binding
     output = std::regex_replace(output, std::regex(R"(\{\{\w+\}\})"), "");
@@ -2039,32 +2054,21 @@ TemplateMeta loadTemplate(const std::string& template_path) {
         throw std::runtime_error("Failed to open template file: " + template_path);
     }
     std::string line;
-    std::vector<std::string> current_injection;
+    std::string current_type;
     while (std::getline(file, line)) {
         std::smatch match;
         static std::regex begin_inject_re(R"(\{\{begin_inject\}\})");
         static std::regex end_inject_re(R"(\{\{end_inject\}\})");
         static std::regex inject_typename_re(R"(\s*typename +(\w+):)");
         if (std::regex_search(line, match, begin_inject_re)) {
-            current_injection.clear();
+            current_type.clear();
         } else if (std::regex_search(line, match, end_inject_re)) {
-            if (!current_injection.empty()) {
-                std::string type_name = current_injection[0];
-                current_injection.erase(current_injection.begin());
-                meta.injections.members[type_name] = current_injection;
-            }
-            current_injection.clear();
+            current_type.clear();
         } else if (std::regex_search(line, match, inject_typename_re)) {
-            if (!current_injection.empty()) {
-                std::string type_name = current_injection[0];
-                current_injection.erase(current_injection.begin());
-                meta.injections.members[type_name] = current_injection;
-            }
-            current_injection.clear();
-            current_injection.push_back(match[1]);
+            current_type = match[1];
         } else {
-            if (!current_injection.empty()) {
-                current_injection.push_back(line);
+            if (!current_type.empty()) {
+                meta.injections.members[current_type].push_back(line);
             } else {
                 meta.text += line + "\n";
             }

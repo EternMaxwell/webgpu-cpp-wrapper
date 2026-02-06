@@ -1,5 +1,6 @@
 ﻿module;
 #include <webgpu/webgpu.h>
+#define WEBGPU_CPP_NAMESPACE wgpu
 #include <atomic>
 #include <iostream>
 #include <vector>
@@ -2299,6 +2300,11 @@ struct StringView {
     StringView&& setData(char const* value) &&;
     StringView& setLength(size_t value) &;
     StringView&& setLength(size_t value) &&;
+    StringView(const std::string_view& sv) : data(sv.data()), length(sv.size()) {}
+    StringView(const char* str) : data(str), length(WGPU_STRLEN) {}
+    operator std::string_view() const {
+        return length == WGPU_STRLEN ? std::string_view(data) : std::string_view(data, length);
+    }
     char const* data;
     size_t length;
 };
@@ -11714,3 +11720,4 @@ wgpu::Bool hasInstanceFeature(wgpu::InstanceFeatureName feature) {
     return res;
 }
 }
+#undef WEBGPU_CPP_NAMESPACE
