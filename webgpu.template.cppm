@@ -2,6 +2,7 @@
 
 {{webgpu_includes}}
 
+#include <atomic>
 #include <iostream>
 #include <vector>
 #include <functional>
@@ -11,6 +12,8 @@
 #include <memory>
 #include <string_view>
 #include <span>
+#include <optional>
+#include <ranges>
 
 export module webgpu;
 
@@ -25,24 +28,29 @@ typename StringView:
 
 export {
 
+{{type_aliases}}
+
 {{enums}}
-{{enums_to_string_decl}}
 
 {{structs_decl}}
 {{handles_decl}}
-// Non member functions
-{{functions_decl}}
+{{callbacks_decl}}
 
 {{handles}}
-{{handles_raii}}
-{{structs}}
 {{callbacks}}
+{{structs}}
+
+// Non member functions
+{{functions_decl}}
 
 }
 
 {{structs_template_impl}}
-{{handle_template_impl}}
+{{handles_template_impl}}
+{{callbacks_template_impl}}
 
-{{enums_to_string_impl}}
+{{enums_impl}}
 {{structs_impl}}
+{{handles_impl}}
+{{callbacks_impl}}
 {{functions_impl}}
