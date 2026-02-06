@@ -350,6 +350,96 @@ void {0}::operator()({3}) const {{ if (data) data->invoke_c({1}); }}
                 std::views::join_with(std::string(", ")) | std::ranges::to<std::string>());
     }
 };
+
+constexpr auto nextInChainHelper = R"(
+struct NextInChainBase {
+    std::atomic<std::size_t> ref_count{1};
+    virtual WGPUChainedStruct* getNextInChain() const = 0;
+    virtual ~NextInChainBase() = default;
+};
+template <typename Struct>
+struct NextInChainImpl : Struct, NextInChainBase {
+    mutable typename Struct::CStruct cstruct;
+    NextInChainImpl(const Struct& s) : Struct(s) {
+        cstruct = this->to_cstruct();
+    }
+    NextInChainImpl(Struct&& s) : Struct(std::move(s)) {
+        cstruct = this->to_cstruct();
+    }
+    WGPUChainedStruct* getNextInChain() const override {
+        cstruct = this->to_cstruct();
+        return reinterpret_cast<WGPUChainedStruct*>(&cstruct);
+    }
+    void updateFromCStruct() {
+        (Struct&)(*this) = static_cast<Struct>(cstruct);
+    }
+};
+struct NextInChainNative : NextInChainBase {
+    WGPUChainedStruct* next;
+    NextInChainNative(WGPUChainedStruct* n) : next(n) {}
+    WGPUChainedStruct* getNextInChain() const override { return next; }
+};
+struct NextInChain {
+public:
+    NextInChain() : data(nullptr) {}
+    NextInChain(const NextInChain& other) : data(other.data) { if (data) ++data->ref_count; }
+    NextInChain(NextInChain&& other) noexcept : data(other.data) { other.data = nullptr; }
+    NextInChain& operator=(const NextInChain& other) {
+        if (this != &other) {
+            if (data && --data->ref_count == 0) {
+                delete data;
+            }
+            data = other.data;
+            if (data) ++data->ref_count;
+        }
+        return *this;
+    }
+    NextInChain& operator=(NextInChain&& other) noexcept {
+        if (this != &other) {
+            if (data && --data->ref_count == 0) {
+                delete data;
+            }
+            data = other.data;
+            other.data = nullptr;
+        }
+        return *this;
+    }
+    ~NextInChain() { reset(); }
+    template <typename Struct>
+    void setNext(Struct&& s) {
+        reset();
+        data = new NextInChainImpl<std::decay_t<Struct>>(std::forward<Struct>(s));
+    }
+    void setNext(WGPUChainedStruct* next) {
+        reset();
+        data = new NextInChainNative(next);
+    }
+    WGPUChainedStruct* getNext() const {
+        if (data) {
+            return data->getNextInChain();
+        }
+        return nullptr;
+    }
+    template <typename Struct>
+    Struct* getAs() const {
+        if (data) {
+            if (auto impl = dynamic_cast<NextInChainImpl<Struct>*>(data)) {
+                impl->updateFromCStruct();
+                return static_cast<Struct*>(impl);
+            }
+        }
+        return nullptr;
+    }
+    void reset() {
+        if (data && --data->ref_count == 0) {
+            delete data;
+        }
+        data = nullptr;
+    }
+private:
+    NextInChainBase* data;
+};)";
+
 struct StructFieldCpp {
     std::string type;
     std::string name;
@@ -371,7 +461,6 @@ struct StructApiCpp {
         return std::format(
             R"(
 struct {0} {{
-    constexpr static bool is_binary_compatible = {5};
     struct CStruct : public WGPU{0} {{
         {2}
     }};
@@ -426,6 +515,26 @@ struct HandleApiCpp {
     std::string gen_raii_definition() const {
         return std::format(R"(
 class {0} : public raw::{0} {{
+public:
+    using base_type = raw::{0};
+    using wgpu_type = WGPU{0};
+    {0}() : base_type() {{}}
+    WEBGPU_RAII_FRIENDS
+private:
+    {0}(wgpu_type raw) : base_type(raw) {{}}
+    {0}(base_type raw) : base_type(raw) {{}}
+    {0}& operator=(const base_type& raw) {{ if (*this) this->release(); base_type::operator=(raw); return *this; }}
+public:
+    {0}& operator=(std::nullptr_t) {{ if (*this) this->release(); base_type::operator=(nullptr); return *this; }}
+    {0}(const {0}& other) : base_type(other) {{ if (*this) this->addRef(); }}
+    {0}({0}&& other) : base_type(other) {{ (base_type&)(other) = nullptr; }}
+    {0}& operator=(const {0}& other) {{ if (this != &other) {{ if (*this) this->release(); base_type::operator=(other); if (*this) this->addRef(); }} return *this; }}
+    {0}& operator=({0}&& other) {{ if (this != &other) {{ if (*this) this->release(); base_type::operator=(other); (base_type&)(other) = nullptr; }} return *this; }}
+    ~{0}() {{ if (*this) this->release(); }}
+    operator bool() const {{ return base_type::operator bool(); }}
+    bool operator==(const {0}& other) const {{ return base_type::operator==(other); }}
+    bool operator!=(const {0}& other) const {{ return base_type::operator!=(other); }}
+    {0} clone() const {{ this->addRef(); return {0}((const base_type&)*this); }}
 }};)",
                            name);
     }
@@ -433,6 +542,7 @@ class {0} : public raw::{0} {{
         return std::format(R"(
 class {0} {{
 public:
+    using wgpu_type = WGPU{0};
     {0}() : m_raw(nullptr) {{}}
     {0}(WGPU{0} raw) : m_raw(raw) {{}}
     operator WGPU{0}() const {{ return m_raw; }}
@@ -707,7 +817,8 @@ template <std::ranges::range T> requires std::convertible_to<std::ranges::range_
         this->{0} = {1}(native.{0}, {2});
     }})",
                     field.name, field_cpp.type,
-                    struct_api.fields | std::views::filter([](const FieldApi& f) { return f.name.starts_with("userdata"); }) |
+                    struct_api.fields |
+                        std::views::filter([](const FieldApi& f) { return f.name.starts_with("userdata"); }) |
                         std::views::transform([](const FieldApi& f) { return "native." + f.name; }) |
                         std::views::join_with(std::string(", ")) | std::ranges::to<std::string>());
                 field_cpp.assign_to_cstruct = std::format(
@@ -863,7 +974,45 @@ template <std::ranges::range T> requires std::convertible_to<std::ranges::range_
             }
             if (field.is_pointer && (field.name == "nextInChain" || field.name == "next")) {
                 struct_cpp.binary_compatible = false;
-                // TODO: next in chain should be a wrapper of unique ptr with virtual base class
+
+                StructFieldCpp field_cpp;
+                field_cpp.name = field.name;
+                field_cpp.type = "NextInChain";
+                // converter
+                field_cpp.assign_from_native = std::format(R"(
+    this->{0}.setNext(native.{0});)",
+                                                           field.name);
+                field_cpp.assign_to_cstruct  = std::format(R"(
+    cstruct.{0} = this->{0}.getNext();)",
+                                                           field.name);
+                // setter
+                std::string setter_name = field.name;
+                setter_name[0]          = std::toupper(setter_name[0]);
+                setter_name             = "set" + setter_name;
+                struct_cpp.methods_decl.push_back(std::format(R"(
+    template <typename T>
+    {}& {}(T&& value) &;)",
+                                                              struct_cpp.name, setter_name));
+                struct_cpp.methods_template_impl.push_back(std::format(R"(
+template <typename T>
+{0}& {0}::{1}(T&& value) & {{
+    this->{2}.setNext(std::forward<T>(value));
+    return *this;
+}})",
+                                                                       struct_cpp.name, setter_name, field.name));
+                struct_cpp.methods_decl.push_back(std::format(R"(
+    template <typename T>
+    {}&& {}(T&& value) &&;)",
+                                                              struct_cpp.name, setter_name));
+                struct_cpp.methods_template_impl.push_back(std::format(R"(
+template <typename T>
+{0}&& {0}::{1}(T&& value) && {{
+    this->{2}.setNext(std::forward<T>(value));
+    return std::move(*this);
+}})",
+                                                                       struct_cpp.name, setter_name, field.name));
+
+                struct_cpp.fields.push_back(std::move(field_cpp));
                 continue;
             }
             // normal field
@@ -902,55 +1051,82 @@ template <std::ranges::range T> requires std::convertible_to<std::ranges::range_
                                                               field.name, field.type);
                 }
 
-                // struct setter should use const ref and rvalue ref
-                std::string setter_name = field.name;
-                setter_name[0]          = std::toupper(setter_name[0]);
-                setter_name             = "set" + setter_name;
-                // two setter, rvalue and lvalue
-                struct_cpp.methods_decl.push_back(std::format(R"(
+                if (field.name == "chain" &&
+                    field.type == "WGPUChainedStruct") {  // ChainedStruct should not change its SType field, so we
+                                                          // offer setNext instead.
+                    std::string setter_name = "setNext";
+                    struct_cpp.methods_decl.push_back(std::format(R"(
+    template <typename T>
+    {}& {}(T&& value) &;)",
+                                                                  struct_cpp.name, setter_name));
+                    struct_cpp.methods_template_impl.push_back(std::format(R"(
+template <typename T>
+{0}& {0}::{1}(T&& value) & {{
+    this->{2}.setNext(std::forward<T>(value));
+    return *this;
+}})",
+                                                                           struct_cpp.name, setter_name, field.name));
+                    struct_cpp.methods_decl.push_back(std::format(R"(
+    template <typename T>
+    {}&& {}(T&& value) &&;)",
+                                                                  struct_cpp.name, setter_name));
+                    struct_cpp.methods_template_impl.push_back(std::format(R"(
+template <typename T>
+{0}&& {0}::{1}(T&& value) && {{
+    this->{2}.setNext(std::forward<T>(value));
+    return std::move(*this);
+}})",
+                                                                           struct_cpp.name, setter_name, field.name));
+                } else {
+                    // struct setter should use const ref and rvalue ref
+                    std::string setter_name = field.name;
+                    setter_name[0]          = std::toupper(setter_name[0]);
+                    setter_name             = "set" + setter_name;
+                    // two setter, rvalue and lvalue
+                    struct_cpp.methods_decl.push_back(std::format(R"(
     {}& {}(const {}& value) &;)",
-                                                              struct_cpp.name, setter_name, field_cpp.type));
-                struct_cpp.methods_impl.push_back(std::format(R"(
+                                                                  struct_cpp.name, setter_name, field_cpp.type));
+                    struct_cpp.methods_impl.push_back(std::format(R"(
 {0}& {0}::{1}(const {2}& value) & {{
     this->{3} = value;
     return *this;
 }})",
-                                                              struct_cpp.name, setter_name, field_cpp.type,
-                                                              field.name));
+                                                                  struct_cpp.name, setter_name, field_cpp.type,
+                                                                  field.name));
 
-                struct_cpp.methods_decl.push_back(std::format(R"(
+                    struct_cpp.methods_decl.push_back(std::format(R"(
     {}&& {}(const {}& value) &&;)",
-                                                              struct_cpp.name, setter_name, field_cpp.type));
-                struct_cpp.methods_impl.push_back(std::format(R"(
+                                                                  struct_cpp.name, setter_name, field_cpp.type));
+                    struct_cpp.methods_impl.push_back(std::format(R"(
 {0}&& {0}::{1}(const {2}& value) && {{
     this->{3} = value;
     return std::move(*this);
 }})",
-                                                              struct_cpp.name, setter_name, field_cpp.type,
-                                                              field.name));
+                                                                  struct_cpp.name, setter_name, field_cpp.type,
+                                                                  field.name));
 
-                struct_cpp.methods_decl.push_back(std::format(R"(
+                    struct_cpp.methods_decl.push_back(std::format(R"(
     {}& {}({}&& value) &;)",
-                                                              struct_cpp.name, setter_name, field_cpp.type));
-                struct_cpp.methods_impl.push_back(std::format(R"(
+                                                                  struct_cpp.name, setter_name, field_cpp.type));
+                    struct_cpp.methods_impl.push_back(std::format(R"(
 {0}& {0}::{1}({2}&& value) & {{
     this->{3} = std::move(value);
     return *this;
 }})",
-                                                              struct_cpp.name, setter_name, field_cpp.type,
-                                                              field.name));
+                                                                  struct_cpp.name, setter_name, field_cpp.type,
+                                                                  field.name));
 
-                struct_cpp.methods_decl.push_back(std::format(R"(
+                    struct_cpp.methods_decl.push_back(std::format(R"(
     {}&& {}({}&& value) &&;)",
-                                                              struct_cpp.name, setter_name, field_cpp.type));
-                struct_cpp.methods_impl.push_back(std::format(R"(
+                                                                  struct_cpp.name, setter_name, field_cpp.type));
+                    struct_cpp.methods_impl.push_back(std::format(R"(
 {0}&& {0}::{1}({2}&& value) && {{
     this->{3} = std::move(value);
     return std::move(*this);
 }})",
-                                                              struct_cpp.name, setter_name, field_cpp.type,
-                                                              field.name));
-
+                                                                  struct_cpp.name, setter_name, field_cpp.type,
+                                                                  field.name));
+                }
                 struct_cpp.fields.push_back(std::move(field_cpp));
                 continue;
             }
@@ -1118,7 +1294,7 @@ template <std::ranges::range T> requires std::convertible_to<std::ranges::range_
                 params_cpp.back().nullable = false;  // force as ref. later add overload.
                 nullable_overload          = true;
             }
-            func_cpp.func_decl    = std::format("{} {}({});", return_type, func_api.name,
+            func_cpp.func_decl    = std::format("{} {}({});", return_type, func_cpp.name,
                                                 params_cpp | std::views::transform([](const FuncParamApiCpp& p) {
                                                  return p.full_type() + " " + p.name;
                                              }) | std::views::join_with(std::string(", ")) |
@@ -1410,6 +1586,7 @@ void generate_webgpu_cpp(const WebGpuApiCpp& api_cpp, const TemplateMeta& templa
 
     // {{structs}}
     std::string structs_def_text;
+    structs_def_text += nextInChainHelper;
     for (const auto& struct_cpp : api_cpp.structs) {
         structs_def_text += struct_cpp.gen_definition() + "\n\n";
     }
@@ -1451,10 +1628,28 @@ void generate_webgpu_cpp(const WebGpuApiCpp& api_cpp, const TemplateMeta& templa
     if (parser.contains("--use-raii")) {
         handles_def_text = std::format("namespace {}::raw {{\n{}\n}}\n", namespace_name, handles_def_text);
         std::string raii_def_text;
+        std::string raii_friends_text = "#define WEBGPU_RAII_FRIENDS";
+        for (const auto& handle_cpp : api_cpp.handles) {
+            raii_friends_text += std::format(" \\\n    friend class raw::{};", handle_cpp.name);
+        }
+        for (const auto& struct_cpp : api.structs) {
+            if (struct_cpp.owning) {
+                raii_friends_text += std::format(" \\\n    friend struct {};", struct_cpp.name);
+            }
+        }
+        for (const auto& func_cpp : api_cpp.functions) {
+            std::string decl = func_cpp.func_decl;
+            decl             = std::regex_replace(decl, std::regex("\n"), " ");
+            if (func_cpp.func_impl.find("wgpu") != std::string::npos) {
+                raii_friends_text += std::format(" \\\n    friend {}", decl);
+            }
+        }
         for (const auto& handle_cpp : api_cpp.handles) {
             raii_def_text += handle_cpp.gen_raii_definition() + "\n\n";
         }
-        handles_def_text += std::format("namespace {} {{\n{}\n}}", namespace_name, raii_def_text);
+        handles_def_text += raii_friends_text + "\n" +
+                            std::format("namespace {} {{\n{}\n}}", namespace_name, raii_def_text) +
+                            "\n#undef WEBGPU_RAII_FRIENDS\n";
     } else {
         handles_def_text = std::format("namespace {} {{\n{}\n}}", namespace_name, handles_def_text);
     }
