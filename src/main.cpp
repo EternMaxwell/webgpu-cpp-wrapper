@@ -1146,7 +1146,7 @@ template <typename T>
                                                           struct_cpp.name, setter_name, field_cpp.type));
             struct_cpp.methods_impl.push_back(std::format(R"(
 {0}& {0}::{1}({2} value) & {{
-    this->{3} = value;
+    this->{3} = std::move(value);
     return *this;
 }})",
                                                           struct_cpp.name, setter_name, field_cpp.type, field.name));
@@ -1156,7 +1156,7 @@ template <typename T>
                                                           struct_cpp.name, setter_name, field_cpp.type));
             struct_cpp.methods_impl.push_back(std::format(R"(
 {0}&& {0}::{1}({2} value) && {{
-    this->{3} = value;
+    this->{3} = std::move(value);
     return std::move(*this);
 }})",
                                                           struct_cpp.name, setter_name, field_cpp.type, field.name));

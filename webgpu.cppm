@@ -6278,19 +6278,19 @@ StringView::CStruct StringView::to_cstruct() const {
     return cstruct;
 }
 StringView& StringView::setData(char const* value) & {
-    this->data = value;
+    this->data = std::move(value);
     return *this;
 }
 StringView&& StringView::setData(char const* value) && {
-    this->data = value;
+    this->data = std::move(value);
     return std::move(*this);
 }
 StringView& StringView::setLength(size_t value) & {
-    this->length = value;
+    this->length = std::move(value);
     return *this;
 }
 StringView&& StringView::setLength(size_t value) && {
-    this->length = value;
+    this->length = std::move(value);
     return std::move(*this);
 }
 ChainedStruct::ChainedStruct(const WGPUChainedStruct& native) {
@@ -6304,11 +6304,11 @@ ChainedStruct::CStruct ChainedStruct::to_cstruct() const {
     return cstruct;
 }
 ChainedStruct& ChainedStruct::setSType(wgpu::SType value) & {
-    this->sType = value;
+    this->sType = std::move(value);
     return *this;
 }
 ChainedStruct&& ChainedStruct::setSType(wgpu::SType value) && {
-    this->sType = value;
+    this->sType = std::move(value);
     return std::move(*this);
 }
 BufferMapCallbackInfo::BufferMapCallbackInfo(const WGPUBufferMapCallbackInfo& native) {
@@ -6334,11 +6334,11 @@ BufferMapCallbackInfo::CStruct BufferMapCallbackInfo::to_cstruct() const {
     return cstruct;
 }
 BufferMapCallbackInfo& BufferMapCallbackInfo::setMode(wgpu::CallbackMode value) & {
-    this->mode = value;
+    this->mode = std::move(value);
     return *this;
 }
 BufferMapCallbackInfo&& BufferMapCallbackInfo::setMode(wgpu::CallbackMode value) && {
-    this->mode = value;
+    this->mode = std::move(value);
     return std::move(*this);
 }
 BufferMapCallbackInfo& BufferMapCallbackInfo::setCallback(wgpu::BufferMapCallback value) & {
@@ -6372,11 +6372,11 @@ CompilationInfoCallbackInfo::CStruct CompilationInfoCallbackInfo::to_cstruct() c
     return cstruct;
 }
 CompilationInfoCallbackInfo& CompilationInfoCallbackInfo::setMode(wgpu::CallbackMode value) & {
-    this->mode = value;
+    this->mode = std::move(value);
     return *this;
 }
 CompilationInfoCallbackInfo&& CompilationInfoCallbackInfo::setMode(wgpu::CallbackMode value) && {
-    this->mode = value;
+    this->mode = std::move(value);
     return std::move(*this);
 }
 CompilationInfoCallbackInfo& CompilationInfoCallbackInfo::setCallback(wgpu::CompilationInfoCallback value) & {
@@ -6410,11 +6410,11 @@ CreateComputePipelineAsyncCallbackInfo::CStruct CreateComputePipelineAsyncCallba
     return cstruct;
 }
 CreateComputePipelineAsyncCallbackInfo& CreateComputePipelineAsyncCallbackInfo::setMode(wgpu::CallbackMode value) & {
-    this->mode = value;
+    this->mode = std::move(value);
     return *this;
 }
 CreateComputePipelineAsyncCallbackInfo&& CreateComputePipelineAsyncCallbackInfo::setMode(wgpu::CallbackMode value) && {
-    this->mode = value;
+    this->mode = std::move(value);
     return std::move(*this);
 }
 CreateComputePipelineAsyncCallbackInfo& CreateComputePipelineAsyncCallbackInfo::setCallback(wgpu::CreateComputePipelineAsyncCallback value) & {
@@ -6448,11 +6448,11 @@ CreateRenderPipelineAsyncCallbackInfo::CStruct CreateRenderPipelineAsyncCallback
     return cstruct;
 }
 CreateRenderPipelineAsyncCallbackInfo& CreateRenderPipelineAsyncCallbackInfo::setMode(wgpu::CallbackMode value) & {
-    this->mode = value;
+    this->mode = std::move(value);
     return *this;
 }
 CreateRenderPipelineAsyncCallbackInfo&& CreateRenderPipelineAsyncCallbackInfo::setMode(wgpu::CallbackMode value) && {
-    this->mode = value;
+    this->mode = std::move(value);
     return std::move(*this);
 }
 CreateRenderPipelineAsyncCallbackInfo& CreateRenderPipelineAsyncCallbackInfo::setCallback(wgpu::CreateRenderPipelineAsyncCallback value) & {
@@ -6486,11 +6486,11 @@ DeviceLostCallbackInfo::CStruct DeviceLostCallbackInfo::to_cstruct() const {
     return cstruct;
 }
 DeviceLostCallbackInfo& DeviceLostCallbackInfo::setMode(wgpu::CallbackMode value) & {
-    this->mode = value;
+    this->mode = std::move(value);
     return *this;
 }
 DeviceLostCallbackInfo&& DeviceLostCallbackInfo::setMode(wgpu::CallbackMode value) && {
-    this->mode = value;
+    this->mode = std::move(value);
     return std::move(*this);
 }
 DeviceLostCallbackInfo& DeviceLostCallbackInfo::setCallback(wgpu::DeviceLostCallback value) & {
@@ -6524,11 +6524,11 @@ PopErrorScopeCallbackInfo::CStruct PopErrorScopeCallbackInfo::to_cstruct() const
     return cstruct;
 }
 PopErrorScopeCallbackInfo& PopErrorScopeCallbackInfo::setMode(wgpu::CallbackMode value) & {
-    this->mode = value;
+    this->mode = std::move(value);
     return *this;
 }
 PopErrorScopeCallbackInfo&& PopErrorScopeCallbackInfo::setMode(wgpu::CallbackMode value) && {
-    this->mode = value;
+    this->mode = std::move(value);
     return std::move(*this);
 }
 PopErrorScopeCallbackInfo& PopErrorScopeCallbackInfo::setCallback(wgpu::PopErrorScopeCallback value) & {
@@ -6562,11 +6562,11 @@ QueueWorkDoneCallbackInfo::CStruct QueueWorkDoneCallbackInfo::to_cstruct() const
     return cstruct;
 }
 QueueWorkDoneCallbackInfo& QueueWorkDoneCallbackInfo::setMode(wgpu::CallbackMode value) & {
-    this->mode = value;
+    this->mode = std::move(value);
     return *this;
 }
 QueueWorkDoneCallbackInfo&& QueueWorkDoneCallbackInfo::setMode(wgpu::CallbackMode value) && {
-    this->mode = value;
+    this->mode = std::move(value);
     return std::move(*this);
 }
 QueueWorkDoneCallbackInfo& QueueWorkDoneCallbackInfo::setCallback(wgpu::QueueWorkDoneCallback value) & {
@@ -6600,11 +6600,11 @@ RequestAdapterCallbackInfo::CStruct RequestAdapterCallbackInfo::to_cstruct() con
     return cstruct;
 }
 RequestAdapterCallbackInfo& RequestAdapterCallbackInfo::setMode(wgpu::CallbackMode value) & {
-    this->mode = value;
+    this->mode = std::move(value);
     return *this;
 }
 RequestAdapterCallbackInfo&& RequestAdapterCallbackInfo::setMode(wgpu::CallbackMode value) && {
-    this->mode = value;
+    this->mode = std::move(value);
     return std::move(*this);
 }
 RequestAdapterCallbackInfo& RequestAdapterCallbackInfo::setCallback(wgpu::RequestAdapterCallback value) & {
@@ -6638,11 +6638,11 @@ RequestDeviceCallbackInfo::CStruct RequestDeviceCallbackInfo::to_cstruct() const
     return cstruct;
 }
 RequestDeviceCallbackInfo& RequestDeviceCallbackInfo::setMode(wgpu::CallbackMode value) & {
-    this->mode = value;
+    this->mode = std::move(value);
     return *this;
 }
 RequestDeviceCallbackInfo&& RequestDeviceCallbackInfo::setMode(wgpu::CallbackMode value) && {
-    this->mode = value;
+    this->mode = std::move(value);
     return std::move(*this);
 }
 RequestDeviceCallbackInfo& RequestDeviceCallbackInfo::setCallback(wgpu::RequestDeviceCallback value) & {
@@ -6774,51 +6774,51 @@ AdapterInfo&& AdapterInfo::setDescription(wgpu::StringView&& value) && {
     return std::move(*this);
 }
 AdapterInfo& AdapterInfo::setBackendType(wgpu::BackendType value) & {
-    this->backendType = value;
+    this->backendType = std::move(value);
     return *this;
 }
 AdapterInfo&& AdapterInfo::setBackendType(wgpu::BackendType value) && {
-    this->backendType = value;
+    this->backendType = std::move(value);
     return std::move(*this);
 }
 AdapterInfo& AdapterInfo::setAdapterType(wgpu::AdapterType value) & {
-    this->adapterType = value;
+    this->adapterType = std::move(value);
     return *this;
 }
 AdapterInfo&& AdapterInfo::setAdapterType(wgpu::AdapterType value) && {
-    this->adapterType = value;
+    this->adapterType = std::move(value);
     return std::move(*this);
 }
 AdapterInfo& AdapterInfo::setVendorID(uint32_t value) & {
-    this->vendorID = value;
+    this->vendorID = std::move(value);
     return *this;
 }
 AdapterInfo&& AdapterInfo::setVendorID(uint32_t value) && {
-    this->vendorID = value;
+    this->vendorID = std::move(value);
     return std::move(*this);
 }
 AdapterInfo& AdapterInfo::setDeviceID(uint32_t value) & {
-    this->deviceID = value;
+    this->deviceID = std::move(value);
     return *this;
 }
 AdapterInfo&& AdapterInfo::setDeviceID(uint32_t value) && {
-    this->deviceID = value;
+    this->deviceID = std::move(value);
     return std::move(*this);
 }
 AdapterInfo& AdapterInfo::setSubgroupMinSize(uint32_t value) & {
-    this->subgroupMinSize = value;
+    this->subgroupMinSize = std::move(value);
     return *this;
 }
 AdapterInfo&& AdapterInfo::setSubgroupMinSize(uint32_t value) && {
-    this->subgroupMinSize = value;
+    this->subgroupMinSize = std::move(value);
     return std::move(*this);
 }
 AdapterInfo& AdapterInfo::setSubgroupMaxSize(uint32_t value) & {
-    this->subgroupMaxSize = value;
+    this->subgroupMaxSize = std::move(value);
     return *this;
 }
 AdapterInfo&& AdapterInfo::setSubgroupMaxSize(uint32_t value) && {
-    this->subgroupMaxSize = value;
+    this->subgroupMaxSize = std::move(value);
     return std::move(*this);
 }
 BlendComponent::BlendComponent(const WGPUBlendComponent& native) {
@@ -6834,27 +6834,27 @@ BlendComponent::CStruct BlendComponent::to_cstruct() const {
     return cstruct;
 }
 BlendComponent& BlendComponent::setOperation(wgpu::BlendOperation value) & {
-    this->operation = value;
+    this->operation = std::move(value);
     return *this;
 }
 BlendComponent&& BlendComponent::setOperation(wgpu::BlendOperation value) && {
-    this->operation = value;
+    this->operation = std::move(value);
     return std::move(*this);
 }
 BlendComponent& BlendComponent::setSrcFactor(wgpu::BlendFactor value) & {
-    this->srcFactor = value;
+    this->srcFactor = std::move(value);
     return *this;
 }
 BlendComponent&& BlendComponent::setSrcFactor(wgpu::BlendFactor value) && {
-    this->srcFactor = value;
+    this->srcFactor = std::move(value);
     return std::move(*this);
 }
 BlendComponent& BlendComponent::setDstFactor(wgpu::BlendFactor value) & {
-    this->dstFactor = value;
+    this->dstFactor = std::move(value);
     return *this;
 }
 BlendComponent&& BlendComponent::setDstFactor(wgpu::BlendFactor value) && {
-    this->dstFactor = value;
+    this->dstFactor = std::move(value);
     return std::move(*this);
 }
 BufferBindingLayout::BufferBindingLayout(const WGPUBufferBindingLayout& native) {
@@ -6872,27 +6872,27 @@ BufferBindingLayout::CStruct BufferBindingLayout::to_cstruct() const {
     return cstruct;
 }
 BufferBindingLayout& BufferBindingLayout::setType(wgpu::BufferBindingType value) & {
-    this->type = value;
+    this->type = std::move(value);
     return *this;
 }
 BufferBindingLayout&& BufferBindingLayout::setType(wgpu::BufferBindingType value) && {
-    this->type = value;
+    this->type = std::move(value);
     return std::move(*this);
 }
 BufferBindingLayout& BufferBindingLayout::setHasDynamicOffset(wgpu::Bool value) & {
-    this->hasDynamicOffset = value;
+    this->hasDynamicOffset = std::move(value);
     return *this;
 }
 BufferBindingLayout&& BufferBindingLayout::setHasDynamicOffset(wgpu::Bool value) && {
-    this->hasDynamicOffset = value;
+    this->hasDynamicOffset = std::move(value);
     return std::move(*this);
 }
 BufferBindingLayout& BufferBindingLayout::setMinBindingSize(uint64_t value) & {
-    this->minBindingSize = value;
+    this->minBindingSize = std::move(value);
     return *this;
 }
 BufferBindingLayout&& BufferBindingLayout::setMinBindingSize(uint64_t value) && {
-    this->minBindingSize = value;
+    this->minBindingSize = std::move(value);
     return std::move(*this);
 }
 BufferDescriptor::BufferDescriptor(const WGPUBufferDescriptor& native) {
@@ -6928,27 +6928,27 @@ BufferDescriptor&& BufferDescriptor::setLabel(wgpu::StringView&& value) && {
     return std::move(*this);
 }
 BufferDescriptor& BufferDescriptor::setUsage(wgpu::BufferUsage value) & {
-    this->usage = value;
+    this->usage = std::move(value);
     return *this;
 }
 BufferDescriptor&& BufferDescriptor::setUsage(wgpu::BufferUsage value) && {
-    this->usage = value;
+    this->usage = std::move(value);
     return std::move(*this);
 }
 BufferDescriptor& BufferDescriptor::setSize(uint64_t value) & {
-    this->size = value;
+    this->size = std::move(value);
     return *this;
 }
 BufferDescriptor&& BufferDescriptor::setSize(uint64_t value) && {
-    this->size = value;
+    this->size = std::move(value);
     return std::move(*this);
 }
 BufferDescriptor& BufferDescriptor::setMappedAtCreation(wgpu::Bool value) & {
-    this->mappedAtCreation = value;
+    this->mappedAtCreation = std::move(value);
     return *this;
 }
 BufferDescriptor&& BufferDescriptor::setMappedAtCreation(wgpu::Bool value) && {
-    this->mappedAtCreation = value;
+    this->mappedAtCreation = std::move(value);
     return std::move(*this);
 }
 Color::Color(const WGPUColor& native) {
@@ -6966,35 +6966,35 @@ Color::CStruct Color::to_cstruct() const {
     return cstruct;
 }
 Color& Color::setR(double value) & {
-    this->r = value;
+    this->r = std::move(value);
     return *this;
 }
 Color&& Color::setR(double value) && {
-    this->r = value;
+    this->r = std::move(value);
     return std::move(*this);
 }
 Color& Color::setG(double value) & {
-    this->g = value;
+    this->g = std::move(value);
     return *this;
 }
 Color&& Color::setG(double value) && {
-    this->g = value;
+    this->g = std::move(value);
     return std::move(*this);
 }
 Color& Color::setB(double value) & {
-    this->b = value;
+    this->b = std::move(value);
     return *this;
 }
 Color&& Color::setB(double value) && {
-    this->b = value;
+    this->b = std::move(value);
     return std::move(*this);
 }
 Color& Color::setA(double value) & {
-    this->a = value;
+    this->a = std::move(value);
     return *this;
 }
 Color&& Color::setA(double value) && {
-    this->a = value;
+    this->a = std::move(value);
     return std::move(*this);
 }
 CommandBufferDescriptor::CommandBufferDescriptor(const WGPUCommandBufferDescriptor& native) {
@@ -7086,43 +7086,43 @@ CompilationMessage&& CompilationMessage::setMessage(wgpu::StringView&& value) &&
     return std::move(*this);
 }
 CompilationMessage& CompilationMessage::setType(wgpu::CompilationMessageType value) & {
-    this->type = value;
+    this->type = std::move(value);
     return *this;
 }
 CompilationMessage&& CompilationMessage::setType(wgpu::CompilationMessageType value) && {
-    this->type = value;
+    this->type = std::move(value);
     return std::move(*this);
 }
 CompilationMessage& CompilationMessage::setLineNum(uint64_t value) & {
-    this->lineNum = value;
+    this->lineNum = std::move(value);
     return *this;
 }
 CompilationMessage&& CompilationMessage::setLineNum(uint64_t value) && {
-    this->lineNum = value;
+    this->lineNum = std::move(value);
     return std::move(*this);
 }
 CompilationMessage& CompilationMessage::setLinePos(uint64_t value) & {
-    this->linePos = value;
+    this->linePos = std::move(value);
     return *this;
 }
 CompilationMessage&& CompilationMessage::setLinePos(uint64_t value) && {
-    this->linePos = value;
+    this->linePos = std::move(value);
     return std::move(*this);
 }
 CompilationMessage& CompilationMessage::setOffset(uint64_t value) & {
-    this->offset = value;
+    this->offset = std::move(value);
     return *this;
 }
 CompilationMessage&& CompilationMessage::setOffset(uint64_t value) && {
-    this->offset = value;
+    this->offset = std::move(value);
     return std::move(*this);
 }
 CompilationMessage& CompilationMessage::setLength(uint64_t value) & {
-    this->length = value;
+    this->length = std::move(value);
     return *this;
 }
 CompilationMessage&& CompilationMessage::setLength(uint64_t value) && {
-    this->length = value;
+    this->length = std::move(value);
     return std::move(*this);
 }
 ConstantEntry::ConstantEntry(const WGPUConstantEntry& native) {
@@ -7154,11 +7154,11 @@ ConstantEntry&& ConstantEntry::setKey(wgpu::StringView&& value) && {
     return std::move(*this);
 }
 ConstantEntry& ConstantEntry::setValue(double value) & {
-    this->value = value;
+    this->value = std::move(value);
     return *this;
 }
 ConstantEntry&& ConstantEntry::setValue(double value) && {
-    this->value = value;
+    this->value = std::move(value);
     return std::move(*this);
 }
 Extent3D::Extent3D(const WGPUExtent3D& native) {
@@ -7174,27 +7174,27 @@ Extent3D::CStruct Extent3D::to_cstruct() const {
     return cstruct;
 }
 Extent3D& Extent3D::setWidth(uint32_t value) & {
-    this->width = value;
+    this->width = std::move(value);
     return *this;
 }
 Extent3D&& Extent3D::setWidth(uint32_t value) && {
-    this->width = value;
+    this->width = std::move(value);
     return std::move(*this);
 }
 Extent3D& Extent3D::setHeight(uint32_t value) & {
-    this->height = value;
+    this->height = std::move(value);
     return *this;
 }
 Extent3D&& Extent3D::setHeight(uint32_t value) && {
-    this->height = value;
+    this->height = std::move(value);
     return std::move(*this);
 }
 Extent3D& Extent3D::setDepthOrArrayLayers(uint32_t value) & {
-    this->depthOrArrayLayers = value;
+    this->depthOrArrayLayers = std::move(value);
     return *this;
 }
 Extent3D&& Extent3D::setDepthOrArrayLayers(uint32_t value) && {
-    this->depthOrArrayLayers = value;
+    this->depthOrArrayLayers = std::move(value);
     return std::move(*this);
 }
 ExternalTextureBindingEntry::ExternalTextureBindingEntry(const WGPUExternalTextureBindingEntry& native) {
@@ -7208,11 +7208,11 @@ ExternalTextureBindingEntry::CStruct ExternalTextureBindingEntry::to_cstruct() c
     return cstruct;
 }
 ExternalTextureBindingEntry& ExternalTextureBindingEntry::setExternalTexture(wgpu::raw::ExternalTexture value) & {
-    this->externalTexture = value;
+    this->externalTexture = std::move(value);
     return *this;
 }
 ExternalTextureBindingEntry&& ExternalTextureBindingEntry::setExternalTexture(wgpu::raw::ExternalTexture value) && {
-    this->externalTexture = value;
+    this->externalTexture = std::move(value);
     return std::move(*this);
 }
 ExternalTextureBindingLayout::ExternalTextureBindingLayout(const WGPUExternalTextureBindingLayout& native) {
@@ -7232,11 +7232,11 @@ Future::CStruct Future::to_cstruct() const {
     return cstruct;
 }
 Future& Future::setId(uint64_t value) & {
-    this->id = value;
+    this->id = std::move(value);
     return *this;
 }
 Future&& Future::setId(uint64_t value) && {
-    this->id = value;
+    this->id = std::move(value);
     return std::move(*this);
 }
 InstanceLimits::InstanceLimits(const WGPUInstanceLimits& native) {
@@ -7250,11 +7250,11 @@ InstanceLimits::CStruct InstanceLimits::to_cstruct() const {
     return cstruct;
 }
 InstanceLimits& InstanceLimits::setTimedWaitAnyMaxCount(size_t value) & {
-    this->timedWaitAnyMaxCount = value;
+    this->timedWaitAnyMaxCount = std::move(value);
     return *this;
 }
 InstanceLimits&& InstanceLimits::setTimedWaitAnyMaxCount(size_t value) && {
-    this->timedWaitAnyMaxCount = value;
+    this->timedWaitAnyMaxCount = std::move(value);
     return std::move(*this);
 }
 Limits::Limits(const WGPULimits& native) {
@@ -7330,259 +7330,259 @@ Limits::CStruct Limits::to_cstruct() const {
     return cstruct;
 }
 Limits& Limits::setMaxTextureDimension1D(uint32_t value) & {
-    this->maxTextureDimension1D = value;
+    this->maxTextureDimension1D = std::move(value);
     return *this;
 }
 Limits&& Limits::setMaxTextureDimension1D(uint32_t value) && {
-    this->maxTextureDimension1D = value;
+    this->maxTextureDimension1D = std::move(value);
     return std::move(*this);
 }
 Limits& Limits::setMaxTextureDimension2D(uint32_t value) & {
-    this->maxTextureDimension2D = value;
+    this->maxTextureDimension2D = std::move(value);
     return *this;
 }
 Limits&& Limits::setMaxTextureDimension2D(uint32_t value) && {
-    this->maxTextureDimension2D = value;
+    this->maxTextureDimension2D = std::move(value);
     return std::move(*this);
 }
 Limits& Limits::setMaxTextureDimension3D(uint32_t value) & {
-    this->maxTextureDimension3D = value;
+    this->maxTextureDimension3D = std::move(value);
     return *this;
 }
 Limits&& Limits::setMaxTextureDimension3D(uint32_t value) && {
-    this->maxTextureDimension3D = value;
+    this->maxTextureDimension3D = std::move(value);
     return std::move(*this);
 }
 Limits& Limits::setMaxTextureArrayLayers(uint32_t value) & {
-    this->maxTextureArrayLayers = value;
+    this->maxTextureArrayLayers = std::move(value);
     return *this;
 }
 Limits&& Limits::setMaxTextureArrayLayers(uint32_t value) && {
-    this->maxTextureArrayLayers = value;
+    this->maxTextureArrayLayers = std::move(value);
     return std::move(*this);
 }
 Limits& Limits::setMaxBindGroups(uint32_t value) & {
-    this->maxBindGroups = value;
+    this->maxBindGroups = std::move(value);
     return *this;
 }
 Limits&& Limits::setMaxBindGroups(uint32_t value) && {
-    this->maxBindGroups = value;
+    this->maxBindGroups = std::move(value);
     return std::move(*this);
 }
 Limits& Limits::setMaxBindGroupsPlusVertexBuffers(uint32_t value) & {
-    this->maxBindGroupsPlusVertexBuffers = value;
+    this->maxBindGroupsPlusVertexBuffers = std::move(value);
     return *this;
 }
 Limits&& Limits::setMaxBindGroupsPlusVertexBuffers(uint32_t value) && {
-    this->maxBindGroupsPlusVertexBuffers = value;
+    this->maxBindGroupsPlusVertexBuffers = std::move(value);
     return std::move(*this);
 }
 Limits& Limits::setMaxBindingsPerBindGroup(uint32_t value) & {
-    this->maxBindingsPerBindGroup = value;
+    this->maxBindingsPerBindGroup = std::move(value);
     return *this;
 }
 Limits&& Limits::setMaxBindingsPerBindGroup(uint32_t value) && {
-    this->maxBindingsPerBindGroup = value;
+    this->maxBindingsPerBindGroup = std::move(value);
     return std::move(*this);
 }
 Limits& Limits::setMaxDynamicUniformBuffersPerPipelineLayout(uint32_t value) & {
-    this->maxDynamicUniformBuffersPerPipelineLayout = value;
+    this->maxDynamicUniformBuffersPerPipelineLayout = std::move(value);
     return *this;
 }
 Limits&& Limits::setMaxDynamicUniformBuffersPerPipelineLayout(uint32_t value) && {
-    this->maxDynamicUniformBuffersPerPipelineLayout = value;
+    this->maxDynamicUniformBuffersPerPipelineLayout = std::move(value);
     return std::move(*this);
 }
 Limits& Limits::setMaxDynamicStorageBuffersPerPipelineLayout(uint32_t value) & {
-    this->maxDynamicStorageBuffersPerPipelineLayout = value;
+    this->maxDynamicStorageBuffersPerPipelineLayout = std::move(value);
     return *this;
 }
 Limits&& Limits::setMaxDynamicStorageBuffersPerPipelineLayout(uint32_t value) && {
-    this->maxDynamicStorageBuffersPerPipelineLayout = value;
+    this->maxDynamicStorageBuffersPerPipelineLayout = std::move(value);
     return std::move(*this);
 }
 Limits& Limits::setMaxSampledTexturesPerShaderStage(uint32_t value) & {
-    this->maxSampledTexturesPerShaderStage = value;
+    this->maxSampledTexturesPerShaderStage = std::move(value);
     return *this;
 }
 Limits&& Limits::setMaxSampledTexturesPerShaderStage(uint32_t value) && {
-    this->maxSampledTexturesPerShaderStage = value;
+    this->maxSampledTexturesPerShaderStage = std::move(value);
     return std::move(*this);
 }
 Limits& Limits::setMaxSamplersPerShaderStage(uint32_t value) & {
-    this->maxSamplersPerShaderStage = value;
+    this->maxSamplersPerShaderStage = std::move(value);
     return *this;
 }
 Limits&& Limits::setMaxSamplersPerShaderStage(uint32_t value) && {
-    this->maxSamplersPerShaderStage = value;
+    this->maxSamplersPerShaderStage = std::move(value);
     return std::move(*this);
 }
 Limits& Limits::setMaxStorageBuffersPerShaderStage(uint32_t value) & {
-    this->maxStorageBuffersPerShaderStage = value;
+    this->maxStorageBuffersPerShaderStage = std::move(value);
     return *this;
 }
 Limits&& Limits::setMaxStorageBuffersPerShaderStage(uint32_t value) && {
-    this->maxStorageBuffersPerShaderStage = value;
+    this->maxStorageBuffersPerShaderStage = std::move(value);
     return std::move(*this);
 }
 Limits& Limits::setMaxStorageTexturesPerShaderStage(uint32_t value) & {
-    this->maxStorageTexturesPerShaderStage = value;
+    this->maxStorageTexturesPerShaderStage = std::move(value);
     return *this;
 }
 Limits&& Limits::setMaxStorageTexturesPerShaderStage(uint32_t value) && {
-    this->maxStorageTexturesPerShaderStage = value;
+    this->maxStorageTexturesPerShaderStage = std::move(value);
     return std::move(*this);
 }
 Limits& Limits::setMaxUniformBuffersPerShaderStage(uint32_t value) & {
-    this->maxUniformBuffersPerShaderStage = value;
+    this->maxUniformBuffersPerShaderStage = std::move(value);
     return *this;
 }
 Limits&& Limits::setMaxUniformBuffersPerShaderStage(uint32_t value) && {
-    this->maxUniformBuffersPerShaderStage = value;
+    this->maxUniformBuffersPerShaderStage = std::move(value);
     return std::move(*this);
 }
 Limits& Limits::setMaxUniformBufferBindingSize(uint64_t value) & {
-    this->maxUniformBufferBindingSize = value;
+    this->maxUniformBufferBindingSize = std::move(value);
     return *this;
 }
 Limits&& Limits::setMaxUniformBufferBindingSize(uint64_t value) && {
-    this->maxUniformBufferBindingSize = value;
+    this->maxUniformBufferBindingSize = std::move(value);
     return std::move(*this);
 }
 Limits& Limits::setMaxStorageBufferBindingSize(uint64_t value) & {
-    this->maxStorageBufferBindingSize = value;
+    this->maxStorageBufferBindingSize = std::move(value);
     return *this;
 }
 Limits&& Limits::setMaxStorageBufferBindingSize(uint64_t value) && {
-    this->maxStorageBufferBindingSize = value;
+    this->maxStorageBufferBindingSize = std::move(value);
     return std::move(*this);
 }
 Limits& Limits::setMinUniformBufferOffsetAlignment(uint32_t value) & {
-    this->minUniformBufferOffsetAlignment = value;
+    this->minUniformBufferOffsetAlignment = std::move(value);
     return *this;
 }
 Limits&& Limits::setMinUniformBufferOffsetAlignment(uint32_t value) && {
-    this->minUniformBufferOffsetAlignment = value;
+    this->minUniformBufferOffsetAlignment = std::move(value);
     return std::move(*this);
 }
 Limits& Limits::setMinStorageBufferOffsetAlignment(uint32_t value) & {
-    this->minStorageBufferOffsetAlignment = value;
+    this->minStorageBufferOffsetAlignment = std::move(value);
     return *this;
 }
 Limits&& Limits::setMinStorageBufferOffsetAlignment(uint32_t value) && {
-    this->minStorageBufferOffsetAlignment = value;
+    this->minStorageBufferOffsetAlignment = std::move(value);
     return std::move(*this);
 }
 Limits& Limits::setMaxVertexBuffers(uint32_t value) & {
-    this->maxVertexBuffers = value;
+    this->maxVertexBuffers = std::move(value);
     return *this;
 }
 Limits&& Limits::setMaxVertexBuffers(uint32_t value) && {
-    this->maxVertexBuffers = value;
+    this->maxVertexBuffers = std::move(value);
     return std::move(*this);
 }
 Limits& Limits::setMaxBufferSize(uint64_t value) & {
-    this->maxBufferSize = value;
+    this->maxBufferSize = std::move(value);
     return *this;
 }
 Limits&& Limits::setMaxBufferSize(uint64_t value) && {
-    this->maxBufferSize = value;
+    this->maxBufferSize = std::move(value);
     return std::move(*this);
 }
 Limits& Limits::setMaxVertexAttributes(uint32_t value) & {
-    this->maxVertexAttributes = value;
+    this->maxVertexAttributes = std::move(value);
     return *this;
 }
 Limits&& Limits::setMaxVertexAttributes(uint32_t value) && {
-    this->maxVertexAttributes = value;
+    this->maxVertexAttributes = std::move(value);
     return std::move(*this);
 }
 Limits& Limits::setMaxVertexBufferArrayStride(uint32_t value) & {
-    this->maxVertexBufferArrayStride = value;
+    this->maxVertexBufferArrayStride = std::move(value);
     return *this;
 }
 Limits&& Limits::setMaxVertexBufferArrayStride(uint32_t value) && {
-    this->maxVertexBufferArrayStride = value;
+    this->maxVertexBufferArrayStride = std::move(value);
     return std::move(*this);
 }
 Limits& Limits::setMaxInterStageShaderVariables(uint32_t value) & {
-    this->maxInterStageShaderVariables = value;
+    this->maxInterStageShaderVariables = std::move(value);
     return *this;
 }
 Limits&& Limits::setMaxInterStageShaderVariables(uint32_t value) && {
-    this->maxInterStageShaderVariables = value;
+    this->maxInterStageShaderVariables = std::move(value);
     return std::move(*this);
 }
 Limits& Limits::setMaxColorAttachments(uint32_t value) & {
-    this->maxColorAttachments = value;
+    this->maxColorAttachments = std::move(value);
     return *this;
 }
 Limits&& Limits::setMaxColorAttachments(uint32_t value) && {
-    this->maxColorAttachments = value;
+    this->maxColorAttachments = std::move(value);
     return std::move(*this);
 }
 Limits& Limits::setMaxColorAttachmentBytesPerSample(uint32_t value) & {
-    this->maxColorAttachmentBytesPerSample = value;
+    this->maxColorAttachmentBytesPerSample = std::move(value);
     return *this;
 }
 Limits&& Limits::setMaxColorAttachmentBytesPerSample(uint32_t value) && {
-    this->maxColorAttachmentBytesPerSample = value;
+    this->maxColorAttachmentBytesPerSample = std::move(value);
     return std::move(*this);
 }
 Limits& Limits::setMaxComputeWorkgroupStorageSize(uint32_t value) & {
-    this->maxComputeWorkgroupStorageSize = value;
+    this->maxComputeWorkgroupStorageSize = std::move(value);
     return *this;
 }
 Limits&& Limits::setMaxComputeWorkgroupStorageSize(uint32_t value) && {
-    this->maxComputeWorkgroupStorageSize = value;
+    this->maxComputeWorkgroupStorageSize = std::move(value);
     return std::move(*this);
 }
 Limits& Limits::setMaxComputeInvocationsPerWorkgroup(uint32_t value) & {
-    this->maxComputeInvocationsPerWorkgroup = value;
+    this->maxComputeInvocationsPerWorkgroup = std::move(value);
     return *this;
 }
 Limits&& Limits::setMaxComputeInvocationsPerWorkgroup(uint32_t value) && {
-    this->maxComputeInvocationsPerWorkgroup = value;
+    this->maxComputeInvocationsPerWorkgroup = std::move(value);
     return std::move(*this);
 }
 Limits& Limits::setMaxComputeWorkgroupSizeX(uint32_t value) & {
-    this->maxComputeWorkgroupSizeX = value;
+    this->maxComputeWorkgroupSizeX = std::move(value);
     return *this;
 }
 Limits&& Limits::setMaxComputeWorkgroupSizeX(uint32_t value) && {
-    this->maxComputeWorkgroupSizeX = value;
+    this->maxComputeWorkgroupSizeX = std::move(value);
     return std::move(*this);
 }
 Limits& Limits::setMaxComputeWorkgroupSizeY(uint32_t value) & {
-    this->maxComputeWorkgroupSizeY = value;
+    this->maxComputeWorkgroupSizeY = std::move(value);
     return *this;
 }
 Limits&& Limits::setMaxComputeWorkgroupSizeY(uint32_t value) && {
-    this->maxComputeWorkgroupSizeY = value;
+    this->maxComputeWorkgroupSizeY = std::move(value);
     return std::move(*this);
 }
 Limits& Limits::setMaxComputeWorkgroupSizeZ(uint32_t value) & {
-    this->maxComputeWorkgroupSizeZ = value;
+    this->maxComputeWorkgroupSizeZ = std::move(value);
     return *this;
 }
 Limits&& Limits::setMaxComputeWorkgroupSizeZ(uint32_t value) && {
-    this->maxComputeWorkgroupSizeZ = value;
+    this->maxComputeWorkgroupSizeZ = std::move(value);
     return std::move(*this);
 }
 Limits& Limits::setMaxComputeWorkgroupsPerDimension(uint32_t value) & {
-    this->maxComputeWorkgroupsPerDimension = value;
+    this->maxComputeWorkgroupsPerDimension = std::move(value);
     return *this;
 }
 Limits&& Limits::setMaxComputeWorkgroupsPerDimension(uint32_t value) && {
-    this->maxComputeWorkgroupsPerDimension = value;
+    this->maxComputeWorkgroupsPerDimension = std::move(value);
     return std::move(*this);
 }
 Limits& Limits::setMaxImmediateSize(uint32_t value) & {
-    this->maxImmediateSize = value;
+    this->maxImmediateSize = std::move(value);
     return *this;
 }
 Limits&& Limits::setMaxImmediateSize(uint32_t value) && {
-    this->maxImmediateSize = value;
+    this->maxImmediateSize = std::move(value);
     return std::move(*this);
 }
 MultisampleState::MultisampleState(const WGPUMultisampleState& native) {
@@ -7600,27 +7600,27 @@ MultisampleState::CStruct MultisampleState::to_cstruct() const {
     return cstruct;
 }
 MultisampleState& MultisampleState::setCount(uint32_t value) & {
-    this->count = value;
+    this->count = std::move(value);
     return *this;
 }
 MultisampleState&& MultisampleState::setCount(uint32_t value) && {
-    this->count = value;
+    this->count = std::move(value);
     return std::move(*this);
 }
 MultisampleState& MultisampleState::setMask(uint32_t value) & {
-    this->mask = value;
+    this->mask = std::move(value);
     return *this;
 }
 MultisampleState&& MultisampleState::setMask(uint32_t value) && {
-    this->mask = value;
+    this->mask = std::move(value);
     return std::move(*this);
 }
 MultisampleState& MultisampleState::setAlphaToCoverageEnabled(wgpu::Bool value) & {
-    this->alphaToCoverageEnabled = value;
+    this->alphaToCoverageEnabled = std::move(value);
     return *this;
 }
 MultisampleState&& MultisampleState::setAlphaToCoverageEnabled(wgpu::Bool value) && {
-    this->alphaToCoverageEnabled = value;
+    this->alphaToCoverageEnabled = std::move(value);
     return std::move(*this);
 }
 Origin3D::Origin3D(const WGPUOrigin3D& native) {
@@ -7636,27 +7636,27 @@ Origin3D::CStruct Origin3D::to_cstruct() const {
     return cstruct;
 }
 Origin3D& Origin3D::setX(uint32_t value) & {
-    this->x = value;
+    this->x = std::move(value);
     return *this;
 }
 Origin3D&& Origin3D::setX(uint32_t value) && {
-    this->x = value;
+    this->x = std::move(value);
     return std::move(*this);
 }
 Origin3D& Origin3D::setY(uint32_t value) & {
-    this->y = value;
+    this->y = std::move(value);
     return *this;
 }
 Origin3D&& Origin3D::setY(uint32_t value) && {
-    this->y = value;
+    this->y = std::move(value);
     return std::move(*this);
 }
 Origin3D& Origin3D::setZ(uint32_t value) & {
-    this->z = value;
+    this->z = std::move(value);
     return *this;
 }
 Origin3D&& Origin3D::setZ(uint32_t value) && {
-    this->z = value;
+    this->z = std::move(value);
     return std::move(*this);
 }
 PassTimestampWrites::PassTimestampWrites(const WGPUPassTimestampWrites& native) {
@@ -7674,27 +7674,27 @@ PassTimestampWrites::CStruct PassTimestampWrites::to_cstruct() const {
     return cstruct;
 }
 PassTimestampWrites& PassTimestampWrites::setQuerySet(wgpu::raw::QuerySet value) & {
-    this->querySet = value;
+    this->querySet = std::move(value);
     return *this;
 }
 PassTimestampWrites&& PassTimestampWrites::setQuerySet(wgpu::raw::QuerySet value) && {
-    this->querySet = value;
+    this->querySet = std::move(value);
     return std::move(*this);
 }
 PassTimestampWrites& PassTimestampWrites::setBeginningOfPassWriteIndex(uint32_t value) & {
-    this->beginningOfPassWriteIndex = value;
+    this->beginningOfPassWriteIndex = std::move(value);
     return *this;
 }
 PassTimestampWrites&& PassTimestampWrites::setBeginningOfPassWriteIndex(uint32_t value) && {
-    this->beginningOfPassWriteIndex = value;
+    this->beginningOfPassWriteIndex = std::move(value);
     return std::move(*this);
 }
 PassTimestampWrites& PassTimestampWrites::setEndOfPassWriteIndex(uint32_t value) & {
-    this->endOfPassWriteIndex = value;
+    this->endOfPassWriteIndex = std::move(value);
     return *this;
 }
 PassTimestampWrites&& PassTimestampWrites::setEndOfPassWriteIndex(uint32_t value) && {
-    this->endOfPassWriteIndex = value;
+    this->endOfPassWriteIndex = std::move(value);
     return std::move(*this);
 }
 PipelineLayoutDescriptor::PipelineLayoutDescriptor(const WGPUPipelineLayoutDescriptor& native) {
@@ -7729,11 +7729,11 @@ PipelineLayoutDescriptor&& PipelineLayoutDescriptor::setLabel(wgpu::StringView&&
     return std::move(*this);
 }
 PipelineLayoutDescriptor& PipelineLayoutDescriptor::setImmediateSize(uint32_t value) & {
-    this->immediateSize = value;
+    this->immediateSize = std::move(value);
     return *this;
 }
 PipelineLayoutDescriptor&& PipelineLayoutDescriptor::setImmediateSize(uint32_t value) && {
-    this->immediateSize = value;
+    this->immediateSize = std::move(value);
     return std::move(*this);
 }
 PrimitiveState::PrimitiveState(const WGPUPrimitiveState& native) {
@@ -7755,43 +7755,43 @@ PrimitiveState::CStruct PrimitiveState::to_cstruct() const {
     return cstruct;
 }
 PrimitiveState& PrimitiveState::setTopology(wgpu::PrimitiveTopology value) & {
-    this->topology = value;
+    this->topology = std::move(value);
     return *this;
 }
 PrimitiveState&& PrimitiveState::setTopology(wgpu::PrimitiveTopology value) && {
-    this->topology = value;
+    this->topology = std::move(value);
     return std::move(*this);
 }
 PrimitiveState& PrimitiveState::setStripIndexFormat(wgpu::IndexFormat value) & {
-    this->stripIndexFormat = value;
+    this->stripIndexFormat = std::move(value);
     return *this;
 }
 PrimitiveState&& PrimitiveState::setStripIndexFormat(wgpu::IndexFormat value) && {
-    this->stripIndexFormat = value;
+    this->stripIndexFormat = std::move(value);
     return std::move(*this);
 }
 PrimitiveState& PrimitiveState::setFrontFace(wgpu::FrontFace value) & {
-    this->frontFace = value;
+    this->frontFace = std::move(value);
     return *this;
 }
 PrimitiveState&& PrimitiveState::setFrontFace(wgpu::FrontFace value) && {
-    this->frontFace = value;
+    this->frontFace = std::move(value);
     return std::move(*this);
 }
 PrimitiveState& PrimitiveState::setCullMode(wgpu::CullMode value) & {
-    this->cullMode = value;
+    this->cullMode = std::move(value);
     return *this;
 }
 PrimitiveState&& PrimitiveState::setCullMode(wgpu::CullMode value) && {
-    this->cullMode = value;
+    this->cullMode = std::move(value);
     return std::move(*this);
 }
 PrimitiveState& PrimitiveState::setUnclippedDepth(wgpu::Bool value) & {
-    this->unclippedDepth = value;
+    this->unclippedDepth = std::move(value);
     return *this;
 }
 PrimitiveState&& PrimitiveState::setUnclippedDepth(wgpu::Bool value) && {
-    this->unclippedDepth = value;
+    this->unclippedDepth = std::move(value);
     return std::move(*this);
 }
 QuerySetDescriptor::QuerySetDescriptor(const WGPUQuerySetDescriptor& native) {
@@ -7825,19 +7825,19 @@ QuerySetDescriptor&& QuerySetDescriptor::setLabel(wgpu::StringView&& value) && {
     return std::move(*this);
 }
 QuerySetDescriptor& QuerySetDescriptor::setType(wgpu::QueryType value) & {
-    this->type = value;
+    this->type = std::move(value);
     return *this;
 }
 QuerySetDescriptor&& QuerySetDescriptor::setType(wgpu::QueryType value) && {
-    this->type = value;
+    this->type = std::move(value);
     return std::move(*this);
 }
 QuerySetDescriptor& QuerySetDescriptor::setCount(uint32_t value) & {
-    this->count = value;
+    this->count = std::move(value);
     return *this;
 }
 QuerySetDescriptor&& QuerySetDescriptor::setCount(uint32_t value) && {
-    this->count = value;
+    this->count = std::move(value);
     return std::move(*this);
 }
 QueueDescriptor::QueueDescriptor(const WGPUQueueDescriptor& native) {
@@ -7930,35 +7930,35 @@ RenderBundleEncoderDescriptor&& RenderBundleEncoderDescriptor::setLabel(wgpu::St
     return std::move(*this);
 }
 RenderBundleEncoderDescriptor& RenderBundleEncoderDescriptor::setDepthStencilFormat(wgpu::TextureFormat value) & {
-    this->depthStencilFormat = value;
+    this->depthStencilFormat = std::move(value);
     return *this;
 }
 RenderBundleEncoderDescriptor&& RenderBundleEncoderDescriptor::setDepthStencilFormat(wgpu::TextureFormat value) && {
-    this->depthStencilFormat = value;
+    this->depthStencilFormat = std::move(value);
     return std::move(*this);
 }
 RenderBundleEncoderDescriptor& RenderBundleEncoderDescriptor::setSampleCount(uint32_t value) & {
-    this->sampleCount = value;
+    this->sampleCount = std::move(value);
     return *this;
 }
 RenderBundleEncoderDescriptor&& RenderBundleEncoderDescriptor::setSampleCount(uint32_t value) && {
-    this->sampleCount = value;
+    this->sampleCount = std::move(value);
     return std::move(*this);
 }
 RenderBundleEncoderDescriptor& RenderBundleEncoderDescriptor::setDepthReadOnly(wgpu::Bool value) & {
-    this->depthReadOnly = value;
+    this->depthReadOnly = std::move(value);
     return *this;
 }
 RenderBundleEncoderDescriptor&& RenderBundleEncoderDescriptor::setDepthReadOnly(wgpu::Bool value) && {
-    this->depthReadOnly = value;
+    this->depthReadOnly = std::move(value);
     return std::move(*this);
 }
 RenderBundleEncoderDescriptor& RenderBundleEncoderDescriptor::setStencilReadOnly(wgpu::Bool value) & {
-    this->stencilReadOnly = value;
+    this->stencilReadOnly = std::move(value);
     return *this;
 }
 RenderBundleEncoderDescriptor&& RenderBundleEncoderDescriptor::setStencilReadOnly(wgpu::Bool value) && {
-    this->stencilReadOnly = value;
+    this->stencilReadOnly = std::move(value);
     return std::move(*this);
 }
 RenderPassDepthStencilAttachment::RenderPassDepthStencilAttachment(const WGPURenderPassDepthStencilAttachment& native) {
@@ -7988,75 +7988,75 @@ RenderPassDepthStencilAttachment::CStruct RenderPassDepthStencilAttachment::to_c
     return cstruct;
 }
 RenderPassDepthStencilAttachment& RenderPassDepthStencilAttachment::setView(wgpu::raw::TextureView value) & {
-    this->view = value;
+    this->view = std::move(value);
     return *this;
 }
 RenderPassDepthStencilAttachment&& RenderPassDepthStencilAttachment::setView(wgpu::raw::TextureView value) && {
-    this->view = value;
+    this->view = std::move(value);
     return std::move(*this);
 }
 RenderPassDepthStencilAttachment& RenderPassDepthStencilAttachment::setDepthLoadOp(wgpu::LoadOp value) & {
-    this->depthLoadOp = value;
+    this->depthLoadOp = std::move(value);
     return *this;
 }
 RenderPassDepthStencilAttachment&& RenderPassDepthStencilAttachment::setDepthLoadOp(wgpu::LoadOp value) && {
-    this->depthLoadOp = value;
+    this->depthLoadOp = std::move(value);
     return std::move(*this);
 }
 RenderPassDepthStencilAttachment& RenderPassDepthStencilAttachment::setDepthStoreOp(wgpu::StoreOp value) & {
-    this->depthStoreOp = value;
+    this->depthStoreOp = std::move(value);
     return *this;
 }
 RenderPassDepthStencilAttachment&& RenderPassDepthStencilAttachment::setDepthStoreOp(wgpu::StoreOp value) && {
-    this->depthStoreOp = value;
+    this->depthStoreOp = std::move(value);
     return std::move(*this);
 }
 RenderPassDepthStencilAttachment& RenderPassDepthStencilAttachment::setDepthClearValue(float value) & {
-    this->depthClearValue = value;
+    this->depthClearValue = std::move(value);
     return *this;
 }
 RenderPassDepthStencilAttachment&& RenderPassDepthStencilAttachment::setDepthClearValue(float value) && {
-    this->depthClearValue = value;
+    this->depthClearValue = std::move(value);
     return std::move(*this);
 }
 RenderPassDepthStencilAttachment& RenderPassDepthStencilAttachment::setDepthReadOnly(wgpu::Bool value) & {
-    this->depthReadOnly = value;
+    this->depthReadOnly = std::move(value);
     return *this;
 }
 RenderPassDepthStencilAttachment&& RenderPassDepthStencilAttachment::setDepthReadOnly(wgpu::Bool value) && {
-    this->depthReadOnly = value;
+    this->depthReadOnly = std::move(value);
     return std::move(*this);
 }
 RenderPassDepthStencilAttachment& RenderPassDepthStencilAttachment::setStencilLoadOp(wgpu::LoadOp value) & {
-    this->stencilLoadOp = value;
+    this->stencilLoadOp = std::move(value);
     return *this;
 }
 RenderPassDepthStencilAttachment&& RenderPassDepthStencilAttachment::setStencilLoadOp(wgpu::LoadOp value) && {
-    this->stencilLoadOp = value;
+    this->stencilLoadOp = std::move(value);
     return std::move(*this);
 }
 RenderPassDepthStencilAttachment& RenderPassDepthStencilAttachment::setStencilStoreOp(wgpu::StoreOp value) & {
-    this->stencilStoreOp = value;
+    this->stencilStoreOp = std::move(value);
     return *this;
 }
 RenderPassDepthStencilAttachment&& RenderPassDepthStencilAttachment::setStencilStoreOp(wgpu::StoreOp value) && {
-    this->stencilStoreOp = value;
+    this->stencilStoreOp = std::move(value);
     return std::move(*this);
 }
 RenderPassDepthStencilAttachment& RenderPassDepthStencilAttachment::setStencilClearValue(uint32_t value) & {
-    this->stencilClearValue = value;
+    this->stencilClearValue = std::move(value);
     return *this;
 }
 RenderPassDepthStencilAttachment&& RenderPassDepthStencilAttachment::setStencilClearValue(uint32_t value) && {
-    this->stencilClearValue = value;
+    this->stencilClearValue = std::move(value);
     return std::move(*this);
 }
 RenderPassDepthStencilAttachment& RenderPassDepthStencilAttachment::setStencilReadOnly(wgpu::Bool value) & {
-    this->stencilReadOnly = value;
+    this->stencilReadOnly = std::move(value);
     return *this;
 }
 RenderPassDepthStencilAttachment&& RenderPassDepthStencilAttachment::setStencilReadOnly(wgpu::Bool value) && {
-    this->stencilReadOnly = value;
+    this->stencilReadOnly = std::move(value);
     return std::move(*this);
 }
 RenderPassMaxDrawCount::RenderPassMaxDrawCount(const WGPURenderPassMaxDrawCount& native) {
@@ -8070,11 +8070,11 @@ RenderPassMaxDrawCount::CStruct RenderPassMaxDrawCount::to_cstruct() const {
     return cstruct;
 }
 RenderPassMaxDrawCount& RenderPassMaxDrawCount::setMaxDrawCount(uint64_t value) & {
-    this->maxDrawCount = value;
+    this->maxDrawCount = std::move(value);
     return *this;
 }
 RenderPassMaxDrawCount&& RenderPassMaxDrawCount::setMaxDrawCount(uint64_t value) && {
-    this->maxDrawCount = value;
+    this->maxDrawCount = std::move(value);
     return std::move(*this);
 }
 RequestAdapterWebXROptions::RequestAdapterWebXROptions(const WGPURequestAdapterWebXROptions& native) {
@@ -8088,11 +8088,11 @@ RequestAdapterWebXROptions::CStruct RequestAdapterWebXROptions::to_cstruct() con
     return cstruct;
 }
 RequestAdapterWebXROptions& RequestAdapterWebXROptions::setXrCompatible(wgpu::Bool value) & {
-    this->xrCompatible = value;
+    this->xrCompatible = std::move(value);
     return *this;
 }
 RequestAdapterWebXROptions&& RequestAdapterWebXROptions::setXrCompatible(wgpu::Bool value) && {
-    this->xrCompatible = value;
+    this->xrCompatible = std::move(value);
     return std::move(*this);
 }
 SamplerBindingLayout::SamplerBindingLayout(const WGPUSamplerBindingLayout& native) {
@@ -8106,11 +8106,11 @@ SamplerBindingLayout::CStruct SamplerBindingLayout::to_cstruct() const {
     return cstruct;
 }
 SamplerBindingLayout& SamplerBindingLayout::setType(wgpu::SamplerBindingType value) & {
-    this->type = value;
+    this->type = std::move(value);
     return *this;
 }
 SamplerBindingLayout&& SamplerBindingLayout::setType(wgpu::SamplerBindingType value) && {
-    this->type = value;
+    this->type = std::move(value);
     return std::move(*this);
 }
 SamplerDescriptor::SamplerDescriptor(const WGPUSamplerDescriptor& native) {
@@ -8160,83 +8160,83 @@ SamplerDescriptor&& SamplerDescriptor::setLabel(wgpu::StringView&& value) && {
     return std::move(*this);
 }
 SamplerDescriptor& SamplerDescriptor::setAddressModeU(wgpu::AddressMode value) & {
-    this->addressModeU = value;
+    this->addressModeU = std::move(value);
     return *this;
 }
 SamplerDescriptor&& SamplerDescriptor::setAddressModeU(wgpu::AddressMode value) && {
-    this->addressModeU = value;
+    this->addressModeU = std::move(value);
     return std::move(*this);
 }
 SamplerDescriptor& SamplerDescriptor::setAddressModeV(wgpu::AddressMode value) & {
-    this->addressModeV = value;
+    this->addressModeV = std::move(value);
     return *this;
 }
 SamplerDescriptor&& SamplerDescriptor::setAddressModeV(wgpu::AddressMode value) && {
-    this->addressModeV = value;
+    this->addressModeV = std::move(value);
     return std::move(*this);
 }
 SamplerDescriptor& SamplerDescriptor::setAddressModeW(wgpu::AddressMode value) & {
-    this->addressModeW = value;
+    this->addressModeW = std::move(value);
     return *this;
 }
 SamplerDescriptor&& SamplerDescriptor::setAddressModeW(wgpu::AddressMode value) && {
-    this->addressModeW = value;
+    this->addressModeW = std::move(value);
     return std::move(*this);
 }
 SamplerDescriptor& SamplerDescriptor::setMagFilter(wgpu::FilterMode value) & {
-    this->magFilter = value;
+    this->magFilter = std::move(value);
     return *this;
 }
 SamplerDescriptor&& SamplerDescriptor::setMagFilter(wgpu::FilterMode value) && {
-    this->magFilter = value;
+    this->magFilter = std::move(value);
     return std::move(*this);
 }
 SamplerDescriptor& SamplerDescriptor::setMinFilter(wgpu::FilterMode value) & {
-    this->minFilter = value;
+    this->minFilter = std::move(value);
     return *this;
 }
 SamplerDescriptor&& SamplerDescriptor::setMinFilter(wgpu::FilterMode value) && {
-    this->minFilter = value;
+    this->minFilter = std::move(value);
     return std::move(*this);
 }
 SamplerDescriptor& SamplerDescriptor::setMipmapFilter(wgpu::MipmapFilterMode value) & {
-    this->mipmapFilter = value;
+    this->mipmapFilter = std::move(value);
     return *this;
 }
 SamplerDescriptor&& SamplerDescriptor::setMipmapFilter(wgpu::MipmapFilterMode value) && {
-    this->mipmapFilter = value;
+    this->mipmapFilter = std::move(value);
     return std::move(*this);
 }
 SamplerDescriptor& SamplerDescriptor::setLodMinClamp(float value) & {
-    this->lodMinClamp = value;
+    this->lodMinClamp = std::move(value);
     return *this;
 }
 SamplerDescriptor&& SamplerDescriptor::setLodMinClamp(float value) && {
-    this->lodMinClamp = value;
+    this->lodMinClamp = std::move(value);
     return std::move(*this);
 }
 SamplerDescriptor& SamplerDescriptor::setLodMaxClamp(float value) & {
-    this->lodMaxClamp = value;
+    this->lodMaxClamp = std::move(value);
     return *this;
 }
 SamplerDescriptor&& SamplerDescriptor::setLodMaxClamp(float value) && {
-    this->lodMaxClamp = value;
+    this->lodMaxClamp = std::move(value);
     return std::move(*this);
 }
 SamplerDescriptor& SamplerDescriptor::setCompare(wgpu::CompareFunction value) & {
-    this->compare = value;
+    this->compare = std::move(value);
     return *this;
 }
 SamplerDescriptor&& SamplerDescriptor::setCompare(wgpu::CompareFunction value) && {
-    this->compare = value;
+    this->compare = std::move(value);
     return std::move(*this);
 }
 SamplerDescriptor& SamplerDescriptor::setMaxAnisotropy(uint16_t value) & {
-    this->maxAnisotropy = value;
+    this->maxAnisotropy = std::move(value);
     return *this;
 }
 SamplerDescriptor&& SamplerDescriptor::setMaxAnisotropy(uint16_t value) && {
-    this->maxAnisotropy = value;
+    this->maxAnisotropy = std::move(value);
     return std::move(*this);
 }
 ShaderSourceSPIRV::ShaderSourceSPIRV(const WGPUShaderSourceSPIRV& native) {
@@ -8252,19 +8252,19 @@ ShaderSourceSPIRV::CStruct ShaderSourceSPIRV::to_cstruct() const {
     return cstruct;
 }
 ShaderSourceSPIRV& ShaderSourceSPIRV::setCodeSize(uint32_t value) & {
-    this->codeSize = value;
+    this->codeSize = std::move(value);
     return *this;
 }
 ShaderSourceSPIRV&& ShaderSourceSPIRV::setCodeSize(uint32_t value) && {
-    this->codeSize = value;
+    this->codeSize = std::move(value);
     return std::move(*this);
 }
 ShaderSourceSPIRV& ShaderSourceSPIRV::setCode(uint32_t const* value) & {
-    this->code = value;
+    this->code = std::move(value);
     return *this;
 }
 ShaderSourceSPIRV&& ShaderSourceSPIRV::setCode(uint32_t const* value) && {
-    this->code = value;
+    this->code = std::move(value);
     return std::move(*this);
 }
 ShaderSourceWGSL::ShaderSourceWGSL(const WGPUShaderSourceWGSL& native) {
@@ -8308,35 +8308,35 @@ StencilFaceState::CStruct StencilFaceState::to_cstruct() const {
     return cstruct;
 }
 StencilFaceState& StencilFaceState::setCompare(wgpu::CompareFunction value) & {
-    this->compare = value;
+    this->compare = std::move(value);
     return *this;
 }
 StencilFaceState&& StencilFaceState::setCompare(wgpu::CompareFunction value) && {
-    this->compare = value;
+    this->compare = std::move(value);
     return std::move(*this);
 }
 StencilFaceState& StencilFaceState::setFailOp(wgpu::StencilOperation value) & {
-    this->failOp = value;
+    this->failOp = std::move(value);
     return *this;
 }
 StencilFaceState&& StencilFaceState::setFailOp(wgpu::StencilOperation value) && {
-    this->failOp = value;
+    this->failOp = std::move(value);
     return std::move(*this);
 }
 StencilFaceState& StencilFaceState::setDepthFailOp(wgpu::StencilOperation value) & {
-    this->depthFailOp = value;
+    this->depthFailOp = std::move(value);
     return *this;
 }
 StencilFaceState&& StencilFaceState::setDepthFailOp(wgpu::StencilOperation value) && {
-    this->depthFailOp = value;
+    this->depthFailOp = std::move(value);
     return std::move(*this);
 }
 StencilFaceState& StencilFaceState::setPassOp(wgpu::StencilOperation value) & {
-    this->passOp = value;
+    this->passOp = std::move(value);
     return *this;
 }
 StencilFaceState&& StencilFaceState::setPassOp(wgpu::StencilOperation value) && {
-    this->passOp = value;
+    this->passOp = std::move(value);
     return std::move(*this);
 }
 StorageTextureBindingLayout::StorageTextureBindingLayout(const WGPUStorageTextureBindingLayout& native) {
@@ -8354,27 +8354,27 @@ StorageTextureBindingLayout::CStruct StorageTextureBindingLayout::to_cstruct() c
     return cstruct;
 }
 StorageTextureBindingLayout& StorageTextureBindingLayout::setAccess(wgpu::StorageTextureAccess value) & {
-    this->access = value;
+    this->access = std::move(value);
     return *this;
 }
 StorageTextureBindingLayout&& StorageTextureBindingLayout::setAccess(wgpu::StorageTextureAccess value) && {
-    this->access = value;
+    this->access = std::move(value);
     return std::move(*this);
 }
 StorageTextureBindingLayout& StorageTextureBindingLayout::setFormat(wgpu::TextureFormat value) & {
-    this->format = value;
+    this->format = std::move(value);
     return *this;
 }
 StorageTextureBindingLayout&& StorageTextureBindingLayout::setFormat(wgpu::TextureFormat value) && {
-    this->format = value;
+    this->format = std::move(value);
     return std::move(*this);
 }
 StorageTextureBindingLayout& StorageTextureBindingLayout::setViewDimension(wgpu::TextureViewDimension value) & {
-    this->viewDimension = value;
+    this->viewDimension = std::move(value);
     return *this;
 }
 StorageTextureBindingLayout&& StorageTextureBindingLayout::setViewDimension(wgpu::TextureViewDimension value) && {
-    this->viewDimension = value;
+    this->viewDimension = std::move(value);
     return std::move(*this);
 }
 SupportedFeatures::SupportedFeatures(const WGPUSupportedFeatures& native) {
@@ -8424,11 +8424,11 @@ SurfaceCapabilities::CStruct SurfaceCapabilities::to_cstruct() const {
     return cstruct;
 }
 SurfaceCapabilities& SurfaceCapabilities::setUsages(wgpu::TextureUsage value) & {
-    this->usages = value;
+    this->usages = std::move(value);
     return *this;
 }
 SurfaceCapabilities&& SurfaceCapabilities::setUsages(wgpu::TextureUsage value) && {
-    this->usages = value;
+    this->usages = std::move(value);
     return std::move(*this);
 }
 SurfaceColorManagement::SurfaceColorManagement(const WGPUSurfaceColorManagement& native) {
@@ -8444,19 +8444,19 @@ SurfaceColorManagement::CStruct SurfaceColorManagement::to_cstruct() const {
     return cstruct;
 }
 SurfaceColorManagement& SurfaceColorManagement::setColorSpace(wgpu::PredefinedColorSpace value) & {
-    this->colorSpace = value;
+    this->colorSpace = std::move(value);
     return *this;
 }
 SurfaceColorManagement&& SurfaceColorManagement::setColorSpace(wgpu::PredefinedColorSpace value) && {
-    this->colorSpace = value;
+    this->colorSpace = std::move(value);
     return std::move(*this);
 }
 SurfaceColorManagement& SurfaceColorManagement::setToneMappingMode(wgpu::ToneMappingMode value) & {
-    this->toneMappingMode = value;
+    this->toneMappingMode = std::move(value);
     return *this;
 }
 SurfaceColorManagement&& SurfaceColorManagement::setToneMappingMode(wgpu::ToneMappingMode value) && {
-    this->toneMappingMode = value;
+    this->toneMappingMode = std::move(value);
     return std::move(*this);
 }
 SurfaceConfiguration::SurfaceConfiguration(const WGPUSurfaceConfiguration& native) {
@@ -8485,59 +8485,59 @@ SurfaceConfiguration::CStruct SurfaceConfiguration::to_cstruct() const {
     return cstruct;
 }
 SurfaceConfiguration& SurfaceConfiguration::setDevice(wgpu::raw::Device value) & {
-    this->device = value;
+    this->device = std::move(value);
     return *this;
 }
 SurfaceConfiguration&& SurfaceConfiguration::setDevice(wgpu::raw::Device value) && {
-    this->device = value;
+    this->device = std::move(value);
     return std::move(*this);
 }
 SurfaceConfiguration& SurfaceConfiguration::setFormat(wgpu::TextureFormat value) & {
-    this->format = value;
+    this->format = std::move(value);
     return *this;
 }
 SurfaceConfiguration&& SurfaceConfiguration::setFormat(wgpu::TextureFormat value) && {
-    this->format = value;
+    this->format = std::move(value);
     return std::move(*this);
 }
 SurfaceConfiguration& SurfaceConfiguration::setUsage(wgpu::TextureUsage value) & {
-    this->usage = value;
+    this->usage = std::move(value);
     return *this;
 }
 SurfaceConfiguration&& SurfaceConfiguration::setUsage(wgpu::TextureUsage value) && {
-    this->usage = value;
+    this->usage = std::move(value);
     return std::move(*this);
 }
 SurfaceConfiguration& SurfaceConfiguration::setWidth(uint32_t value) & {
-    this->width = value;
+    this->width = std::move(value);
     return *this;
 }
 SurfaceConfiguration&& SurfaceConfiguration::setWidth(uint32_t value) && {
-    this->width = value;
+    this->width = std::move(value);
     return std::move(*this);
 }
 SurfaceConfiguration& SurfaceConfiguration::setHeight(uint32_t value) & {
-    this->height = value;
+    this->height = std::move(value);
     return *this;
 }
 SurfaceConfiguration&& SurfaceConfiguration::setHeight(uint32_t value) && {
-    this->height = value;
+    this->height = std::move(value);
     return std::move(*this);
 }
 SurfaceConfiguration& SurfaceConfiguration::setAlphaMode(wgpu::CompositeAlphaMode value) & {
-    this->alphaMode = value;
+    this->alphaMode = std::move(value);
     return *this;
 }
 SurfaceConfiguration&& SurfaceConfiguration::setAlphaMode(wgpu::CompositeAlphaMode value) && {
-    this->alphaMode = value;
+    this->alphaMode = std::move(value);
     return std::move(*this);
 }
 SurfaceConfiguration& SurfaceConfiguration::setPresentMode(wgpu::PresentMode value) & {
-    this->presentMode = value;
+    this->presentMode = std::move(value);
     return *this;
 }
 SurfaceConfiguration&& SurfaceConfiguration::setPresentMode(wgpu::PresentMode value) && {
-    this->presentMode = value;
+    this->presentMode = std::move(value);
     return std::move(*this);
 }
 SurfaceSourceAndroidNativeWindow::SurfaceSourceAndroidNativeWindow(const WGPUSurfaceSourceAndroidNativeWindow& native) {
@@ -8551,11 +8551,11 @@ SurfaceSourceAndroidNativeWindow::CStruct SurfaceSourceAndroidNativeWindow::to_c
     return cstruct;
 }
 SurfaceSourceAndroidNativeWindow& SurfaceSourceAndroidNativeWindow::setWindow(void* value) & {
-    this->window = value;
+    this->window = std::move(value);
     return *this;
 }
 SurfaceSourceAndroidNativeWindow&& SurfaceSourceAndroidNativeWindow::setWindow(void* value) && {
-    this->window = value;
+    this->window = std::move(value);
     return std::move(*this);
 }
 SurfaceSourceMetalLayer::SurfaceSourceMetalLayer(const WGPUSurfaceSourceMetalLayer& native) {
@@ -8569,11 +8569,11 @@ SurfaceSourceMetalLayer::CStruct SurfaceSourceMetalLayer::to_cstruct() const {
     return cstruct;
 }
 SurfaceSourceMetalLayer& SurfaceSourceMetalLayer::setLayer(void* value) & {
-    this->layer = value;
+    this->layer = std::move(value);
     return *this;
 }
 SurfaceSourceMetalLayer&& SurfaceSourceMetalLayer::setLayer(void* value) && {
-    this->layer = value;
+    this->layer = std::move(value);
     return std::move(*this);
 }
 SurfaceSourceWaylandSurface::SurfaceSourceWaylandSurface(const WGPUSurfaceSourceWaylandSurface& native) {
@@ -8589,19 +8589,19 @@ SurfaceSourceWaylandSurface::CStruct SurfaceSourceWaylandSurface::to_cstruct() c
     return cstruct;
 }
 SurfaceSourceWaylandSurface& SurfaceSourceWaylandSurface::setDisplay(void* value) & {
-    this->display = value;
+    this->display = std::move(value);
     return *this;
 }
 SurfaceSourceWaylandSurface&& SurfaceSourceWaylandSurface::setDisplay(void* value) && {
-    this->display = value;
+    this->display = std::move(value);
     return std::move(*this);
 }
 SurfaceSourceWaylandSurface& SurfaceSourceWaylandSurface::setSurface(void* value) & {
-    this->surface = value;
+    this->surface = std::move(value);
     return *this;
 }
 SurfaceSourceWaylandSurface&& SurfaceSourceWaylandSurface::setSurface(void* value) && {
-    this->surface = value;
+    this->surface = std::move(value);
     return std::move(*this);
 }
 SurfaceSourceWindowsHWND::SurfaceSourceWindowsHWND(const WGPUSurfaceSourceWindowsHWND& native) {
@@ -8617,19 +8617,19 @@ SurfaceSourceWindowsHWND::CStruct SurfaceSourceWindowsHWND::to_cstruct() const {
     return cstruct;
 }
 SurfaceSourceWindowsHWND& SurfaceSourceWindowsHWND::setHinstance(void* value) & {
-    this->hinstance = value;
+    this->hinstance = std::move(value);
     return *this;
 }
 SurfaceSourceWindowsHWND&& SurfaceSourceWindowsHWND::setHinstance(void* value) && {
-    this->hinstance = value;
+    this->hinstance = std::move(value);
     return std::move(*this);
 }
 SurfaceSourceWindowsHWND& SurfaceSourceWindowsHWND::setHwnd(void* value) & {
-    this->hwnd = value;
+    this->hwnd = std::move(value);
     return *this;
 }
 SurfaceSourceWindowsHWND&& SurfaceSourceWindowsHWND::setHwnd(void* value) && {
-    this->hwnd = value;
+    this->hwnd = std::move(value);
     return std::move(*this);
 }
 SurfaceSourceXCBWindow::SurfaceSourceXCBWindow(const WGPUSurfaceSourceXCBWindow& native) {
@@ -8645,19 +8645,19 @@ SurfaceSourceXCBWindow::CStruct SurfaceSourceXCBWindow::to_cstruct() const {
     return cstruct;
 }
 SurfaceSourceXCBWindow& SurfaceSourceXCBWindow::setConnection(void* value) & {
-    this->connection = value;
+    this->connection = std::move(value);
     return *this;
 }
 SurfaceSourceXCBWindow&& SurfaceSourceXCBWindow::setConnection(void* value) && {
-    this->connection = value;
+    this->connection = std::move(value);
     return std::move(*this);
 }
 SurfaceSourceXCBWindow& SurfaceSourceXCBWindow::setWindow(uint32_t value) & {
-    this->window = value;
+    this->window = std::move(value);
     return *this;
 }
 SurfaceSourceXCBWindow&& SurfaceSourceXCBWindow::setWindow(uint32_t value) && {
-    this->window = value;
+    this->window = std::move(value);
     return std::move(*this);
 }
 SurfaceSourceXlibWindow::SurfaceSourceXlibWindow(const WGPUSurfaceSourceXlibWindow& native) {
@@ -8673,19 +8673,19 @@ SurfaceSourceXlibWindow::CStruct SurfaceSourceXlibWindow::to_cstruct() const {
     return cstruct;
 }
 SurfaceSourceXlibWindow& SurfaceSourceXlibWindow::setDisplay(void* value) & {
-    this->display = value;
+    this->display = std::move(value);
     return *this;
 }
 SurfaceSourceXlibWindow&& SurfaceSourceXlibWindow::setDisplay(void* value) && {
-    this->display = value;
+    this->display = std::move(value);
     return std::move(*this);
 }
 SurfaceSourceXlibWindow& SurfaceSourceXlibWindow::setWindow(uint64_t value) & {
-    this->window = value;
+    this->window = std::move(value);
     return *this;
 }
 SurfaceSourceXlibWindow&& SurfaceSourceXlibWindow::setWindow(uint64_t value) && {
-    this->window = value;
+    this->window = std::move(value);
     return std::move(*this);
 }
 SurfaceTexture::SurfaceTexture(const WGPUSurfaceTexture& native) {
@@ -8701,19 +8701,19 @@ SurfaceTexture::CStruct SurfaceTexture::to_cstruct() const {
     return cstruct;
 }
 SurfaceTexture& SurfaceTexture::setTexture(wgpu::Texture value) & {
-    this->texture = value;
+    this->texture = std::move(value);
     return *this;
 }
 SurfaceTexture&& SurfaceTexture::setTexture(wgpu::Texture value) && {
-    this->texture = value;
+    this->texture = std::move(value);
     return std::move(*this);
 }
 SurfaceTexture& SurfaceTexture::setStatus(wgpu::SurfaceGetCurrentTextureStatus value) & {
-    this->status = value;
+    this->status = std::move(value);
     return *this;
 }
 SurfaceTexture&& SurfaceTexture::setStatus(wgpu::SurfaceGetCurrentTextureStatus value) && {
-    this->status = value;
+    this->status = std::move(value);
     return std::move(*this);
 }
 TexelCopyBufferLayout::TexelCopyBufferLayout(const WGPUTexelCopyBufferLayout& native) {
@@ -8729,27 +8729,27 @@ TexelCopyBufferLayout::CStruct TexelCopyBufferLayout::to_cstruct() const {
     return cstruct;
 }
 TexelCopyBufferLayout& TexelCopyBufferLayout::setOffset(uint64_t value) & {
-    this->offset = value;
+    this->offset = std::move(value);
     return *this;
 }
 TexelCopyBufferLayout&& TexelCopyBufferLayout::setOffset(uint64_t value) && {
-    this->offset = value;
+    this->offset = std::move(value);
     return std::move(*this);
 }
 TexelCopyBufferLayout& TexelCopyBufferLayout::setBytesPerRow(uint32_t value) & {
-    this->bytesPerRow = value;
+    this->bytesPerRow = std::move(value);
     return *this;
 }
 TexelCopyBufferLayout&& TexelCopyBufferLayout::setBytesPerRow(uint32_t value) && {
-    this->bytesPerRow = value;
+    this->bytesPerRow = std::move(value);
     return std::move(*this);
 }
 TexelCopyBufferLayout& TexelCopyBufferLayout::setRowsPerImage(uint32_t value) & {
-    this->rowsPerImage = value;
+    this->rowsPerImage = std::move(value);
     return *this;
 }
 TexelCopyBufferLayout&& TexelCopyBufferLayout::setRowsPerImage(uint32_t value) && {
-    this->rowsPerImage = value;
+    this->rowsPerImage = std::move(value);
     return std::move(*this);
 }
 TextureBindingLayout::TextureBindingLayout(const WGPUTextureBindingLayout& native) {
@@ -8767,27 +8767,27 @@ TextureBindingLayout::CStruct TextureBindingLayout::to_cstruct() const {
     return cstruct;
 }
 TextureBindingLayout& TextureBindingLayout::setSampleType(wgpu::TextureSampleType value) & {
-    this->sampleType = value;
+    this->sampleType = std::move(value);
     return *this;
 }
 TextureBindingLayout&& TextureBindingLayout::setSampleType(wgpu::TextureSampleType value) && {
-    this->sampleType = value;
+    this->sampleType = std::move(value);
     return std::move(*this);
 }
 TextureBindingLayout& TextureBindingLayout::setViewDimension(wgpu::TextureViewDimension value) & {
-    this->viewDimension = value;
+    this->viewDimension = std::move(value);
     return *this;
 }
 TextureBindingLayout&& TextureBindingLayout::setViewDimension(wgpu::TextureViewDimension value) && {
-    this->viewDimension = value;
+    this->viewDimension = std::move(value);
     return std::move(*this);
 }
 TextureBindingLayout& TextureBindingLayout::setMultisampled(wgpu::Bool value) & {
-    this->multisampled = value;
+    this->multisampled = std::move(value);
     return *this;
 }
 TextureBindingLayout&& TextureBindingLayout::setMultisampled(wgpu::Bool value) && {
-    this->multisampled = value;
+    this->multisampled = std::move(value);
     return std::move(*this);
 }
 TextureComponentSwizzle::TextureComponentSwizzle(const WGPUTextureComponentSwizzle& native) {
@@ -8805,35 +8805,35 @@ TextureComponentSwizzle::CStruct TextureComponentSwizzle::to_cstruct() const {
     return cstruct;
 }
 TextureComponentSwizzle& TextureComponentSwizzle::setR(wgpu::ComponentSwizzle value) & {
-    this->r = value;
+    this->r = std::move(value);
     return *this;
 }
 TextureComponentSwizzle&& TextureComponentSwizzle::setR(wgpu::ComponentSwizzle value) && {
-    this->r = value;
+    this->r = std::move(value);
     return std::move(*this);
 }
 TextureComponentSwizzle& TextureComponentSwizzle::setG(wgpu::ComponentSwizzle value) & {
-    this->g = value;
+    this->g = std::move(value);
     return *this;
 }
 TextureComponentSwizzle&& TextureComponentSwizzle::setG(wgpu::ComponentSwizzle value) && {
-    this->g = value;
+    this->g = std::move(value);
     return std::move(*this);
 }
 TextureComponentSwizzle& TextureComponentSwizzle::setB(wgpu::ComponentSwizzle value) & {
-    this->b = value;
+    this->b = std::move(value);
     return *this;
 }
 TextureComponentSwizzle&& TextureComponentSwizzle::setB(wgpu::ComponentSwizzle value) && {
-    this->b = value;
+    this->b = std::move(value);
     return std::move(*this);
 }
 TextureComponentSwizzle& TextureComponentSwizzle::setA(wgpu::ComponentSwizzle value) & {
-    this->a = value;
+    this->a = std::move(value);
     return *this;
 }
 TextureComponentSwizzle&& TextureComponentSwizzle::setA(wgpu::ComponentSwizzle value) && {
-    this->a = value;
+    this->a = std::move(value);
     return std::move(*this);
 }
 TextureViewDescriptor::TextureViewDescriptor(const WGPUTextureViewDescriptor& native) {
@@ -8879,67 +8879,67 @@ TextureViewDescriptor&& TextureViewDescriptor::setLabel(wgpu::StringView&& value
     return std::move(*this);
 }
 TextureViewDescriptor& TextureViewDescriptor::setFormat(wgpu::TextureFormat value) & {
-    this->format = value;
+    this->format = std::move(value);
     return *this;
 }
 TextureViewDescriptor&& TextureViewDescriptor::setFormat(wgpu::TextureFormat value) && {
-    this->format = value;
+    this->format = std::move(value);
     return std::move(*this);
 }
 TextureViewDescriptor& TextureViewDescriptor::setDimension(wgpu::TextureViewDimension value) & {
-    this->dimension = value;
+    this->dimension = std::move(value);
     return *this;
 }
 TextureViewDescriptor&& TextureViewDescriptor::setDimension(wgpu::TextureViewDimension value) && {
-    this->dimension = value;
+    this->dimension = std::move(value);
     return std::move(*this);
 }
 TextureViewDescriptor& TextureViewDescriptor::setBaseMipLevel(uint32_t value) & {
-    this->baseMipLevel = value;
+    this->baseMipLevel = std::move(value);
     return *this;
 }
 TextureViewDescriptor&& TextureViewDescriptor::setBaseMipLevel(uint32_t value) && {
-    this->baseMipLevel = value;
+    this->baseMipLevel = std::move(value);
     return std::move(*this);
 }
 TextureViewDescriptor& TextureViewDescriptor::setMipLevelCount(uint32_t value) & {
-    this->mipLevelCount = value;
+    this->mipLevelCount = std::move(value);
     return *this;
 }
 TextureViewDescriptor&& TextureViewDescriptor::setMipLevelCount(uint32_t value) && {
-    this->mipLevelCount = value;
+    this->mipLevelCount = std::move(value);
     return std::move(*this);
 }
 TextureViewDescriptor& TextureViewDescriptor::setBaseArrayLayer(uint32_t value) & {
-    this->baseArrayLayer = value;
+    this->baseArrayLayer = std::move(value);
     return *this;
 }
 TextureViewDescriptor&& TextureViewDescriptor::setBaseArrayLayer(uint32_t value) && {
-    this->baseArrayLayer = value;
+    this->baseArrayLayer = std::move(value);
     return std::move(*this);
 }
 TextureViewDescriptor& TextureViewDescriptor::setArrayLayerCount(uint32_t value) & {
-    this->arrayLayerCount = value;
+    this->arrayLayerCount = std::move(value);
     return *this;
 }
 TextureViewDescriptor&& TextureViewDescriptor::setArrayLayerCount(uint32_t value) && {
-    this->arrayLayerCount = value;
+    this->arrayLayerCount = std::move(value);
     return std::move(*this);
 }
 TextureViewDescriptor& TextureViewDescriptor::setAspect(wgpu::TextureAspect value) & {
-    this->aspect = value;
+    this->aspect = std::move(value);
     return *this;
 }
 TextureViewDescriptor&& TextureViewDescriptor::setAspect(wgpu::TextureAspect value) && {
-    this->aspect = value;
+    this->aspect = std::move(value);
     return std::move(*this);
 }
 TextureViewDescriptor& TextureViewDescriptor::setUsage(wgpu::TextureUsage value) & {
-    this->usage = value;
+    this->usage = std::move(value);
     return *this;
 }
 TextureViewDescriptor&& TextureViewDescriptor::setUsage(wgpu::TextureUsage value) && {
-    this->usage = value;
+    this->usage = std::move(value);
     return std::move(*this);
 }
 VertexAttribute::VertexAttribute(const WGPUVertexAttribute& native) {
@@ -8957,27 +8957,27 @@ VertexAttribute::CStruct VertexAttribute::to_cstruct() const {
     return cstruct;
 }
 VertexAttribute& VertexAttribute::setFormat(wgpu::VertexFormat value) & {
-    this->format = value;
+    this->format = std::move(value);
     return *this;
 }
 VertexAttribute&& VertexAttribute::setFormat(wgpu::VertexFormat value) && {
-    this->format = value;
+    this->format = std::move(value);
     return std::move(*this);
 }
 VertexAttribute& VertexAttribute::setOffset(uint64_t value) & {
-    this->offset = value;
+    this->offset = std::move(value);
     return *this;
 }
 VertexAttribute&& VertexAttribute::setOffset(uint64_t value) && {
-    this->offset = value;
+    this->offset = std::move(value);
     return std::move(*this);
 }
 VertexAttribute& VertexAttribute::setShaderLocation(uint32_t value) & {
-    this->shaderLocation = value;
+    this->shaderLocation = std::move(value);
     return *this;
 }
 VertexAttribute&& VertexAttribute::setShaderLocation(uint32_t value) && {
-    this->shaderLocation = value;
+    this->shaderLocation = std::move(value);
     return std::move(*this);
 }
 BindGroupEntry::BindGroupEntry(const WGPUBindGroupEntry& native) {
@@ -9001,51 +9001,51 @@ BindGroupEntry::CStruct BindGroupEntry::to_cstruct() const {
     return cstruct;
 }
 BindGroupEntry& BindGroupEntry::setBinding(uint32_t value) & {
-    this->binding = value;
+    this->binding = std::move(value);
     return *this;
 }
 BindGroupEntry&& BindGroupEntry::setBinding(uint32_t value) && {
-    this->binding = value;
+    this->binding = std::move(value);
     return std::move(*this);
 }
 BindGroupEntry& BindGroupEntry::setBuffer(wgpu::raw::Buffer value) & {
-    this->buffer = value;
+    this->buffer = std::move(value);
     return *this;
 }
 BindGroupEntry&& BindGroupEntry::setBuffer(wgpu::raw::Buffer value) && {
-    this->buffer = value;
+    this->buffer = std::move(value);
     return std::move(*this);
 }
 BindGroupEntry& BindGroupEntry::setOffset(uint64_t value) & {
-    this->offset = value;
+    this->offset = std::move(value);
     return *this;
 }
 BindGroupEntry&& BindGroupEntry::setOffset(uint64_t value) && {
-    this->offset = value;
+    this->offset = std::move(value);
     return std::move(*this);
 }
 BindGroupEntry& BindGroupEntry::setSize(uint64_t value) & {
-    this->size = value;
+    this->size = std::move(value);
     return *this;
 }
 BindGroupEntry&& BindGroupEntry::setSize(uint64_t value) && {
-    this->size = value;
+    this->size = std::move(value);
     return std::move(*this);
 }
 BindGroupEntry& BindGroupEntry::setSampler(wgpu::raw::Sampler value) & {
-    this->sampler = value;
+    this->sampler = std::move(value);
     return *this;
 }
 BindGroupEntry&& BindGroupEntry::setSampler(wgpu::raw::Sampler value) && {
-    this->sampler = value;
+    this->sampler = std::move(value);
     return std::move(*this);
 }
 BindGroupEntry& BindGroupEntry::setTextureView(wgpu::raw::TextureView value) & {
-    this->textureView = value;
+    this->textureView = std::move(value);
     return *this;
 }
 BindGroupEntry&& BindGroupEntry::setTextureView(wgpu::raw::TextureView value) && {
-    this->textureView = value;
+    this->textureView = std::move(value);
     return std::move(*this);
 }
 BindGroupLayoutEntry::BindGroupLayoutEntry(const WGPUBindGroupLayoutEntry& native) {
@@ -9071,27 +9071,27 @@ BindGroupLayoutEntry::CStruct BindGroupLayoutEntry::to_cstruct() const {
     return cstruct;
 }
 BindGroupLayoutEntry& BindGroupLayoutEntry::setBinding(uint32_t value) & {
-    this->binding = value;
+    this->binding = std::move(value);
     return *this;
 }
 BindGroupLayoutEntry&& BindGroupLayoutEntry::setBinding(uint32_t value) && {
-    this->binding = value;
+    this->binding = std::move(value);
     return std::move(*this);
 }
 BindGroupLayoutEntry& BindGroupLayoutEntry::setVisibility(wgpu::ShaderStage value) & {
-    this->visibility = value;
+    this->visibility = std::move(value);
     return *this;
 }
 BindGroupLayoutEntry&& BindGroupLayoutEntry::setVisibility(wgpu::ShaderStage value) && {
-    this->visibility = value;
+    this->visibility = std::move(value);
     return std::move(*this);
 }
 BindGroupLayoutEntry& BindGroupLayoutEntry::setBindingArraySize(uint32_t value) & {
-    this->bindingArraySize = value;
+    this->bindingArraySize = std::move(value);
     return *this;
 }
 BindGroupLayoutEntry&& BindGroupLayoutEntry::setBindingArraySize(uint32_t value) && {
-    this->bindingArraySize = value;
+    this->bindingArraySize = std::move(value);
     return std::move(*this);
 }
 BindGroupLayoutEntry& BindGroupLayoutEntry::setBuffer(const wgpu::BufferBindingLayout& value) & {
@@ -9282,11 +9282,11 @@ ComputeState::CStruct ComputeState::to_cstruct() const {
     return cstruct;
 }
 ComputeState& ComputeState::setModule(wgpu::raw::ShaderModule value) & {
-    this->module = value;
+    this->module = std::move(value);
     return *this;
 }
 ComputeState&& ComputeState::setModule(wgpu::raw::ShaderModule value) && {
-    this->module = value;
+    this->module = std::move(value);
     return std::move(*this);
 }
 ComputeState& ComputeState::setEntryPoint(const wgpu::StringView& value) & {
@@ -9334,27 +9334,27 @@ DepthStencilState::CStruct DepthStencilState::to_cstruct() const {
     return cstruct;
 }
 DepthStencilState& DepthStencilState::setFormat(wgpu::TextureFormat value) & {
-    this->format = value;
+    this->format = std::move(value);
     return *this;
 }
 DepthStencilState&& DepthStencilState::setFormat(wgpu::TextureFormat value) && {
-    this->format = value;
+    this->format = std::move(value);
     return std::move(*this);
 }
 DepthStencilState& DepthStencilState::setDepthWriteEnabled(wgpu::OptionalBool value) & {
-    this->depthWriteEnabled = value;
+    this->depthWriteEnabled = std::move(value);
     return *this;
 }
 DepthStencilState&& DepthStencilState::setDepthWriteEnabled(wgpu::OptionalBool value) && {
-    this->depthWriteEnabled = value;
+    this->depthWriteEnabled = std::move(value);
     return std::move(*this);
 }
 DepthStencilState& DepthStencilState::setDepthCompare(wgpu::CompareFunction value) & {
-    this->depthCompare = value;
+    this->depthCompare = std::move(value);
     return *this;
 }
 DepthStencilState&& DepthStencilState::setDepthCompare(wgpu::CompareFunction value) && {
-    this->depthCompare = value;
+    this->depthCompare = std::move(value);
     return std::move(*this);
 }
 DepthStencilState& DepthStencilState::setStencilFront(const wgpu::StencilFaceState& value) & {
@@ -9390,43 +9390,43 @@ DepthStencilState&& DepthStencilState::setStencilBack(wgpu::StencilFaceState&& v
     return std::move(*this);
 }
 DepthStencilState& DepthStencilState::setStencilReadMask(uint32_t value) & {
-    this->stencilReadMask = value;
+    this->stencilReadMask = std::move(value);
     return *this;
 }
 DepthStencilState&& DepthStencilState::setStencilReadMask(uint32_t value) && {
-    this->stencilReadMask = value;
+    this->stencilReadMask = std::move(value);
     return std::move(*this);
 }
 DepthStencilState& DepthStencilState::setStencilWriteMask(uint32_t value) & {
-    this->stencilWriteMask = value;
+    this->stencilWriteMask = std::move(value);
     return *this;
 }
 DepthStencilState&& DepthStencilState::setStencilWriteMask(uint32_t value) && {
-    this->stencilWriteMask = value;
+    this->stencilWriteMask = std::move(value);
     return std::move(*this);
 }
 DepthStencilState& DepthStencilState::setDepthBias(int32_t value) & {
-    this->depthBias = value;
+    this->depthBias = std::move(value);
     return *this;
 }
 DepthStencilState&& DepthStencilState::setDepthBias(int32_t value) && {
-    this->depthBias = value;
+    this->depthBias = std::move(value);
     return std::move(*this);
 }
 DepthStencilState& DepthStencilState::setDepthBiasSlopeScale(float value) & {
-    this->depthBiasSlopeScale = value;
+    this->depthBiasSlopeScale = std::move(value);
     return *this;
 }
 DepthStencilState&& DepthStencilState::setDepthBiasSlopeScale(float value) && {
-    this->depthBiasSlopeScale = value;
+    this->depthBiasSlopeScale = std::move(value);
     return std::move(*this);
 }
 DepthStencilState& DepthStencilState::setDepthBiasClamp(float value) & {
-    this->depthBiasClamp = value;
+    this->depthBiasClamp = std::move(value);
     return *this;
 }
 DepthStencilState&& DepthStencilState::setDepthBiasClamp(float value) && {
-    this->depthBiasClamp = value;
+    this->depthBiasClamp = std::move(value);
     return std::move(*this);
 }
 DeviceDescriptor::DeviceDescriptor(const WGPUDeviceDescriptor& native) {
@@ -9566,11 +9566,11 @@ FutureWaitInfo&& FutureWaitInfo::setFuture(wgpu::Future&& value) && {
     return std::move(*this);
 }
 FutureWaitInfo& FutureWaitInfo::setCompleted(wgpu::Bool value) & {
-    this->completed = value;
+    this->completed = std::move(value);
     return *this;
 }
 FutureWaitInfo&& FutureWaitInfo::setCompleted(wgpu::Bool value) && {
-    this->completed = value;
+    this->completed = std::move(value);
     return std::move(*this);
 }
 InstanceDescriptor::InstanceDescriptor(const WGPUInstanceDescriptor& native) {
@@ -9632,43 +9632,43 @@ RenderPassColorAttachment::CStruct RenderPassColorAttachment::to_cstruct() const
     return cstruct;
 }
 RenderPassColorAttachment& RenderPassColorAttachment::setView(wgpu::raw::TextureView value) & {
-    this->view = value;
+    this->view = std::move(value);
     return *this;
 }
 RenderPassColorAttachment&& RenderPassColorAttachment::setView(wgpu::raw::TextureView value) && {
-    this->view = value;
+    this->view = std::move(value);
     return std::move(*this);
 }
 RenderPassColorAttachment& RenderPassColorAttachment::setDepthSlice(uint32_t value) & {
-    this->depthSlice = value;
+    this->depthSlice = std::move(value);
     return *this;
 }
 RenderPassColorAttachment&& RenderPassColorAttachment::setDepthSlice(uint32_t value) && {
-    this->depthSlice = value;
+    this->depthSlice = std::move(value);
     return std::move(*this);
 }
 RenderPassColorAttachment& RenderPassColorAttachment::setResolveTarget(wgpu::raw::TextureView value) & {
-    this->resolveTarget = value;
+    this->resolveTarget = std::move(value);
     return *this;
 }
 RenderPassColorAttachment&& RenderPassColorAttachment::setResolveTarget(wgpu::raw::TextureView value) && {
-    this->resolveTarget = value;
+    this->resolveTarget = std::move(value);
     return std::move(*this);
 }
 RenderPassColorAttachment& RenderPassColorAttachment::setLoadOp(wgpu::LoadOp value) & {
-    this->loadOp = value;
+    this->loadOp = std::move(value);
     return *this;
 }
 RenderPassColorAttachment&& RenderPassColorAttachment::setLoadOp(wgpu::LoadOp value) && {
-    this->loadOp = value;
+    this->loadOp = std::move(value);
     return std::move(*this);
 }
 RenderPassColorAttachment& RenderPassColorAttachment::setStoreOp(wgpu::StoreOp value) & {
-    this->storeOp = value;
+    this->storeOp = std::move(value);
     return *this;
 }
 RenderPassColorAttachment&& RenderPassColorAttachment::setStoreOp(wgpu::StoreOp value) && {
-    this->storeOp = value;
+    this->storeOp = std::move(value);
     return std::move(*this);
 }
 RenderPassColorAttachment& RenderPassColorAttachment::setClearValue(const wgpu::Color& value) & {
@@ -9706,43 +9706,43 @@ RequestAdapterOptions::CStruct RequestAdapterOptions::to_cstruct() const {
     return cstruct;
 }
 RequestAdapterOptions& RequestAdapterOptions::setFeatureLevel(wgpu::FeatureLevel value) & {
-    this->featureLevel = value;
+    this->featureLevel = std::move(value);
     return *this;
 }
 RequestAdapterOptions&& RequestAdapterOptions::setFeatureLevel(wgpu::FeatureLevel value) && {
-    this->featureLevel = value;
+    this->featureLevel = std::move(value);
     return std::move(*this);
 }
 RequestAdapterOptions& RequestAdapterOptions::setPowerPreference(wgpu::PowerPreference value) & {
-    this->powerPreference = value;
+    this->powerPreference = std::move(value);
     return *this;
 }
 RequestAdapterOptions&& RequestAdapterOptions::setPowerPreference(wgpu::PowerPreference value) && {
-    this->powerPreference = value;
+    this->powerPreference = std::move(value);
     return std::move(*this);
 }
 RequestAdapterOptions& RequestAdapterOptions::setForceFallbackAdapter(wgpu::Bool value) & {
-    this->forceFallbackAdapter = value;
+    this->forceFallbackAdapter = std::move(value);
     return *this;
 }
 RequestAdapterOptions&& RequestAdapterOptions::setForceFallbackAdapter(wgpu::Bool value) && {
-    this->forceFallbackAdapter = value;
+    this->forceFallbackAdapter = std::move(value);
     return std::move(*this);
 }
 RequestAdapterOptions& RequestAdapterOptions::setBackendType(wgpu::BackendType value) & {
-    this->backendType = value;
+    this->backendType = std::move(value);
     return *this;
 }
 RequestAdapterOptions&& RequestAdapterOptions::setBackendType(wgpu::BackendType value) && {
-    this->backendType = value;
+    this->backendType = std::move(value);
     return std::move(*this);
 }
 RequestAdapterOptions& RequestAdapterOptions::setCompatibleSurface(wgpu::raw::Surface value) & {
-    this->compatibleSurface = value;
+    this->compatibleSurface = std::move(value);
     return *this;
 }
 RequestAdapterOptions&& RequestAdapterOptions::setCompatibleSurface(wgpu::raw::Surface value) && {
-    this->compatibleSurface = value;
+    this->compatibleSurface = std::move(value);
     return std::move(*this);
 }
 ShaderModuleDescriptor::ShaderModuleDescriptor(const WGPUShaderModuleDescriptor& native) {
@@ -9824,11 +9824,11 @@ TexelCopyBufferInfo&& TexelCopyBufferInfo::setLayout(wgpu::TexelCopyBufferLayout
     return std::move(*this);
 }
 TexelCopyBufferInfo& TexelCopyBufferInfo::setBuffer(wgpu::raw::Buffer value) & {
-    this->buffer = value;
+    this->buffer = std::move(value);
     return *this;
 }
 TexelCopyBufferInfo&& TexelCopyBufferInfo::setBuffer(wgpu::raw::Buffer value) && {
-    this->buffer = value;
+    this->buffer = std::move(value);
     return std::move(*this);
 }
 TexelCopyTextureInfo::TexelCopyTextureInfo(const WGPUTexelCopyTextureInfo& native) {
@@ -9846,19 +9846,19 @@ TexelCopyTextureInfo::CStruct TexelCopyTextureInfo::to_cstruct() const {
     return cstruct;
 }
 TexelCopyTextureInfo& TexelCopyTextureInfo::setTexture(wgpu::raw::Texture value) & {
-    this->texture = value;
+    this->texture = std::move(value);
     return *this;
 }
 TexelCopyTextureInfo&& TexelCopyTextureInfo::setTexture(wgpu::raw::Texture value) && {
-    this->texture = value;
+    this->texture = std::move(value);
     return std::move(*this);
 }
 TexelCopyTextureInfo& TexelCopyTextureInfo::setMipLevel(uint32_t value) & {
-    this->mipLevel = value;
+    this->mipLevel = std::move(value);
     return *this;
 }
 TexelCopyTextureInfo&& TexelCopyTextureInfo::setMipLevel(uint32_t value) && {
-    this->mipLevel = value;
+    this->mipLevel = std::move(value);
     return std::move(*this);
 }
 TexelCopyTextureInfo& TexelCopyTextureInfo::setOrigin(const wgpu::Origin3D& value) & {
@@ -9878,11 +9878,11 @@ TexelCopyTextureInfo&& TexelCopyTextureInfo::setOrigin(wgpu::Origin3D&& value) &
     return std::move(*this);
 }
 TexelCopyTextureInfo& TexelCopyTextureInfo::setAspect(wgpu::TextureAspect value) & {
-    this->aspect = value;
+    this->aspect = std::move(value);
     return *this;
 }
 TexelCopyTextureInfo&& TexelCopyTextureInfo::setAspect(wgpu::TextureAspect value) && {
-    this->aspect = value;
+    this->aspect = std::move(value);
     return std::move(*this);
 }
 TextureComponentSwizzleDescriptor::TextureComponentSwizzleDescriptor(const WGPUTextureComponentSwizzleDescriptor& native) {
@@ -9953,19 +9953,19 @@ TextureDescriptor&& TextureDescriptor::setLabel(wgpu::StringView&& value) && {
     return std::move(*this);
 }
 TextureDescriptor& TextureDescriptor::setUsage(wgpu::TextureUsage value) & {
-    this->usage = value;
+    this->usage = std::move(value);
     return *this;
 }
 TextureDescriptor&& TextureDescriptor::setUsage(wgpu::TextureUsage value) && {
-    this->usage = value;
+    this->usage = std::move(value);
     return std::move(*this);
 }
 TextureDescriptor& TextureDescriptor::setDimension(wgpu::TextureDimension value) & {
-    this->dimension = value;
+    this->dimension = std::move(value);
     return *this;
 }
 TextureDescriptor&& TextureDescriptor::setDimension(wgpu::TextureDimension value) && {
-    this->dimension = value;
+    this->dimension = std::move(value);
     return std::move(*this);
 }
 TextureDescriptor& TextureDescriptor::setSize(const wgpu::Extent3D& value) & {
@@ -9985,27 +9985,27 @@ TextureDescriptor&& TextureDescriptor::setSize(wgpu::Extent3D&& value) && {
     return std::move(*this);
 }
 TextureDescriptor& TextureDescriptor::setFormat(wgpu::TextureFormat value) & {
-    this->format = value;
+    this->format = std::move(value);
     return *this;
 }
 TextureDescriptor&& TextureDescriptor::setFormat(wgpu::TextureFormat value) && {
-    this->format = value;
+    this->format = std::move(value);
     return std::move(*this);
 }
 TextureDescriptor& TextureDescriptor::setMipLevelCount(uint32_t value) & {
-    this->mipLevelCount = value;
+    this->mipLevelCount = std::move(value);
     return *this;
 }
 TextureDescriptor&& TextureDescriptor::setMipLevelCount(uint32_t value) && {
-    this->mipLevelCount = value;
+    this->mipLevelCount = std::move(value);
     return std::move(*this);
 }
 TextureDescriptor& TextureDescriptor::setSampleCount(uint32_t value) & {
-    this->sampleCount = value;
+    this->sampleCount = std::move(value);
     return *this;
 }
 TextureDescriptor&& TextureDescriptor::setSampleCount(uint32_t value) && {
-    this->sampleCount = value;
+    this->sampleCount = std::move(value);
     return std::move(*this);
 }
 VertexBufferLayout::VertexBufferLayout(const WGPUVertexBufferLayout& native) {
@@ -10025,19 +10025,19 @@ VertexBufferLayout::CStruct VertexBufferLayout::to_cstruct() const {
     return cstruct;
 }
 VertexBufferLayout& VertexBufferLayout::setStepMode(wgpu::VertexStepMode value) & {
-    this->stepMode = value;
+    this->stepMode = std::move(value);
     return *this;
 }
 VertexBufferLayout&& VertexBufferLayout::setStepMode(wgpu::VertexStepMode value) && {
-    this->stepMode = value;
+    this->stepMode = std::move(value);
     return std::move(*this);
 }
 VertexBufferLayout& VertexBufferLayout::setArrayStride(uint64_t value) & {
-    this->arrayStride = value;
+    this->arrayStride = std::move(value);
     return *this;
 }
 VertexBufferLayout&& VertexBufferLayout::setArrayStride(uint64_t value) && {
-    this->arrayStride = value;
+    this->arrayStride = std::move(value);
     return std::move(*this);
 }
 BindGroupDescriptor::BindGroupDescriptor(const WGPUBindGroupDescriptor& native) {
@@ -10073,11 +10073,11 @@ BindGroupDescriptor&& BindGroupDescriptor::setLabel(wgpu::StringView&& value) &&
     return std::move(*this);
 }
 BindGroupDescriptor& BindGroupDescriptor::setLayout(wgpu::raw::BindGroupLayout value) & {
-    this->layout = value;
+    this->layout = std::move(value);
     return *this;
 }
 BindGroupDescriptor&& BindGroupDescriptor::setLayout(wgpu::raw::BindGroupLayout value) && {
-    this->layout = value;
+    this->layout = std::move(value);
     return std::move(*this);
 }
 BindGroupLayoutDescriptor::BindGroupLayoutDescriptor(const WGPUBindGroupLayoutDescriptor& native) {
@@ -10133,11 +10133,11 @@ ColorTargetState::CStruct ColorTargetState::to_cstruct() const {
     return cstruct;
 }
 ColorTargetState& ColorTargetState::setFormat(wgpu::TextureFormat value) & {
-    this->format = value;
+    this->format = std::move(value);
     return *this;
 }
 ColorTargetState&& ColorTargetState::setFormat(wgpu::TextureFormat value) && {
-    this->format = value;
+    this->format = std::move(value);
     return std::move(*this);
 }
 ColorTargetState& ColorTargetState::setBlend(const wgpu::BlendState& value) & {
@@ -10157,11 +10157,11 @@ ColorTargetState&& ColorTargetState::setBlend(wgpu::BlendState&& value) && {
     return std::move(*this);
 }
 ColorTargetState& ColorTargetState::setWriteMask(wgpu::ColorWriteMask value) & {
-    this->writeMask = value;
+    this->writeMask = std::move(value);
     return *this;
 }
 ColorTargetState&& ColorTargetState::setWriteMask(wgpu::ColorWriteMask value) && {
-    this->writeMask = value;
+    this->writeMask = std::move(value);
     return std::move(*this);
 }
 ComputePipelineDescriptor::ComputePipelineDescriptor(const WGPUComputePipelineDescriptor& native) {
@@ -10196,11 +10196,11 @@ ComputePipelineDescriptor&& ComputePipelineDescriptor::setLabel(wgpu::StringView
     return std::move(*this);
 }
 ComputePipelineDescriptor& ComputePipelineDescriptor::setLayout(wgpu::raw::PipelineLayout value) & {
-    this->layout = value;
+    this->layout = std::move(value);
     return *this;
 }
 ComputePipelineDescriptor&& ComputePipelineDescriptor::setLayout(wgpu::raw::PipelineLayout value) && {
-    this->layout = value;
+    this->layout = std::move(value);
     return std::move(*this);
 }
 ComputePipelineDescriptor& ComputePipelineDescriptor::setCompute(const wgpu::ComputeState& value) & {
@@ -10290,11 +10290,11 @@ RenderPassDescriptor&& RenderPassDescriptor::setDepthStencilAttachment(wgpu::Ren
     return std::move(*this);
 }
 RenderPassDescriptor& RenderPassDescriptor::setOcclusionQuerySet(wgpu::raw::QuerySet value) & {
-    this->occlusionQuerySet = value;
+    this->occlusionQuerySet = std::move(value);
     return *this;
 }
 RenderPassDescriptor&& RenderPassDescriptor::setOcclusionQuerySet(wgpu::raw::QuerySet value) && {
-    this->occlusionQuerySet = value;
+    this->occlusionQuerySet = std::move(value);
     return std::move(*this);
 }
 RenderPassDescriptor& RenderPassDescriptor::setTimestampWrites(const wgpu::PassTimestampWrites& value) & {
@@ -10335,11 +10335,11 @@ VertexState::CStruct VertexState::to_cstruct() const {
     return cstruct;
 }
 VertexState& VertexState::setModule(wgpu::raw::ShaderModule value) & {
-    this->module = value;
+    this->module = std::move(value);
     return *this;
 }
 VertexState&& VertexState::setModule(wgpu::raw::ShaderModule value) && {
-    this->module = value;
+    this->module = std::move(value);
     return std::move(*this);
 }
 VertexState& VertexState::setEntryPoint(const wgpu::StringView& value) & {
@@ -10379,11 +10379,11 @@ FragmentState::CStruct FragmentState::to_cstruct() const {
     return cstruct;
 }
 FragmentState& FragmentState::setModule(wgpu::raw::ShaderModule value) & {
-    this->module = value;
+    this->module = std::move(value);
     return *this;
 }
 FragmentState&& FragmentState::setModule(wgpu::raw::ShaderModule value) && {
-    this->module = value;
+    this->module = std::move(value);
     return std::move(*this);
 }
 FragmentState& FragmentState::setEntryPoint(const wgpu::StringView& value) & {
@@ -10460,11 +10460,11 @@ RenderPipelineDescriptor&& RenderPipelineDescriptor::setLabel(wgpu::StringView&&
     return std::move(*this);
 }
 RenderPipelineDescriptor& RenderPipelineDescriptor::setLayout(wgpu::raw::PipelineLayout value) & {
-    this->layout = value;
+    this->layout = std::move(value);
     return *this;
 }
 RenderPipelineDescriptor&& RenderPipelineDescriptor::setLayout(wgpu::raw::PipelineLayout value) && {
-    this->layout = value;
+    this->layout = std::move(value);
     return std::move(*this);
 }
 RenderPipelineDescriptor& RenderPipelineDescriptor::setVertex(const wgpu::VertexState& value) & {
