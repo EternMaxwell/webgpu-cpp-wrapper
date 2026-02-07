@@ -1352,6 +1352,8 @@ def generate_webgpu_cpp(api: WebGpuApi, api_cpp: WebGpuApiCpp, template_meta: Te
 		file_name = Path(header).name
 		includes_text += f"#include <webgpu/{file_name}>\n"
 	includes_text += f"\n#define WEBGPU_CPP_NAMESPACE {namespace}\n"
+	if use_raii:
+		includes_text += "#define WEBGPU_CPP_USE_RAII\n"
 	output = re.sub(r"\{\{webgpu_includes\}\}", includes_text, output)
 
 	enums_text = ""
@@ -1469,6 +1471,8 @@ def generate_webgpu_cpp(api: WebGpuApi, api_cpp: WebGpuApiCpp, template_meta: Te
 	output = re.sub(r"\{\{functions_impl\}\}", f"namespace {namespace} {{\n{functions_impl_text}\n}}", output)
 
 	output += "#undef WEBGPU_CPP_NAMESPACE"
+	if use_raii:
+		output += "\n#undef WEBGPU_CPP_USE_RAII"
 	output = re.sub(r"\{\{\w+\}\}", "", output)
 	output = re.sub(r"(\s*\n\s*){1,}\n", "\n", output)
 

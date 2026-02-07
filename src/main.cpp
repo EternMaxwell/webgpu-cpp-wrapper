@@ -1517,6 +1517,9 @@ void generate_webgpu_cpp(const WebGpuApiCpp& api_cpp, const TemplateMeta& templa
         includes_text += std::format("#include <webgpu/{}>\n", file_name);
     }
     includes_text += "\n#define WEBGPU_CPP_NAMESPACE " + namespace_name + "\n";
+    if (parser.contains("--use-raii")) {
+        includes_text += "#define WEBGPU_CPP_USE_RAII\n";
+    }
     output = std::regex_replace(output, std::regex(R"(\{\{webgpu_includes\}\})"), includes_text);
 
     // {{enums}}
@@ -1728,6 +1731,7 @@ void generate_webgpu_cpp(const WebGpuApiCpp& api_cpp, const TemplateMeta& templa
                                 std::format("namespace {} {{\n{}\n}}", namespace_name, functions_impl_text));
 
     output += "#undef WEBGPU_CPP_NAMESPACE";
+    output += "\n#undef WEBGPU_CPP_USE_RAII";
 
     // remove all non used binding
     output = std::regex_replace(output, std::regex(R"(\{\{\w+\}\})"), "");
