@@ -330,13 +330,15 @@ class CallbackApiCpp:
 
 
 NEXT_IN_CHAIN_HELPER = """
+template <typename Struct>
 struct NextInChainBase {
     std::atomic<std::size_t> ref_count{1};
-    virtual WGPUChainedStruct* getNextInChain() const = 0;
+    virtual Struct* getNextInChain() const = 0;
     virtual ~NextInChainBase() = default;
 };
-template <typename Struct>
-struct NextInChainImpl : Struct, NextInChainBase {
+template <typename Struct, typename ChainT>
+    requires requires(typename Struct::CStruct c) { c.chain; }
+struct NextInChainImpl : Struct, NextInChainBase<ChainT> {
     mutable typename Struct::CStruct cstruct;
     NextInChainImpl(const Struct& s) : Struct(s) {
         cstruct = this->to_cstruct();
@@ -344,19 +346,21 @@ struct NextInChainImpl : Struct, NextInChainBase {
     NextInChainImpl(Struct&& s) : Struct(std::move(s)) {
         cstruct = this->to_cstruct();
     }
-    WGPUChainedStruct* getNextInChain() const override {
+    ChainT* getNextInChain() const override {
         cstruct = this->to_cstruct();
-        return reinterpret_cast<WGPUChainedStruct*>(&cstruct);
+        return reinterpret_cast<ChainT*>(&cstruct);
     }
     void updateFromCStruct() {
         (Struct&)(*this) = static_cast<Struct>(cstruct);
     }
 };
-struct NextInChainNative : NextInChainBase {
-    WGPUChainedStruct* next;
-    NextInChainNative(WGPUChainedStruct* n) : next(n) {}
-    WGPUChainedStruct* getNextInChain() const override { return next; }
+template <typename ChainT>
+struct NextInChainNative : NextInChainBase<ChainT> {
+    ChainT* next;
+    NextInChainNative(ChainT* n) : next(n) {}
+    ChainT* getNextInChain() const override { return next; }
 };
+template <typename ChainT>
 struct NextInChain {
 public:
     NextInChain() : data(nullptr) {}
@@ -384,15 +388,16 @@ public:
     }
     ~NextInChain() { reset(); }
     template <typename Struct>
+        requires requires(typename std::decay_t<Struct>::CStruct c) { c.chain; }
     void setNext(Struct&& s) {
         reset();
-        data = new NextInChainImpl<std::decay_t<Struct>>(std::forward<Struct>(s));
+        data = new NextInChainImpl<std::decay_t<Struct>, ChainT>(std::forward<Struct>(s));
     }
-    void setNext(WGPUChainedStruct* next) {
+    void setNext(ChainT* next) {
         reset();
         data = new NextInChainNative(next);
     }
-    WGPUChainedStruct* getNext() const {
+    ChainT* getNext() const {
         if (data) {
             return data->getNextInChain();
         }
@@ -401,8 +406,8 @@ public:
     template <typename Struct>
     Struct* getAs() const {
         if (data) {
-            if (auto impl = dynamic_cast<NextInChainImpl<Struct>*>(data)) {
-                impl->updateFromCStruct();
+            if (auto impl = dynamic_cast<NextInChainImpl<Struct, ChainT>*>(data)) {
+                if constexpr (!std::is_const_v<ChainT>) impl->updateFromCStruct();
                 return static_cast<Struct*>(impl);
             }
         }
@@ -415,7 +420,7 @@ public:
         data = nullptr;
     }
 private:
-    NextInChainBase* data;
+    NextInChainBase<ChainT>* data;
 };"""
 
 
@@ -929,7 +934,7 @@ def produce_webgpu_cpp(api: WebGpuApi, template_meta: TemplateMeta, args: argpar
 				counter_type = next(f.type for f in struct_api.fields if f.name == field.counter)
 				cpp_type = get_cpp_field_type(field.type, struct_api.owning)
 				field_cpp = StructFieldCpp(
-					type=f"std::vector<{cpp_type}>",
+					type=f"{'' if field.is_const else 'mutable '}std::vector<{cpp_type}>",
 					name=field.name,
 					assign_from_native=(
 						f"\n    this->{field.name} = std::span(native.{field.name}, native.{field.counter}) | std::views::transform([](auto&& e) {{ return static_cast<{cpp_type}>(e); }}) | std::ranges::to<std::vector<{cpp_type}>>();"
@@ -1060,7 +1065,7 @@ def produce_webgpu_cpp(api: WebGpuApi, template_meta: TemplateMeta, args: argpar
 			if field.is_pointer and (field.name == "nextInChain" or field.name == "next"):
 				struct_cpp.binary_compatible = False
 				field_cpp = StructFieldCpp(
-					type="NextInChain",
+					type=f"NextInChain<{field.type}{' const' if field.is_const else ''}>",
 					name=field.name,
 					assign_from_native=f"\n    this->{field.name}.setNext(native.{field.name});",
 					assign_to_cstruct=f"\n    cstruct.{field.name} = this->{field.name}.getNext();",

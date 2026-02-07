@@ -1,5 +1,6 @@
 ﻿module;
 #include <webgpu/webgpu.h>
+#include <webgpu/wgpu.h>
 #define WEBGPU_CPP_NAMESPACE wgpu
 #include <atomic>
 #include <iostream>
@@ -18,6 +19,7 @@ export {
 namespace wgpu {
 using Flags = uint64_t;
 using Bool = uint32_t;
+using SubmissionIndex = uint64_t;
 }
 namespace wgpu {
 enum class AdapterType {
@@ -110,7 +112,9 @@ enum class CompareFunction {
 };
 enum class CompilationInfoRequestStatus {
     eSuccess = WGPUCompilationInfoRequestStatus_Success,
-    eCallbackCancelled = WGPUCompilationInfoRequestStatus_CallbackCancelled,
+    eInstanceDropped = WGPUCompilationInfoRequestStatus_InstanceDropped,
+    eError = WGPUCompilationInfoRequestStatus_Error,
+    eUnknown = WGPUCompilationInfoRequestStatus_Unknown,
     eForce32 = WGPUCompilationInfoRequestStatus_Force32,
 };
 enum class CompilationMessageType {
@@ -118,16 +122,6 @@ enum class CompilationMessageType {
     eWarning = WGPUCompilationMessageType_Warning,
     eInfo = WGPUCompilationMessageType_Info,
     eForce32 = WGPUCompilationMessageType_Force32,
-};
-enum class ComponentSwizzle {
-    eUndefined = WGPUComponentSwizzle_Undefined,
-    eZero = WGPUComponentSwizzle_Zero,
-    eOne = WGPUComponentSwizzle_One,
-    eR = WGPUComponentSwizzle_R,
-    eG = WGPUComponentSwizzle_G,
-    eB = WGPUComponentSwizzle_B,
-    eA = WGPUComponentSwizzle_A,
-    eForce32 = WGPUComponentSwizzle_Force32,
 };
 enum class CompositeAlphaMode {
     eAuto = WGPUCompositeAlphaMode_Auto,
@@ -139,9 +133,10 @@ enum class CompositeAlphaMode {
 };
 enum class CreatePipelineAsyncStatus {
     eSuccess = WGPUCreatePipelineAsyncStatus_Success,
-    eCallbackCancelled = WGPUCreatePipelineAsyncStatus_CallbackCancelled,
+    eInstanceDropped = WGPUCreatePipelineAsyncStatus_InstanceDropped,
     eValidationError = WGPUCreatePipelineAsyncStatus_ValidationError,
     eInternalError = WGPUCreatePipelineAsyncStatus_InternalError,
+    eUnknown = WGPUCreatePipelineAsyncStatus_Unknown,
     eForce32 = WGPUCreatePipelineAsyncStatus_Force32,
 };
 enum class CullMode {
@@ -154,7 +149,7 @@ enum class CullMode {
 enum class DeviceLostReason {
     eUnknown = WGPUDeviceLostReason_Unknown,
     eDestroyed = WGPUDeviceLostReason_Destroyed,
-    eCallbackCancelled = WGPUDeviceLostReason_CallbackCancelled,
+    eInstanceDropped = WGPUDeviceLostReason_InstanceDropped,
     eFailedCreation = WGPUDeviceLostReason_FailedCreation,
     eForce32 = WGPUDeviceLostReason_Force32,
 };
@@ -173,21 +168,20 @@ enum class ErrorType {
     eForce32 = WGPUErrorType_Force32,
 };
 enum class FeatureLevel {
-    eUndefined = WGPUFeatureLevel_Undefined,
     eCompatibility = WGPUFeatureLevel_Compatibility,
     eCore = WGPUFeatureLevel_Core,
     eForce32 = WGPUFeatureLevel_Force32,
 };
 enum class FeatureName {
-    eCoreFeaturesAndLimits = WGPUFeatureName_CoreFeaturesAndLimits,
+    eUndefined = WGPUFeatureName_Undefined,
     eDepthClipControl = WGPUFeatureName_DepthClipControl,
     eDepth32FloatStencil8 = WGPUFeatureName_Depth32FloatStencil8,
+    eTimestampQuery = WGPUFeatureName_TimestampQuery,
     eTextureCompressionBC = WGPUFeatureName_TextureCompressionBC,
     eTextureCompressionBCSliced3D = WGPUFeatureName_TextureCompressionBCSliced3D,
     eTextureCompressionETC2 = WGPUFeatureName_TextureCompressionETC2,
     eTextureCompressionASTC = WGPUFeatureName_TextureCompressionASTC,
     eTextureCompressionASTCSliced3D = WGPUFeatureName_TextureCompressionASTCSliced3D,
-    eTimestampQuery = WGPUFeatureName_TimestampQuery,
     eIndirectFirstInstance = WGPUFeatureName_IndirectFirstInstance,
     eShaderF16 = WGPUFeatureName_ShaderF16,
     eRG11B10UfloatRenderable = WGPUFeatureName_RG11B10UfloatRenderable,
@@ -196,11 +190,6 @@ enum class FeatureName {
     eFloat32Blendable = WGPUFeatureName_Float32Blendable,
     eClipDistances = WGPUFeatureName_ClipDistances,
     eDualSourceBlending = WGPUFeatureName_DualSourceBlending,
-    eSubgroups = WGPUFeatureName_Subgroups,
-    eTextureFormatsTier1 = WGPUFeatureName_TextureFormatsTier1,
-    eTextureFormatsTier2 = WGPUFeatureName_TextureFormatsTier2,
-    ePrimitiveIndex = WGPUFeatureName_PrimitiveIndex,
-    eTextureComponentSwizzle = WGPUFeatureName_TextureComponentSwizzle,
     eForce32 = WGPUFeatureName_Force32,
 };
 enum class FilterMode {
@@ -221,12 +210,6 @@ enum class IndexFormat {
     eUint32 = WGPUIndexFormat_Uint32,
     eForce32 = WGPUIndexFormat_Force32,
 };
-enum class InstanceFeatureName {
-    eTimedWaitAny = WGPUInstanceFeatureName_TimedWaitAny,
-    eShaderSourceSPIRV = WGPUInstanceFeatureName_ShaderSourceSPIRV,
-    eMultipleDevicesPerAdapter = WGPUInstanceFeatureName_MultipleDevicesPerAdapter,
-    eForce32 = WGPUInstanceFeatureName_Force32,
-};
 enum class LoadOp {
     eUndefined = WGPULoadOp_Undefined,
     eLoad = WGPULoadOp_Load,
@@ -235,9 +218,10 @@ enum class LoadOp {
 };
 enum class MapAsyncStatus {
     eSuccess = WGPUMapAsyncStatus_Success,
-    eCallbackCancelled = WGPUMapAsyncStatus_CallbackCancelled,
+    eInstanceDropped = WGPUMapAsyncStatus_InstanceDropped,
     eError = WGPUMapAsyncStatus_Error,
     eAborted = WGPUMapAsyncStatus_Aborted,
+    eUnknown = WGPUMapAsyncStatus_Unknown,
     eForce32 = WGPUMapAsyncStatus_Force32,
 };
 enum class MipmapFilterMode {
@@ -254,8 +238,8 @@ enum class OptionalBool {
 };
 enum class PopErrorScopeStatus {
     eSuccess = WGPUPopErrorScopeStatus_Success,
-    eCallbackCancelled = WGPUPopErrorScopeStatus_CallbackCancelled,
-    eError = WGPUPopErrorScopeStatus_Error,
+    eInstanceDropped = WGPUPopErrorScopeStatus_InstanceDropped,
+    eEmptyStack = WGPUPopErrorScopeStatus_EmptyStack,
     eForce32 = WGPUPopErrorScopeStatus_Force32,
 };
 enum class PowerPreference {
@@ -263,11 +247,6 @@ enum class PowerPreference {
     eLowPower = WGPUPowerPreference_LowPower,
     eHighPerformance = WGPUPowerPreference_HighPerformance,
     eForce32 = WGPUPowerPreference_Force32,
-};
-enum class PredefinedColorSpace {
-    eSRGB = WGPUPredefinedColorSpace_SRGB,
-    eDisplayP3 = WGPUPredefinedColorSpace_DisplayP3,
-    eForce32 = WGPUPredefinedColorSpace_Force32,
 };
 enum class PresentMode {
     eUndefined = WGPUPresentMode_Undefined,
@@ -293,22 +272,37 @@ enum class QueryType {
 };
 enum class QueueWorkDoneStatus {
     eSuccess = WGPUQueueWorkDoneStatus_Success,
-    eCallbackCancelled = WGPUQueueWorkDoneStatus_CallbackCancelled,
+    eInstanceDropped = WGPUQueueWorkDoneStatus_InstanceDropped,
     eError = WGPUQueueWorkDoneStatus_Error,
+    eUnknown = WGPUQueueWorkDoneStatus_Unknown,
     eForce32 = WGPUQueueWorkDoneStatus_Force32,
 };
 enum class RequestAdapterStatus {
     eSuccess = WGPURequestAdapterStatus_Success,
-    eCallbackCancelled = WGPURequestAdapterStatus_CallbackCancelled,
+    eInstanceDropped = WGPURequestAdapterStatus_InstanceDropped,
     eUnavailable = WGPURequestAdapterStatus_Unavailable,
     eError = WGPURequestAdapterStatus_Error,
+    eUnknown = WGPURequestAdapterStatus_Unknown,
     eForce32 = WGPURequestAdapterStatus_Force32,
 };
 enum class RequestDeviceStatus {
     eSuccess = WGPURequestDeviceStatus_Success,
-    eCallbackCancelled = WGPURequestDeviceStatus_CallbackCancelled,
+    eInstanceDropped = WGPURequestDeviceStatus_InstanceDropped,
     eError = WGPURequestDeviceStatus_Error,
+    eUnknown = WGPURequestDeviceStatus_Unknown,
     eForce32 = WGPURequestDeviceStatus_Force32,
+};
+enum class SType {
+    eShaderSourceSPIRV = WGPUSType_ShaderSourceSPIRV,
+    eShaderSourceWGSL = WGPUSType_ShaderSourceWGSL,
+    eRenderPassMaxDrawCount = WGPUSType_RenderPassMaxDrawCount,
+    eSurfaceSourceMetalLayer = WGPUSType_SurfaceSourceMetalLayer,
+    eSurfaceSourceWindowsHWND = WGPUSType_SurfaceSourceWindowsHWND,
+    eSurfaceSourceXlibWindow = WGPUSType_SurfaceSourceXlibWindow,
+    eSurfaceSourceWaylandSurface = WGPUSType_SurfaceSourceWaylandSurface,
+    eSurfaceSourceAndroidNativeWindow = WGPUSType_SurfaceSourceAndroidNativeWindow,
+    eSurfaceSourceXCBWindow = WGPUSType_SurfaceSourceXCBWindow,
+    eForce32 = WGPUSType_Force32,
 };
 enum class SamplerBindingType {
     eBindingNotUsed = WGPUSamplerBindingType_BindingNotUsed,
@@ -349,29 +343,14 @@ enum class StoreOp {
     eDiscard = WGPUStoreOp_Discard,
     eForce32 = WGPUStoreOp_Force32,
 };
-enum class SType {
-    eShaderSourceSPIRV = WGPUSType_ShaderSourceSPIRV,
-    eShaderSourceWGSL = WGPUSType_ShaderSourceWGSL,
-    eRenderPassMaxDrawCount = WGPUSType_RenderPassMaxDrawCount,
-    eSurfaceSourceMetalLayer = WGPUSType_SurfaceSourceMetalLayer,
-    eSurfaceSourceWindowsHWND = WGPUSType_SurfaceSourceWindowsHWND,
-    eSurfaceSourceXlibWindow = WGPUSType_SurfaceSourceXlibWindow,
-    eSurfaceSourceWaylandSurface = WGPUSType_SurfaceSourceWaylandSurface,
-    eSurfaceSourceAndroidNativeWindow = WGPUSType_SurfaceSourceAndroidNativeWindow,
-    eSurfaceSourceXCBWindow = WGPUSType_SurfaceSourceXCBWindow,
-    eSurfaceColorManagement = WGPUSType_SurfaceColorManagement,
-    eRequestAdapterWebXROptions = WGPUSType_RequestAdapterWebXROptions,
-    eTextureComponentSwizzleDescriptor = WGPUSType_TextureComponentSwizzleDescriptor,
-    eExternalTextureBindingLayout = WGPUSType_ExternalTextureBindingLayout,
-    eExternalTextureBindingEntry = WGPUSType_ExternalTextureBindingEntry,
-    eForce32 = WGPUSType_Force32,
-};
 enum class SurfaceGetCurrentTextureStatus {
     eSuccessOptimal = WGPUSurfaceGetCurrentTextureStatus_SuccessOptimal,
     eSuccessSuboptimal = WGPUSurfaceGetCurrentTextureStatus_SuccessSuboptimal,
     eTimeout = WGPUSurfaceGetCurrentTextureStatus_Timeout,
     eOutdated = WGPUSurfaceGetCurrentTextureStatus_Outdated,
     eLost = WGPUSurfaceGetCurrentTextureStatus_Lost,
+    eOutOfMemory = WGPUSurfaceGetCurrentTextureStatus_OutOfMemory,
+    eDeviceLost = WGPUSurfaceGetCurrentTextureStatus_DeviceLost,
     eError = WGPUSurfaceGetCurrentTextureStatus_Error,
     eForce32 = WGPUSurfaceGetCurrentTextureStatus_Force32,
 };
@@ -395,8 +374,6 @@ enum class TextureFormat {
     eR8Snorm = WGPUTextureFormat_R8Snorm,
     eR8Uint = WGPUTextureFormat_R8Uint,
     eR8Sint = WGPUTextureFormat_R8Sint,
-    eR16Unorm = WGPUTextureFormat_R16Unorm,
-    eR16Snorm = WGPUTextureFormat_R16Snorm,
     eR16Uint = WGPUTextureFormat_R16Uint,
     eR16Sint = WGPUTextureFormat_R16Sint,
     eR16Float = WGPUTextureFormat_R16Float,
@@ -407,8 +384,6 @@ enum class TextureFormat {
     eR32Float = WGPUTextureFormat_R32Float,
     eR32Uint = WGPUTextureFormat_R32Uint,
     eR32Sint = WGPUTextureFormat_R32Sint,
-    eRG16Unorm = WGPUTextureFormat_RG16Unorm,
-    eRG16Snorm = WGPUTextureFormat_RG16Snorm,
     eRG16Uint = WGPUTextureFormat_RG16Uint,
     eRG16Sint = WGPUTextureFormat_RG16Sint,
     eRG16Float = WGPUTextureFormat_RG16Float,
@@ -426,8 +401,6 @@ enum class TextureFormat {
     eRG32Float = WGPUTextureFormat_RG32Float,
     eRG32Uint = WGPUTextureFormat_RG32Uint,
     eRG32Sint = WGPUTextureFormat_RG32Sint,
-    eRGBA16Unorm = WGPUTextureFormat_RGBA16Unorm,
-    eRGBA16Snorm = WGPUTextureFormat_RGBA16Snorm,
     eRGBA16Uint = WGPUTextureFormat_RGBA16Uint,
     eRGBA16Sint = WGPUTextureFormat_RGBA16Sint,
     eRGBA16Float = WGPUTextureFormat_RGBA16Float,
@@ -514,11 +487,6 @@ enum class TextureViewDimension {
     e3D = WGPUTextureViewDimension_3D,
     eForce32 = WGPUTextureViewDimension_Force32,
 };
-enum class ToneMappingMode {
-    eStandard = WGPUToneMappingMode_Standard,
-    eExtended = WGPUToneMappingMode_Extended,
-    eForce32 = WGPUToneMappingMode_Force32,
-};
 enum class VertexFormat {
     eUint8 = WGPUVertexFormat_Uint8,
     eUint8x2 = WGPUVertexFormat_Uint8x2,
@@ -564,27 +532,26 @@ enum class VertexFormat {
     eForce32 = WGPUVertexFormat_Force32,
 };
 enum class VertexStepMode {
+    eVertexBufferNotUsed = WGPUVertexStepMode_VertexBufferNotUsed,
     eUndefined = WGPUVertexStepMode_Undefined,
     eVertex = WGPUVertexStepMode_Vertex,
     eInstance = WGPUVertexStepMode_Instance,
     eForce32 = WGPUVertexStepMode_Force32,
-};
-enum class WaitStatus {
-    eSuccess = WGPUWaitStatus_Success,
-    eTimedOut = WGPUWaitStatus_TimedOut,
-    eError = WGPUWaitStatus_Error,
-    eForce32 = WGPUWaitStatus_Force32,
 };
 enum class WGSLLanguageFeatureName {
     eReadonlyAndReadwriteStorageTextures = WGPUWGSLLanguageFeatureName_ReadonlyAndReadwriteStorageTextures,
     ePacked4x8IntegerDotProduct = WGPUWGSLLanguageFeatureName_Packed4x8IntegerDotProduct,
     eUnrestrictedPointerParameters = WGPUWGSLLanguageFeatureName_UnrestrictedPointerParameters,
     ePointerCompositeAccess = WGPUWGSLLanguageFeatureName_PointerCompositeAccess,
-    eUniformBufferStandardLayout = WGPUWGSLLanguageFeatureName_UniformBufferStandardLayout,
-    eSubgroupId = WGPUWGSLLanguageFeatureName_SubgroupId,
-    eTextureAndSamplerLet = WGPUWGSLLanguageFeatureName_TextureAndSamplerLet,
-    eSubgroupUniformity = WGPUWGSLLanguageFeatureName_SubgroupUniformity,
     eForce32 = WGPUWGSLLanguageFeatureName_Force32,
+};
+enum class WaitStatus {
+    eSuccess = WGPUWaitStatus_Success,
+    eTimedOut = WGPUWaitStatus_TimedOut,
+    eUnsupportedTimeout = WGPUWaitStatus_UnsupportedTimeout,
+    eUnsupportedCount = WGPUWaitStatus_UnsupportedCount,
+    eUnsupportedMixedSources = WGPUWaitStatus_UnsupportedMixedSources,
+    eForce32 = WGPUWaitStatus_Force32,
 };
 enum class BufferUsage : Flags {
     eNone = WGPUBufferUsage_None,
@@ -625,7 +592,101 @@ enum class TextureUsage : Flags {
     eTextureBinding = WGPUTextureUsage_TextureBinding,
     eStorageBinding = WGPUTextureUsage_StorageBinding,
     eRenderAttachment = WGPUTextureUsage_RenderAttachment,
-    eTransientAttachment = WGPUTextureUsage_TransientAttachment,
+};
+enum class NativeSType {
+    eDeviceExtras = WGPUSType_DeviceExtras,
+    eNativeLimits = WGPUSType_NativeLimits,
+    ePipelineLayoutExtras = WGPUSType_PipelineLayoutExtras,
+    eShaderModuleGLSLDescriptor = WGPUSType_ShaderModuleGLSLDescriptor,
+    eInstanceExtras = WGPUSType_InstanceExtras,
+    eBindGroupEntryExtras = WGPUSType_BindGroupEntryExtras,
+    eBindGroupLayoutEntryExtras = WGPUSType_BindGroupLayoutEntryExtras,
+    eQuerySetDescriptorExtras = WGPUSType_QuerySetDescriptorExtras,
+    eSurfaceConfigurationExtras = WGPUSType_SurfaceConfigurationExtras,
+    eForce32 = WGPUNativeSType_Force32,
+};
+enum class NativeFeature {
+    ePushConstants = WGPUNativeFeature_PushConstants,
+    eTextureAdapterSpecificFormatFeatures = WGPUNativeFeature_TextureAdapterSpecificFormatFeatures,
+    eMultiDrawIndirect = WGPUNativeFeature_MultiDrawIndirect,
+    eMultiDrawIndirectCount = WGPUNativeFeature_MultiDrawIndirectCount,
+    eVertexWritableStorage = WGPUNativeFeature_VertexWritableStorage,
+    eTextureBindingArray = WGPUNativeFeature_TextureBindingArray,
+    eSampledTextureAndStorageBufferArrayNonUniformIndexing = WGPUNativeFeature_SampledTextureAndStorageBufferArrayNonUniformIndexing,
+    ePipelineStatisticsQuery = WGPUNativeFeature_PipelineStatisticsQuery,
+    eStorageResourceBindingArray = WGPUNativeFeature_StorageResourceBindingArray,
+    ePartiallyBoundBindingArray = WGPUNativeFeature_PartiallyBoundBindingArray,
+    eTextureFormat16bitNorm = WGPUNativeFeature_TextureFormat16bitNorm,
+    eTextureCompressionAstcHdr = WGPUNativeFeature_TextureCompressionAstcHdr,
+    eMappablePrimaryBuffers = WGPUNativeFeature_MappablePrimaryBuffers,
+    eBufferBindingArray = WGPUNativeFeature_BufferBindingArray,
+    eUniformBufferAndStorageTextureArrayNonUniformIndexing = WGPUNativeFeature_UniformBufferAndStorageTextureArrayNonUniformIndexing,
+    eSpirvShaderPassthrough = WGPUNativeFeature_SpirvShaderPassthrough,
+    eVertexAttribute64bit = WGPUNativeFeature_VertexAttribute64bit,
+    eTextureFormatNv12 = WGPUNativeFeature_TextureFormatNv12,
+    eRayTracingAccelerationStructure = WGPUNativeFeature_RayTracingAccelerationStructure,
+    eRayQuery = WGPUNativeFeature_RayQuery,
+    eShaderF64 = WGPUNativeFeature_ShaderF64,
+    eShaderI16 = WGPUNativeFeature_ShaderI16,
+    eShaderPrimitiveIndex = WGPUNativeFeature_ShaderPrimitiveIndex,
+    eShaderEarlyDepthTest = WGPUNativeFeature_ShaderEarlyDepthTest,
+    eSubgroup = WGPUNativeFeature_Subgroup,
+    eSubgroupVertex = WGPUNativeFeature_SubgroupVertex,
+    eSubgroupBarrier = WGPUNativeFeature_SubgroupBarrier,
+    eTimestampQueryInsideEncoders = WGPUNativeFeature_TimestampQueryInsideEncoders,
+    eTimestampQueryInsidePasses = WGPUNativeFeature_TimestampQueryInsidePasses,
+    eForce32 = WGPUNativeFeature_Force32,
+};
+enum class LogLevel {
+    eOff = WGPULogLevel_Off,
+    eError = WGPULogLevel_Error,
+    eWarn = WGPULogLevel_Warn,
+    eInfo = WGPULogLevel_Info,
+    eDebug = WGPULogLevel_Debug,
+    eTrace = WGPULogLevel_Trace,
+    eForce32 = WGPULogLevel_Force32,
+};
+enum class InstanceBackend : Flags {
+    eAll = WGPUInstanceBackend_All,
+    eForce32 = WGPUInstanceBackend_Force32,
+};
+enum class InstanceFlag : Flags {
+    eDefault = WGPUInstanceFlag_Default,
+    eForce32 = WGPUInstanceFlag_Force32,
+};
+enum class Dx12Compiler {
+    eUndefined = WGPUDx12Compiler_Undefined,
+    eFxc = WGPUDx12Compiler_Fxc,
+    eDxc = WGPUDx12Compiler_Dxc,
+    eForce32 = WGPUDx12Compiler_Force32,
+};
+enum class Gles3MinorVersion {
+    eAutomatic = WGPUGles3MinorVersion_Automatic,
+    eVersion0 = WGPUGles3MinorVersion_Version0,
+    eVersion1 = WGPUGles3MinorVersion_Version1,
+    eVersion2 = WGPUGles3MinorVersion_Version2,
+    eForce32 = WGPUGles3MinorVersion_Force32,
+};
+enum class PipelineStatisticName {
+    eVertexShaderInvocations = WGPUPipelineStatisticName_VertexShaderInvocations,
+    eClipperInvocations = WGPUPipelineStatisticName_ClipperInvocations,
+    eClipperPrimitivesOut = WGPUPipelineStatisticName_ClipperPrimitivesOut,
+    eFragmentShaderInvocations = WGPUPipelineStatisticName_FragmentShaderInvocations,
+    eComputeShaderInvocations = WGPUPipelineStatisticName_ComputeShaderInvocations,
+    eForce32 = WGPUPipelineStatisticName_Force32,
+};
+enum class NativeQueryType {
+    ePipelineStatistics = WGPUNativeQueryType_PipelineStatistics,
+    eForce32 = WGPUNativeQueryType_Force32,
+};
+enum class NativeTextureFormat {
+    eR16Unorm = WGPUNativeTextureFormat_R16Unorm,
+    eR16Snorm = WGPUNativeTextureFormat_R16Snorm,
+    eRg16Unorm = WGPUNativeTextureFormat_Rg16Unorm,
+    eRg16Snorm = WGPUNativeTextureFormat_Rg16Snorm,
+    eRgba16Unorm = WGPUNativeTextureFormat_Rgba16Unorm,
+    eRgba16Snorm = WGPUNativeTextureFormat_Rgba16Snorm,
+    eNV12 = WGPUNativeTextureFormat_NV12,
 };
 std::string_view to_string(AdapterType value);
 std::string_view to_string(AddressMode value);
@@ -638,7 +699,6 @@ std::string_view to_string(CallbackMode value);
 std::string_view to_string(CompareFunction value);
 std::string_view to_string(CompilationInfoRequestStatus value);
 std::string_view to_string(CompilationMessageType value);
-std::string_view to_string(ComponentSwizzle value);
 std::string_view to_string(CompositeAlphaMode value);
 std::string_view to_string(CreatePipelineAsyncStatus value);
 std::string_view to_string(CullMode value);
@@ -650,51 +710,61 @@ std::string_view to_string(FeatureName value);
 std::string_view to_string(FilterMode value);
 std::string_view to_string(FrontFace value);
 std::string_view to_string(IndexFormat value);
-std::string_view to_string(InstanceFeatureName value);
 std::string_view to_string(LoadOp value);
 std::string_view to_string(MapAsyncStatus value);
 std::string_view to_string(MipmapFilterMode value);
 std::string_view to_string(OptionalBool value);
 std::string_view to_string(PopErrorScopeStatus value);
 std::string_view to_string(PowerPreference value);
-std::string_view to_string(PredefinedColorSpace value);
 std::string_view to_string(PresentMode value);
 std::string_view to_string(PrimitiveTopology value);
 std::string_view to_string(QueryType value);
 std::string_view to_string(QueueWorkDoneStatus value);
 std::string_view to_string(RequestAdapterStatus value);
 std::string_view to_string(RequestDeviceStatus value);
+std::string_view to_string(SType value);
 std::string_view to_string(SamplerBindingType value);
 std::string_view to_string(Status value);
 std::string_view to_string(StencilOperation value);
 std::string_view to_string(StorageTextureAccess value);
 std::string_view to_string(StoreOp value);
-std::string_view to_string(SType value);
 std::string_view to_string(SurfaceGetCurrentTextureStatus value);
 std::string_view to_string(TextureAspect value);
 std::string_view to_string(TextureDimension value);
 std::string_view to_string(TextureFormat value);
 std::string_view to_string(TextureSampleType value);
 std::string_view to_string(TextureViewDimension value);
-std::string_view to_string(ToneMappingMode value);
 std::string_view to_string(VertexFormat value);
 std::string_view to_string(VertexStepMode value);
-std::string_view to_string(WaitStatus value);
 std::string_view to_string(WGSLLanguageFeatureName value);
+std::string_view to_string(WaitStatus value);
 std::string_view to_string(BufferUsage value);
 std::string_view to_string(ColorWriteMask value);
 std::string_view to_string(MapMode value);
 std::string_view to_string(ShaderStage value);
 std::string_view to_string(TextureUsage value);
+std::string_view to_string(NativeSType value);
+std::string_view to_string(NativeFeature value);
+std::string_view to_string(LogLevel value);
+std::string_view to_string(InstanceBackend value);
+std::string_view to_string(InstanceFlag value);
+std::string_view to_string(Dx12Compiler value);
+std::string_view to_string(Gles3MinorVersion value);
+std::string_view to_string(PipelineStatisticName value);
+std::string_view to_string(NativeQueryType value);
+std::string_view to_string(NativeTextureFormat value);
 BufferUsage operator|(BufferUsage lhs, BufferUsage rhs);
 ColorWriteMask operator|(ColorWriteMask lhs, ColorWriteMask rhs);
 MapMode operator|(MapMode lhs, MapMode rhs);
 ShaderStage operator|(ShaderStage lhs, ShaderStage rhs);
 TextureUsage operator|(TextureUsage lhs, TextureUsage rhs);
+InstanceBackend operator|(InstanceBackend lhs, InstanceBackend rhs);
+InstanceFlag operator|(InstanceFlag lhs, InstanceFlag rhs);
 }
 namespace wgpu {
 struct StringView;
 struct ChainedStruct;
+struct ChainedStructOut;
 struct BufferMapCallbackInfo;
 struct CompilationInfoCallbackInfo;
 struct CreateComputePipelineAsyncCallbackInfo;
@@ -706,6 +776,7 @@ struct RequestAdapterCallbackInfo;
 struct RequestDeviceCallbackInfo;
 struct UncapturedErrorCallbackInfo;
 struct AdapterInfo;
+struct BindGroupEntry;
 struct BlendComponent;
 struct BufferBindingLayout;
 struct BufferDescriptor;
@@ -713,16 +784,14 @@ struct Color;
 struct CommandBufferDescriptor;
 struct CommandEncoderDescriptor;
 struct CompilationMessage;
+struct ComputePassTimestampWrites;
 struct ConstantEntry;
 struct Extent3D;
-struct ExternalTextureBindingEntry;
-struct ExternalTextureBindingLayout;
 struct Future;
-struct InstanceLimits;
+struct InstanceCapabilities;
 struct Limits;
 struct MultisampleState;
 struct Origin3D;
-struct PassTimestampWrites;
 struct PipelineLayoutDescriptor;
 struct PrimitiveState;
 struct QuerySetDescriptor;
@@ -731,19 +800,20 @@ struct RenderBundleDescriptor;
 struct RenderBundleEncoderDescriptor;
 struct RenderPassDepthStencilAttachment;
 struct RenderPassMaxDrawCount;
-struct RequestAdapterWebXROptions;
+struct RenderPassTimestampWrites;
+struct RequestAdapterOptions;
 struct SamplerBindingLayout;
 struct SamplerDescriptor;
+struct ShaderModuleDescriptor;
 struct ShaderSourceSPIRV;
 struct ShaderSourceWGSL;
 struct StencilFaceState;
 struct StorageTextureBindingLayout;
 struct SupportedFeatures;
-struct SupportedInstanceFeatures;
 struct SupportedWGSLLanguageFeatures;
 struct SurfaceCapabilities;
-struct SurfaceColorManagement;
 struct SurfaceConfiguration;
+struct SurfaceDescriptor;
 struct SurfaceSourceAndroidNativeWindow;
 struct SurfaceSourceMetalLayer;
 struct SurfaceSourceWaylandSurface;
@@ -753,29 +823,23 @@ struct SurfaceSourceXlibWindow;
 struct SurfaceTexture;
 struct TexelCopyBufferLayout;
 struct TextureBindingLayout;
-struct TextureComponentSwizzle;
 struct TextureViewDescriptor;
 struct VertexAttribute;
-struct BindGroupEntry;
+struct BindGroupDescriptor;
 struct BindGroupLayoutEntry;
 struct BlendState;
 struct CompilationInfo;
 struct ComputePassDescriptor;
-struct ComputeState;
 struct DepthStencilState;
 struct DeviceDescriptor;
 struct FutureWaitInfo;
 struct InstanceDescriptor;
+struct ProgrammableStageDescriptor;
 struct RenderPassColorAttachment;
-struct RequestAdapterOptions;
-struct ShaderModuleDescriptor;
-struct SurfaceDescriptor;
 struct TexelCopyBufferInfo;
 struct TexelCopyTextureInfo;
-struct TextureComponentSwizzleDescriptor;
 struct TextureDescriptor;
 struct VertexBufferLayout;
-struct BindGroupDescriptor;
 struct BindGroupLayoutDescriptor;
 struct ColorTargetState;
 struct ComputePipelineDescriptor;
@@ -783,6 +847,22 @@ struct RenderPassDescriptor;
 struct VertexState;
 struct FragmentState;
 struct RenderPipelineDescriptor;
+struct InstanceExtras;
+struct DeviceExtras;
+struct NativeLimits;
+struct PushConstantRange;
+struct PipelineLayoutExtras;
+struct ShaderDefine;
+struct ShaderModuleGLSLDescriptor;
+struct ShaderModuleDescriptorSpirV;
+struct RegistryReport;
+struct HubReport;
+struct GlobalReport;
+struct InstanceEnumerateAdapterOptions;
+struct BindGroupEntryExtras;
+struct BindGroupLayoutEntryExtras;
+struct QuerySetDescriptorExtras;
+struct SurfaceConfigurationExtras;
 }
 namespace wgpu::raw {
 class Adapter;
@@ -794,7 +874,6 @@ class CommandEncoder;
 class ComputePassEncoder;
 class ComputePipeline;
 class Device;
-class ExternalTexture;
 class Instance;
 class PipelineLayout;
 class QuerySet;
@@ -819,7 +898,6 @@ class CommandEncoder;
 class ComputePassEncoder;
 class ComputePipeline;
 class Device;
-class ExternalTexture;
 class Instance;
 class PipelineLayout;
 class QuerySet;
@@ -911,15 +989,13 @@ public:
     Buffer& operator=(std::nullptr_t) { m_raw = nullptr; return *this; }
     void destroy() const;
     void const * getConstMappedRange(size_t offset, size_t size) const;
-    void * getMappedRange(size_t offset, size_t size) const;
     wgpu::BufferMapState getMapState() const;
+    void * getMappedRange(size_t offset, size_t size) const;
     uint64_t getSize() const;
     wgpu::BufferUsage getUsage() const;
     wgpu::Future mapAsync(wgpu::MapMode mode, size_t offset, size_t size, wgpu::BufferMapCallbackInfo callbackInfo) const;
-    wgpu::Status readMappedRange(size_t offset, void* data, size_t size) const;
     void setLabel(wgpu::StringView label) const;
     void unmap() const;
-    wgpu::Status writeMappedRange(size_t offset, void const* data, size_t size) const;
     void addRef() const;
     void release() const;
 private:
@@ -1040,7 +1116,7 @@ public:
     wgpu::ShaderModule createShaderModule(wgpu::ShaderModuleDescriptor const& descriptor) const;
     wgpu::Texture createTexture(wgpu::TextureDescriptor const& descriptor) const;
     void destroy() const;
-    wgpu::Status getAdapterInfo(wgpu::AdapterInfo& adapterInfo) const;
+    wgpu::AdapterInfo getAdapterInfo() const;
     void getFeatures(wgpu::SupportedFeatures& features) const;
     wgpu::Status getLimits(wgpu::Limits& limits) const;
     wgpu::Future getLostFuture() const;
@@ -1054,22 +1130,6 @@ public:
 private:
     WGPUDevice m_raw;
 };
-class ExternalTexture {
-public:
-    using wgpu_type = WGPUExternalTexture;
-    ExternalTexture() : m_raw(nullptr) {}
-    ExternalTexture(WGPUExternalTexture raw) : m_raw(raw) {}
-    operator WGPUExternalTexture() const { return m_raw; }
-    operator bool() const { return m_raw != nullptr; }
-    bool operator==(const ExternalTexture& other) const { return m_raw == other.m_raw; }
-    bool operator!=(const ExternalTexture& other) const { return m_raw != other.m_raw; }
-    ExternalTexture& operator=(std::nullptr_t) { m_raw = nullptr; return *this; }
-    void setLabel(wgpu::StringView label) const;
-    void addRef() const;
-    void release() const;
-private:
-    WGPUExternalTexture m_raw;
-};
 class Instance {
 public:
     using wgpu_type = WGPUInstance;
@@ -1081,7 +1141,7 @@ public:
     bool operator!=(const Instance& other) const { return m_raw != other.m_raw; }
     Instance& operator=(std::nullptr_t) { m_raw = nullptr; return *this; }
     wgpu::Surface createSurface(wgpu::SurfaceDescriptor const& descriptor) const;
-    void getWGSLLanguageFeatures(wgpu::SupportedWGSLLanguageFeatures& features) const;
+    wgpu::Status getWGSLLanguageFeatures(wgpu::SupportedWGSLLanguageFeatures& features) const;
     wgpu::Bool hasWGSLLanguageFeature(wgpu::WGSLLanguageFeatureName feature) const;
     void processEvents() const;
     wgpu::Future requestAdapter(wgpu::RequestAdapterOptions const* options, wgpu::RequestAdapterCallbackInfo callbackInfo) const;
@@ -1316,7 +1376,6 @@ public:
     uint32_t getHeight() const;
     uint32_t getMipLevelCount() const;
     uint32_t getSampleCount() const;
-    wgpu::TextureViewDimension getTextureBindingViewDimension() const;
     wgpu::TextureUsage getUsage() const;
     uint32_t getWidth() const;
     void setLabel(wgpu::StringView label) const;
@@ -1352,7 +1411,6 @@ private:
     friend class raw::ComputePassEncoder; \
     friend class raw::ComputePipeline; \
     friend class raw::Device; \
-    friend class raw::ExternalTexture; \
     friend class raw::Instance; \
     friend class raw::PipelineLayout; \
     friend class raw::QuerySet; \
@@ -1368,6 +1426,7 @@ private:
     friend class raw::TextureView; \
     friend struct StringView; \
     friend struct ChainedStruct; \
+    friend struct ChainedStructOut; \
     friend struct BufferMapCallbackInfo; \
     friend struct CompilationInfoCallbackInfo; \
     friend struct CreateComputePipelineAsyncCallbackInfo; \
@@ -1379,6 +1438,7 @@ private:
     friend struct RequestDeviceCallbackInfo; \
     friend struct UncapturedErrorCallbackInfo; \
     friend struct AdapterInfo; \
+    friend struct BindGroupEntry; \
     friend struct BlendComponent; \
     friend struct BufferBindingLayout; \
     friend struct BufferDescriptor; \
@@ -1386,16 +1446,14 @@ private:
     friend struct CommandBufferDescriptor; \
     friend struct CommandEncoderDescriptor; \
     friend struct CompilationMessage; \
+    friend struct ComputePassTimestampWrites; \
     friend struct ConstantEntry; \
     friend struct Extent3D; \
-    friend struct ExternalTextureBindingEntry; \
-    friend struct ExternalTextureBindingLayout; \
     friend struct Future; \
-    friend struct InstanceLimits; \
+    friend struct InstanceCapabilities; \
     friend struct Limits; \
     friend struct MultisampleState; \
     friend struct Origin3D; \
-    friend struct PassTimestampWrites; \
     friend struct PipelineLayoutDescriptor; \
     friend struct PrimitiveState; \
     friend struct QuerySetDescriptor; \
@@ -1404,19 +1462,20 @@ private:
     friend struct RenderBundleEncoderDescriptor; \
     friend struct RenderPassDepthStencilAttachment; \
     friend struct RenderPassMaxDrawCount; \
-    friend struct RequestAdapterWebXROptions; \
+    friend struct RenderPassTimestampWrites; \
+    friend struct RequestAdapterOptions; \
     friend struct SamplerBindingLayout; \
     friend struct SamplerDescriptor; \
+    friend struct ShaderModuleDescriptor; \
     friend struct ShaderSourceSPIRV; \
     friend struct ShaderSourceWGSL; \
     friend struct StencilFaceState; \
     friend struct StorageTextureBindingLayout; \
     friend struct SupportedFeatures; \
-    friend struct SupportedInstanceFeatures; \
     friend struct SupportedWGSLLanguageFeatures; \
     friend struct SurfaceCapabilities; \
-    friend struct SurfaceColorManagement; \
     friend struct SurfaceConfiguration; \
+    friend struct SurfaceDescriptor; \
     friend struct SurfaceSourceAndroidNativeWindow; \
     friend struct SurfaceSourceMetalLayer; \
     friend struct SurfaceSourceWaylandSurface; \
@@ -1426,29 +1485,23 @@ private:
     friend struct SurfaceTexture; \
     friend struct TexelCopyBufferLayout; \
     friend struct TextureBindingLayout; \
-    friend struct TextureComponentSwizzle; \
     friend struct TextureViewDescriptor; \
     friend struct VertexAttribute; \
-    friend struct BindGroupEntry; \
+    friend struct BindGroupDescriptor; \
     friend struct BindGroupLayoutEntry; \
     friend struct BlendState; \
     friend struct CompilationInfo; \
     friend struct ComputePassDescriptor; \
-    friend struct ComputeState; \
     friend struct DepthStencilState; \
     friend struct DeviceDescriptor; \
     friend struct FutureWaitInfo; \
     friend struct InstanceDescriptor; \
+    friend struct ProgrammableStageDescriptor; \
     friend struct RenderPassColorAttachment; \
-    friend struct RequestAdapterOptions; \
-    friend struct ShaderModuleDescriptor; \
-    friend struct SurfaceDescriptor; \
     friend struct TexelCopyBufferInfo; \
     friend struct TexelCopyTextureInfo; \
-    friend struct TextureComponentSwizzleDescriptor; \
     friend struct TextureDescriptor; \
     friend struct VertexBufferLayout; \
-    friend struct BindGroupDescriptor; \
     friend struct BindGroupLayoutDescriptor; \
     friend struct ColorTargetState; \
     friend struct ComputePipelineDescriptor; \
@@ -1456,11 +1509,25 @@ private:
     friend struct VertexState; \
     friend struct FragmentState; \
     friend struct RenderPipelineDescriptor; \
+    friend struct InstanceExtras; \
+    friend struct DeviceExtras; \
+    friend struct NativeLimits; \
+    friend struct PushConstantRange; \
+    friend struct PipelineLayoutExtras; \
+    friend struct ShaderDefine; \
+    friend struct ShaderModuleGLSLDescriptor; \
+    friend struct ShaderModuleDescriptorSpirV; \
+    friend struct RegistryReport; \
+    friend struct HubReport; \
+    friend struct GlobalReport; \
+    friend struct InstanceEnumerateAdapterOptions; \
+    friend struct BindGroupEntryExtras; \
+    friend struct BindGroupLayoutEntryExtras; \
+    friend struct QuerySetDescriptorExtras; \
+    friend struct SurfaceConfigurationExtras; \
     friend wgpu::Instance createInstance(wgpu::InstanceDescriptor const& descriptor); \
     friend wgpu::Instance createInstance(); \
-    friend void getInstanceFeatures(wgpu::SupportedInstanceFeatures& features); \
-    friend wgpu::Status getInstanceLimits(wgpu::InstanceLimits& limits); \
-    friend wgpu::Bool hasInstanceFeature(wgpu::InstanceFeatureName feature);
+    friend wgpu::Status getInstanceCapabilities(wgpu::InstanceCapabilities& capabilities);
 namespace wgpu {
 class Adapter : public raw::Adapter {
 public:
@@ -1659,28 +1726,6 @@ public:
     bool operator==(const Device& other) const { return base_type::operator==(other); }
     bool operator!=(const Device& other) const { return base_type::operator!=(other); }
     Device clone() const { this->addRef(); return Device((const base_type&)*this); }
-};
-class ExternalTexture : public raw::ExternalTexture {
-public:
-    using base_type = raw::ExternalTexture;
-    using wgpu_type = WGPUExternalTexture;
-    ExternalTexture() : base_type() {}
-    WEBGPU_RAII_FRIENDS
-private:
-    ExternalTexture(wgpu_type raw) : base_type(raw) {}
-    ExternalTexture(base_type raw) : base_type(raw) {}
-    ExternalTexture& operator=(const base_type& raw) { if (*this) this->release(); base_type::operator=(raw); return *this; }
-public:
-    ExternalTexture& operator=(std::nullptr_t) { if (*this) this->release(); base_type::operator=(nullptr); return *this; }
-    ExternalTexture(const ExternalTexture& other) : base_type(other) { if (*this) this->addRef(); }
-    ExternalTexture(ExternalTexture&& other) : base_type(other) { (base_type&)(other) = nullptr; }
-    ExternalTexture& operator=(const ExternalTexture& other) { if (this != &other) { if (*this) this->release(); base_type::operator=(other); if (*this) this->addRef(); } return *this; }
-    ExternalTexture& operator=(ExternalTexture&& other) { if (this != &other) { if (*this) this->release(); base_type::operator=(other); (base_type&)(other) = nullptr; } return *this; }
-    ~ExternalTexture() { if (*this) this->release(); }
-    operator bool() const { return base_type::operator bool(); }
-    bool operator==(const ExternalTexture& other) const { return base_type::operator==(other); }
-    bool operator!=(const ExternalTexture& other) const { return base_type::operator!=(other); }
-    ExternalTexture clone() const { this->addRef(); return ExternalTexture((const base_type&)*this); }
 };
 class Instance : public raw::Instance {
 public:
@@ -2161,15 +2206,15 @@ struct QueueWorkDoneCallback {
     struct Control {
         std::atomic<std::size_t> count{1};
         virtual ~Control() = default;
-        virtual void invoke(wgpu::QueueWorkDoneStatus status, wgpu::StringView message) const = 0;
-        virtual void invoke_c(WGPUQueueWorkDoneStatus status, WGPUStringView message) const;
+        virtual void invoke(wgpu::QueueWorkDoneStatus status) const = 0;
+        virtual void invoke_c(WGPUQueueWorkDoneStatus status) const;
     };
 private:
     template <typename F>
     struct ControlImpl : Control {
         F func;
         ControlImpl(const F& f) : func(f) {}
-        void invoke(wgpu::QueueWorkDoneStatus status, wgpu::StringView message) const override;
+        void invoke(wgpu::QueueWorkDoneStatus status) const override;
     };
     Control* data;
 public:
@@ -2181,10 +2226,10 @@ public:
     QueueWorkDoneCallback& operator=(QueueWorkDoneCallback&& other);
     QueueWorkDoneCallback& operator=(std::nullptr_t) { reset(); return *this; }
     ~QueueWorkDoneCallback() { if (data && --data->count == 0) { delete data; } }
-    template <std::invocable<wgpu::QueueWorkDoneStatus, wgpu::StringView> F>
+    template <std::invocable<wgpu::QueueWorkDoneStatus> F>
     QueueWorkDoneCallback(const F& f);
-    void operator()(wgpu::QueueWorkDoneStatus status, wgpu::StringView message) const;
-    void operator()(WGPUQueueWorkDoneStatus status, WGPUStringView message) const;
+    void operator()(wgpu::QueueWorkDoneStatus status) const;
+    void operator()(WGPUQueueWorkDoneStatus status) const;
     void reset() { if (data && --data->count == 0) { delete data; } data = nullptr; }
     operator bool() const { return data != nullptr; }
 };
@@ -2283,13 +2328,15 @@ public:
 };
 }
 namespace wgpu {
+template <typename Struct>
 struct NextInChainBase {
     std::atomic<std::size_t> ref_count{1};
-    virtual WGPUChainedStruct* getNextInChain() const = 0;
+    virtual Struct* getNextInChain() const = 0;
     virtual ~NextInChainBase() = default;
 };
-template <typename Struct>
-struct NextInChainImpl : Struct, NextInChainBase {
+template <typename Struct, typename ChainT>
+    requires requires(typename Struct::CStruct c) { c.chain; }
+struct NextInChainImpl : Struct, NextInChainBase<ChainT> {
     mutable typename Struct::CStruct cstruct;
     NextInChainImpl(const Struct& s) : Struct(s) {
         cstruct = this->to_cstruct();
@@ -2297,19 +2344,21 @@ struct NextInChainImpl : Struct, NextInChainBase {
     NextInChainImpl(Struct&& s) : Struct(std::move(s)) {
         cstruct = this->to_cstruct();
     }
-    WGPUChainedStruct* getNextInChain() const override {
+    ChainT* getNextInChain() const override {
         cstruct = this->to_cstruct();
-        return reinterpret_cast<WGPUChainedStruct*>(&cstruct);
+        return reinterpret_cast<ChainT*>(&cstruct);
     }
     void updateFromCStruct() {
         (Struct&)(*this) = static_cast<Struct>(cstruct);
     }
 };
-struct NextInChainNative : NextInChainBase {
-    WGPUChainedStruct* next;
-    NextInChainNative(WGPUChainedStruct* n) : next(n) {}
-    WGPUChainedStruct* getNextInChain() const override { return next; }
+template <typename ChainT>
+struct NextInChainNative : NextInChainBase<ChainT> {
+    ChainT* next;
+    NextInChainNative(ChainT* n) : next(n) {}
+    ChainT* getNextInChain() const override { return next; }
 };
+template <typename ChainT>
 struct NextInChain {
 public:
     NextInChain() : data(nullptr) {}
@@ -2337,15 +2386,16 @@ public:
     }
     ~NextInChain() { reset(); }
     template <typename Struct>
+        requires requires(typename std::decay_t<Struct>::CStruct c) { c.chain; }
     void setNext(Struct&& s) {
         reset();
-        data = new NextInChainImpl<std::decay_t<Struct>>(std::forward<Struct>(s));
+        data = new NextInChainImpl<std::decay_t<Struct>, ChainT>(std::forward<Struct>(s));
     }
-    void setNext(WGPUChainedStruct* next) {
+    void setNext(ChainT* next) {
         reset();
         data = new NextInChainNative(next);
     }
-    WGPUChainedStruct* getNext() const {
+    ChainT* getNext() const {
         if (data) {
             return data->getNextInChain();
         }
@@ -2354,8 +2404,8 @@ public:
     template <typename Struct>
     Struct* getAs() const {
         if (data) {
-            if (auto impl = dynamic_cast<NextInChainImpl<Struct>*>(data)) {
-                impl->updateFromCStruct();
+            if (auto impl = dynamic_cast<NextInChainImpl<Struct, ChainT>*>(data)) {
+                if constexpr (!std::is_const_v<ChainT>) impl->updateFromCStruct();
                 return static_cast<Struct*>(impl);
             }
         }
@@ -2368,7 +2418,7 @@ public:
         data = nullptr;
     }
 private:
-    NextInChainBase* data;
+    NextInChainBase<ChainT>* data;
 };
 struct StringView {
     struct CStruct : public WGPUStringView {
@@ -2376,8 +2426,8 @@ struct StringView {
     StringView(const WGPUStringView& native);
     StringView() : StringView(WGPU_STRING_VIEW_INIT) {};
     CStruct to_cstruct() const;
-    StringView& setData(char const* value) &;
-    StringView&& setData(char const* value) &&;
+    StringView& setData(char   WGPU_NULLABLE const* value) &;
+    StringView&& setData(char   WGPU_NULLABLE const* value) &&;
     StringView& setLength(size_t value) &;
     StringView&& setLength(size_t value) &&;
     StringView(const std::string_view& sv) : data(sv.data()), length(sv.size()) {}
@@ -2385,7 +2435,7 @@ struct StringView {
     operator std::string_view() const {
         return length == WGPU_STRLEN ? std::string_view(data) : std::string_view(data, length);
     }
-    char const* data;
+    char   WGPU_NULLABLE const* data;
     size_t length;
 };
 struct ChainedStruct {
@@ -2400,14 +2450,29 @@ struct ChainedStruct {
     ChainedStruct&& setNext(T&& value) &&;
     ChainedStruct& setSType(wgpu::SType value) &;
     ChainedStruct&& setSType(wgpu::SType value) &&;
-    NextInChain next;
+    NextInChain<struct WGPUChainedStruct const> next;
+    wgpu::SType sType;
+};
+struct ChainedStructOut {
+    struct CStruct : public WGPUChainedStructOut {
+    };
+    ChainedStructOut(const WGPUChainedStructOut& native);
+    ChainedStructOut() {};
+    CStruct to_cstruct() const;
+    template <typename T>
+    ChainedStructOut& setNext(T&& value) &;
+    template <typename T>
+    ChainedStructOut&& setNext(T&& value) &&;
+    ChainedStructOut& setSType(wgpu::SType value) &;
+    ChainedStructOut&& setSType(wgpu::SType value) &&;
+    NextInChain<struct WGPUChainedStructOut> next;
     wgpu::SType sType;
 };
 struct BufferMapCallbackInfo {
     struct CStruct : public WGPUBufferMapCallbackInfo {
     };
     BufferMapCallbackInfo(const WGPUBufferMapCallbackInfo& native);
-    BufferMapCallbackInfo() : BufferMapCallbackInfo(WGPU_BUFFER_MAP_CALLBACK_INFO_INIT) {};
+    BufferMapCallbackInfo() {};
     CStruct to_cstruct() const;
     template <typename T>
     BufferMapCallbackInfo& setNextInChain(T&& value) &;
@@ -2417,7 +2482,7 @@ struct BufferMapCallbackInfo {
     BufferMapCallbackInfo&& setMode(wgpu::CallbackMode value) &&;
     BufferMapCallbackInfo& setCallback(wgpu::BufferMapCallback value) &;
     BufferMapCallbackInfo&& setCallback(wgpu::BufferMapCallback value) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     wgpu::CallbackMode mode;
     wgpu::BufferMapCallback callback;
 };
@@ -2425,7 +2490,7 @@ struct CompilationInfoCallbackInfo {
     struct CStruct : public WGPUCompilationInfoCallbackInfo {
     };
     CompilationInfoCallbackInfo(const WGPUCompilationInfoCallbackInfo& native);
-    CompilationInfoCallbackInfo() : CompilationInfoCallbackInfo(WGPU_COMPILATION_INFO_CALLBACK_INFO_INIT) {};
+    CompilationInfoCallbackInfo() {};
     CStruct to_cstruct() const;
     template <typename T>
     CompilationInfoCallbackInfo& setNextInChain(T&& value) &;
@@ -2435,7 +2500,7 @@ struct CompilationInfoCallbackInfo {
     CompilationInfoCallbackInfo&& setMode(wgpu::CallbackMode value) &&;
     CompilationInfoCallbackInfo& setCallback(wgpu::CompilationInfoCallback value) &;
     CompilationInfoCallbackInfo&& setCallback(wgpu::CompilationInfoCallback value) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     wgpu::CallbackMode mode;
     wgpu::CompilationInfoCallback callback;
 };
@@ -2443,7 +2508,7 @@ struct CreateComputePipelineAsyncCallbackInfo {
     struct CStruct : public WGPUCreateComputePipelineAsyncCallbackInfo {
     };
     CreateComputePipelineAsyncCallbackInfo(const WGPUCreateComputePipelineAsyncCallbackInfo& native);
-    CreateComputePipelineAsyncCallbackInfo() : CreateComputePipelineAsyncCallbackInfo(WGPU_CREATE_COMPUTE_PIPELINE_ASYNC_CALLBACK_INFO_INIT) {};
+    CreateComputePipelineAsyncCallbackInfo() {};
     CStruct to_cstruct() const;
     template <typename T>
     CreateComputePipelineAsyncCallbackInfo& setNextInChain(T&& value) &;
@@ -2453,7 +2518,7 @@ struct CreateComputePipelineAsyncCallbackInfo {
     CreateComputePipelineAsyncCallbackInfo&& setMode(wgpu::CallbackMode value) &&;
     CreateComputePipelineAsyncCallbackInfo& setCallback(wgpu::CreateComputePipelineAsyncCallback value) &;
     CreateComputePipelineAsyncCallbackInfo&& setCallback(wgpu::CreateComputePipelineAsyncCallback value) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     wgpu::CallbackMode mode;
     wgpu::CreateComputePipelineAsyncCallback callback;
 };
@@ -2461,7 +2526,7 @@ struct CreateRenderPipelineAsyncCallbackInfo {
     struct CStruct : public WGPUCreateRenderPipelineAsyncCallbackInfo {
     };
     CreateRenderPipelineAsyncCallbackInfo(const WGPUCreateRenderPipelineAsyncCallbackInfo& native);
-    CreateRenderPipelineAsyncCallbackInfo() : CreateRenderPipelineAsyncCallbackInfo(WGPU_CREATE_RENDER_PIPELINE_ASYNC_CALLBACK_INFO_INIT) {};
+    CreateRenderPipelineAsyncCallbackInfo() {};
     CStruct to_cstruct() const;
     template <typename T>
     CreateRenderPipelineAsyncCallbackInfo& setNextInChain(T&& value) &;
@@ -2471,7 +2536,7 @@ struct CreateRenderPipelineAsyncCallbackInfo {
     CreateRenderPipelineAsyncCallbackInfo&& setMode(wgpu::CallbackMode value) &&;
     CreateRenderPipelineAsyncCallbackInfo& setCallback(wgpu::CreateRenderPipelineAsyncCallback value) &;
     CreateRenderPipelineAsyncCallbackInfo&& setCallback(wgpu::CreateRenderPipelineAsyncCallback value) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     wgpu::CallbackMode mode;
     wgpu::CreateRenderPipelineAsyncCallback callback;
 };
@@ -2479,7 +2544,7 @@ struct DeviceLostCallbackInfo {
     struct CStruct : public WGPUDeviceLostCallbackInfo {
     };
     DeviceLostCallbackInfo(const WGPUDeviceLostCallbackInfo& native);
-    DeviceLostCallbackInfo() : DeviceLostCallbackInfo(WGPU_DEVICE_LOST_CALLBACK_INFO_INIT) {};
+    DeviceLostCallbackInfo() {};
     CStruct to_cstruct() const;
     template <typename T>
     DeviceLostCallbackInfo& setNextInChain(T&& value) &;
@@ -2489,7 +2554,7 @@ struct DeviceLostCallbackInfo {
     DeviceLostCallbackInfo&& setMode(wgpu::CallbackMode value) &&;
     DeviceLostCallbackInfo& setCallback(wgpu::DeviceLostCallback value) &;
     DeviceLostCallbackInfo&& setCallback(wgpu::DeviceLostCallback value) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     wgpu::CallbackMode mode;
     wgpu::DeviceLostCallback callback;
 };
@@ -2497,7 +2562,7 @@ struct PopErrorScopeCallbackInfo {
     struct CStruct : public WGPUPopErrorScopeCallbackInfo {
     };
     PopErrorScopeCallbackInfo(const WGPUPopErrorScopeCallbackInfo& native);
-    PopErrorScopeCallbackInfo() : PopErrorScopeCallbackInfo(WGPU_POP_ERROR_SCOPE_CALLBACK_INFO_INIT) {};
+    PopErrorScopeCallbackInfo() {};
     CStruct to_cstruct() const;
     template <typename T>
     PopErrorScopeCallbackInfo& setNextInChain(T&& value) &;
@@ -2507,7 +2572,7 @@ struct PopErrorScopeCallbackInfo {
     PopErrorScopeCallbackInfo&& setMode(wgpu::CallbackMode value) &&;
     PopErrorScopeCallbackInfo& setCallback(wgpu::PopErrorScopeCallback value) &;
     PopErrorScopeCallbackInfo&& setCallback(wgpu::PopErrorScopeCallback value) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     wgpu::CallbackMode mode;
     wgpu::PopErrorScopeCallback callback;
 };
@@ -2515,7 +2580,7 @@ struct QueueWorkDoneCallbackInfo {
     struct CStruct : public WGPUQueueWorkDoneCallbackInfo {
     };
     QueueWorkDoneCallbackInfo(const WGPUQueueWorkDoneCallbackInfo& native);
-    QueueWorkDoneCallbackInfo() : QueueWorkDoneCallbackInfo(WGPU_QUEUE_WORK_DONE_CALLBACK_INFO_INIT) {};
+    QueueWorkDoneCallbackInfo() {};
     CStruct to_cstruct() const;
     template <typename T>
     QueueWorkDoneCallbackInfo& setNextInChain(T&& value) &;
@@ -2525,7 +2590,7 @@ struct QueueWorkDoneCallbackInfo {
     QueueWorkDoneCallbackInfo&& setMode(wgpu::CallbackMode value) &&;
     QueueWorkDoneCallbackInfo& setCallback(wgpu::QueueWorkDoneCallback value) &;
     QueueWorkDoneCallbackInfo&& setCallback(wgpu::QueueWorkDoneCallback value) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     wgpu::CallbackMode mode;
     wgpu::QueueWorkDoneCallback callback;
 };
@@ -2533,7 +2598,7 @@ struct RequestAdapterCallbackInfo {
     struct CStruct : public WGPURequestAdapterCallbackInfo {
     };
     RequestAdapterCallbackInfo(const WGPURequestAdapterCallbackInfo& native);
-    RequestAdapterCallbackInfo() : RequestAdapterCallbackInfo(WGPU_REQUEST_ADAPTER_CALLBACK_INFO_INIT) {};
+    RequestAdapterCallbackInfo() {};
     CStruct to_cstruct() const;
     template <typename T>
     RequestAdapterCallbackInfo& setNextInChain(T&& value) &;
@@ -2543,7 +2608,7 @@ struct RequestAdapterCallbackInfo {
     RequestAdapterCallbackInfo&& setMode(wgpu::CallbackMode value) &&;
     RequestAdapterCallbackInfo& setCallback(wgpu::RequestAdapterCallback value) &;
     RequestAdapterCallbackInfo&& setCallback(wgpu::RequestAdapterCallback value) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     wgpu::CallbackMode mode;
     wgpu::RequestAdapterCallback callback;
 };
@@ -2551,7 +2616,7 @@ struct RequestDeviceCallbackInfo {
     struct CStruct : public WGPURequestDeviceCallbackInfo {
     };
     RequestDeviceCallbackInfo(const WGPURequestDeviceCallbackInfo& native);
-    RequestDeviceCallbackInfo() : RequestDeviceCallbackInfo(WGPU_REQUEST_DEVICE_CALLBACK_INFO_INIT) {};
+    RequestDeviceCallbackInfo() {};
     CStruct to_cstruct() const;
     template <typename T>
     RequestDeviceCallbackInfo& setNextInChain(T&& value) &;
@@ -2561,7 +2626,7 @@ struct RequestDeviceCallbackInfo {
     RequestDeviceCallbackInfo&& setMode(wgpu::CallbackMode value) &&;
     RequestDeviceCallbackInfo& setCallback(wgpu::RequestDeviceCallback value) &;
     RequestDeviceCallbackInfo&& setCallback(wgpu::RequestDeviceCallback value) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     wgpu::CallbackMode mode;
     wgpu::RequestDeviceCallback callback;
 };
@@ -2569,7 +2634,7 @@ struct UncapturedErrorCallbackInfo {
     struct CStruct : public WGPUUncapturedErrorCallbackInfo {
     };
     UncapturedErrorCallbackInfo(const WGPUUncapturedErrorCallbackInfo& native);
-    UncapturedErrorCallbackInfo() : UncapturedErrorCallbackInfo(WGPU_UNCAPTURED_ERROR_CALLBACK_INFO_INIT) {};
+    UncapturedErrorCallbackInfo() {};
     CStruct to_cstruct() const;
     template <typename T>
     UncapturedErrorCallbackInfo& setNextInChain(T&& value) &;
@@ -2577,14 +2642,14 @@ struct UncapturedErrorCallbackInfo {
     UncapturedErrorCallbackInfo&& setNextInChain(T&& value) &&;
     UncapturedErrorCallbackInfo& setCallback(wgpu::UncapturedErrorCallback value) &;
     UncapturedErrorCallbackInfo&& setCallback(wgpu::UncapturedErrorCallback value) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     wgpu::UncapturedErrorCallback callback;
 };
 struct AdapterInfo {
     struct CStruct : public WGPUAdapterInfo {
     };
     AdapterInfo(const WGPUAdapterInfo& native);
-    AdapterInfo() : AdapterInfo(WGPU_ADAPTER_INFO_INIT) {};
+    AdapterInfo() {};
     CStruct to_cstruct() const;
     template <typename T>
     AdapterInfo& setNextInChain(T&& value) &;
@@ -2614,11 +2679,7 @@ struct AdapterInfo {
     AdapterInfo&& setVendorID(uint32_t value) &&;
     AdapterInfo& setDeviceID(uint32_t value) &;
     AdapterInfo&& setDeviceID(uint32_t value) &&;
-    AdapterInfo& setSubgroupMinSize(uint32_t value) &;
-    AdapterInfo&& setSubgroupMinSize(uint32_t value) &&;
-    AdapterInfo& setSubgroupMaxSize(uint32_t value) &;
-    AdapterInfo&& setSubgroupMaxSize(uint32_t value) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStructOut> nextInChain;
     wgpu::StringView vendor;
     wgpu::StringView architecture;
     wgpu::StringView device;
@@ -2627,14 +2688,42 @@ struct AdapterInfo {
     wgpu::AdapterType adapterType;
     uint32_t vendorID;
     uint32_t deviceID;
-    uint32_t subgroupMinSize;
-    uint32_t subgroupMaxSize;
+};
+struct BindGroupEntry {
+    struct CStruct : public WGPUBindGroupEntry {
+    };
+    BindGroupEntry(const WGPUBindGroupEntry& native);
+    BindGroupEntry() {};
+    CStruct to_cstruct() const;
+    template <typename T>
+    BindGroupEntry& setNextInChain(T&& value) &;
+    template <typename T>
+    BindGroupEntry&& setNextInChain(T&& value) &&;
+    BindGroupEntry& setBinding(uint32_t value) &;
+    BindGroupEntry&& setBinding(uint32_t value) &&;
+    BindGroupEntry& setBuffer(wgpu::Buffer value) &;
+    BindGroupEntry&& setBuffer(wgpu::Buffer value) &&;
+    BindGroupEntry& setOffset(uint64_t value) &;
+    BindGroupEntry&& setOffset(uint64_t value) &&;
+    BindGroupEntry& setSize(uint64_t value) &;
+    BindGroupEntry&& setSize(uint64_t value) &&;
+    BindGroupEntry& setSampler(wgpu::Sampler value) &;
+    BindGroupEntry&& setSampler(wgpu::Sampler value) &&;
+    BindGroupEntry& setTextureView(wgpu::TextureView value) &;
+    BindGroupEntry&& setTextureView(wgpu::TextureView value) &&;
+    NextInChain<WGPUChainedStruct const> nextInChain;
+    uint32_t binding;
+    wgpu::Buffer buffer;
+    uint64_t offset;
+    uint64_t size;
+    wgpu::Sampler sampler;
+    wgpu::TextureView textureView;
 };
 struct BlendComponent {
     struct CStruct : public WGPUBlendComponent {
     };
     BlendComponent(const WGPUBlendComponent& native);
-    BlendComponent() : BlendComponent(WGPU_BLEND_COMPONENT_INIT) {};
+    BlendComponent() {};
     CStruct to_cstruct() const;
     BlendComponent& setOperation(wgpu::BlendOperation value) &;
     BlendComponent&& setOperation(wgpu::BlendOperation value) &&;
@@ -2650,7 +2739,7 @@ struct BufferBindingLayout {
     struct CStruct : public WGPUBufferBindingLayout {
     };
     BufferBindingLayout(const WGPUBufferBindingLayout& native);
-    BufferBindingLayout() : BufferBindingLayout(WGPU_BUFFER_BINDING_LAYOUT_INIT) {};
+    BufferBindingLayout() {};
     CStruct to_cstruct() const;
     template <typename T>
     BufferBindingLayout& setNextInChain(T&& value) &;
@@ -2662,7 +2751,7 @@ struct BufferBindingLayout {
     BufferBindingLayout&& setHasDynamicOffset(wgpu::Bool value) &&;
     BufferBindingLayout& setMinBindingSize(uint64_t value) &;
     BufferBindingLayout&& setMinBindingSize(uint64_t value) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     wgpu::BufferBindingType type;
     wgpu::Bool hasDynamicOffset;
     uint64_t minBindingSize;
@@ -2671,7 +2760,7 @@ struct BufferDescriptor {
     struct CStruct : public WGPUBufferDescriptor {
     };
     BufferDescriptor(const WGPUBufferDescriptor& native);
-    BufferDescriptor() : BufferDescriptor(WGPU_BUFFER_DESCRIPTOR_INIT) {};
+    BufferDescriptor() {};
     CStruct to_cstruct() const;
     template <typename T>
     BufferDescriptor& setNextInChain(T&& value) &;
@@ -2687,7 +2776,7 @@ struct BufferDescriptor {
     BufferDescriptor&& setSize(uint64_t value) &&;
     BufferDescriptor& setMappedAtCreation(wgpu::Bool value) &;
     BufferDescriptor&& setMappedAtCreation(wgpu::Bool value) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     wgpu::StringView label;
     wgpu::BufferUsage usage;
     uint64_t size;
@@ -2697,7 +2786,7 @@ struct Color {
     struct CStruct : public WGPUColor {
     };
     Color(const WGPUColor& native);
-    Color() : Color(WGPU_COLOR_INIT) {};
+    Color() {};
     CStruct to_cstruct() const;
     Color& setR(double value) &;
     Color&& setR(double value) &&;
@@ -2716,7 +2805,7 @@ struct CommandBufferDescriptor {
     struct CStruct : public WGPUCommandBufferDescriptor {
     };
     CommandBufferDescriptor(const WGPUCommandBufferDescriptor& native);
-    CommandBufferDescriptor() : CommandBufferDescriptor(WGPU_COMMAND_BUFFER_DESCRIPTOR_INIT) {};
+    CommandBufferDescriptor() {};
     CStruct to_cstruct() const;
     template <typename T>
     CommandBufferDescriptor& setNextInChain(T&& value) &;
@@ -2726,14 +2815,14 @@ struct CommandBufferDescriptor {
     CommandBufferDescriptor&& setLabel(const wgpu::StringView& value) &&;
     CommandBufferDescriptor& setLabel(wgpu::StringView&& value) &;
     CommandBufferDescriptor&& setLabel(wgpu::StringView&& value) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     wgpu::StringView label;
 };
 struct CommandEncoderDescriptor {
     struct CStruct : public WGPUCommandEncoderDescriptor {
     };
     CommandEncoderDescriptor(const WGPUCommandEncoderDescriptor& native);
-    CommandEncoderDescriptor() : CommandEncoderDescriptor(WGPU_COMMAND_ENCODER_DESCRIPTOR_INIT) {};
+    CommandEncoderDescriptor() {};
     CStruct to_cstruct() const;
     template <typename T>
     CommandEncoderDescriptor& setNextInChain(T&& value) &;
@@ -2743,14 +2832,14 @@ struct CommandEncoderDescriptor {
     CommandEncoderDescriptor&& setLabel(const wgpu::StringView& value) &&;
     CommandEncoderDescriptor& setLabel(wgpu::StringView&& value) &;
     CommandEncoderDescriptor&& setLabel(wgpu::StringView&& value) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     wgpu::StringView label;
 };
 struct CompilationMessage {
     struct CStruct : public WGPUCompilationMessage {
     };
     CompilationMessage(const WGPUCompilationMessage& native);
-    CompilationMessage() : CompilationMessage(WGPU_COMPILATION_MESSAGE_INIT) {};
+    CompilationMessage() {};
     CStruct to_cstruct() const;
     template <typename T>
     CompilationMessage& setNextInChain(T&& value) &;
@@ -2770,7 +2859,7 @@ struct CompilationMessage {
     CompilationMessage&& setOffset(uint64_t value) &&;
     CompilationMessage& setLength(uint64_t value) &;
     CompilationMessage&& setLength(uint64_t value) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     wgpu::StringView message;
     wgpu::CompilationMessageType type;
     uint64_t lineNum;
@@ -2778,11 +2867,27 @@ struct CompilationMessage {
     uint64_t offset;
     uint64_t length;
 };
+struct ComputePassTimestampWrites {
+    struct CStruct : public WGPUComputePassTimestampWrites {
+    };
+    ComputePassTimestampWrites(const WGPUComputePassTimestampWrites& native);
+    ComputePassTimestampWrites() {};
+    CStruct to_cstruct() const;
+    ComputePassTimestampWrites& setQuerySet(wgpu::QuerySet value) &;
+    ComputePassTimestampWrites&& setQuerySet(wgpu::QuerySet value) &&;
+    ComputePassTimestampWrites& setBeginningOfPassWriteIndex(uint32_t value) &;
+    ComputePassTimestampWrites&& setBeginningOfPassWriteIndex(uint32_t value) &&;
+    ComputePassTimestampWrites& setEndOfPassWriteIndex(uint32_t value) &;
+    ComputePassTimestampWrites&& setEndOfPassWriteIndex(uint32_t value) &&;
+    wgpu::QuerySet querySet;
+    uint32_t beginningOfPassWriteIndex;
+    uint32_t endOfPassWriteIndex;
+};
 struct ConstantEntry {
     struct CStruct : public WGPUConstantEntry {
     };
     ConstantEntry(const WGPUConstantEntry& native);
-    ConstantEntry() : ConstantEntry(WGPU_CONSTANT_ENTRY_INIT) {};
+    ConstantEntry() {};
     CStruct to_cstruct() const;
     template <typename T>
     ConstantEntry& setNextInChain(T&& value) &;
@@ -2794,7 +2899,7 @@ struct ConstantEntry {
     ConstantEntry&& setKey(wgpu::StringView&& value) &&;
     ConstantEntry& setValue(double value) &;
     ConstantEntry&& setValue(double value) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     wgpu::StringView key;
     double value;
 };
@@ -2814,63 +2919,39 @@ struct Extent3D {
     uint32_t height;
     uint32_t depthOrArrayLayers;
 };
-struct ExternalTextureBindingEntry {
-    struct CStruct : public WGPUExternalTextureBindingEntry {
-    };
-    ExternalTextureBindingEntry(const WGPUExternalTextureBindingEntry& native);
-    ExternalTextureBindingEntry() : ExternalTextureBindingEntry(WGPU_EXTERNAL_TEXTURE_BINDING_ENTRY_INIT) {};
-    CStruct to_cstruct() const;
-    template <typename T>
-    ExternalTextureBindingEntry& setNext(T&& value) &;
-    template <typename T>
-    ExternalTextureBindingEntry&& setNext(T&& value) &&;
-    ExternalTextureBindingEntry& setExternalTexture(wgpu::ExternalTexture value) &;
-    ExternalTextureBindingEntry&& setExternalTexture(wgpu::ExternalTexture value) &&;
-    wgpu::ChainedStruct chain;
-    wgpu::ExternalTexture externalTexture;
-};
-struct ExternalTextureBindingLayout {
-    struct CStruct : public WGPUExternalTextureBindingLayout {
-    };
-    ExternalTextureBindingLayout(const WGPUExternalTextureBindingLayout& native);
-    ExternalTextureBindingLayout() : ExternalTextureBindingLayout(WGPU_EXTERNAL_TEXTURE_BINDING_LAYOUT_INIT) {};
-    CStruct to_cstruct() const;
-    template <typename T>
-    ExternalTextureBindingLayout& setNext(T&& value) &;
-    template <typename T>
-    ExternalTextureBindingLayout&& setNext(T&& value) &&;
-    wgpu::ChainedStruct chain;
-};
 struct Future {
     struct CStruct : public WGPUFuture {
     };
     Future(const WGPUFuture& native);
-    Future() : Future(WGPU_FUTURE_INIT) {};
+    Future() {};
     CStruct to_cstruct() const;
     Future& setId(uint64_t value) &;
     Future&& setId(uint64_t value) &&;
     uint64_t id;
 };
-struct InstanceLimits {
-    struct CStruct : public WGPUInstanceLimits {
+struct InstanceCapabilities {
+    struct CStruct : public WGPUInstanceCapabilities {
     };
-    InstanceLimits(const WGPUInstanceLimits& native);
-    InstanceLimits() : InstanceLimits(WGPU_INSTANCE_LIMITS_INIT) {};
+    InstanceCapabilities(const WGPUInstanceCapabilities& native);
+    InstanceCapabilities() {};
     CStruct to_cstruct() const;
     template <typename T>
-    InstanceLimits& setNextInChain(T&& value) &;
+    InstanceCapabilities& setNextInChain(T&& value) &;
     template <typename T>
-    InstanceLimits&& setNextInChain(T&& value) &&;
-    InstanceLimits& setTimedWaitAnyMaxCount(size_t value) &;
-    InstanceLimits&& setTimedWaitAnyMaxCount(size_t value) &&;
-    NextInChain nextInChain;
+    InstanceCapabilities&& setNextInChain(T&& value) &&;
+    InstanceCapabilities& setTimedWaitAnyEnable(wgpu::Bool value) &;
+    InstanceCapabilities&& setTimedWaitAnyEnable(wgpu::Bool value) &&;
+    InstanceCapabilities& setTimedWaitAnyMaxCount(size_t value) &;
+    InstanceCapabilities&& setTimedWaitAnyMaxCount(size_t value) &&;
+    NextInChain<WGPUChainedStructOut> nextInChain;
+    wgpu::Bool timedWaitAnyEnable;
     size_t timedWaitAnyMaxCount;
 };
 struct Limits {
     struct CStruct : public WGPULimits {
     };
     Limits(const WGPULimits& native);
-    Limits() : Limits(WGPU_LIMITS_INIT) {};
+    Limits() {};
     CStruct to_cstruct() const;
     template <typename T>
     Limits& setNextInChain(T&& value) &;
@@ -2938,9 +3019,7 @@ struct Limits {
     Limits&& setMaxComputeWorkgroupSizeZ(uint32_t value) &&;
     Limits& setMaxComputeWorkgroupsPerDimension(uint32_t value) &;
     Limits&& setMaxComputeWorkgroupsPerDimension(uint32_t value) &&;
-    Limits& setMaxImmediateSize(uint32_t value) &;
-    Limits&& setMaxImmediateSize(uint32_t value) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStructOut> nextInChain;
     uint32_t maxTextureDimension1D;
     uint32_t maxTextureDimension2D;
     uint32_t maxTextureDimension3D;
@@ -2972,13 +3051,12 @@ struct Limits {
     uint32_t maxComputeWorkgroupSizeY;
     uint32_t maxComputeWorkgroupSizeZ;
     uint32_t maxComputeWorkgroupsPerDimension;
-    uint32_t maxImmediateSize;
 };
 struct MultisampleState {
     struct CStruct : public WGPUMultisampleState {
     };
     MultisampleState(const WGPUMultisampleState& native);
-    MultisampleState() : MultisampleState(WGPU_MULTISAMPLE_STATE_INIT) {};
+    MultisampleState() {};
     CStruct to_cstruct() const;
     template <typename T>
     MultisampleState& setNextInChain(T&& value) &;
@@ -2990,7 +3068,7 @@ struct MultisampleState {
     MultisampleState&& setMask(uint32_t value) &&;
     MultisampleState& setAlphaToCoverageEnabled(wgpu::Bool value) &;
     MultisampleState&& setAlphaToCoverageEnabled(wgpu::Bool value) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     uint32_t count;
     uint32_t mask;
     wgpu::Bool alphaToCoverageEnabled;
@@ -3011,32 +3089,11 @@ struct Origin3D {
     uint32_t y;
     uint32_t z;
 };
-struct PassTimestampWrites {
-    struct CStruct : public WGPUPassTimestampWrites {
-    };
-    PassTimestampWrites(const WGPUPassTimestampWrites& native);
-    PassTimestampWrites() : PassTimestampWrites(WGPU_PASS_TIMESTAMP_WRITES_INIT) {};
-    CStruct to_cstruct() const;
-    template <typename T>
-    PassTimestampWrites& setNextInChain(T&& value) &;
-    template <typename T>
-    PassTimestampWrites&& setNextInChain(T&& value) &&;
-    PassTimestampWrites& setQuerySet(wgpu::QuerySet value) &;
-    PassTimestampWrites&& setQuerySet(wgpu::QuerySet value) &&;
-    PassTimestampWrites& setBeginningOfPassWriteIndex(uint32_t value) &;
-    PassTimestampWrites&& setBeginningOfPassWriteIndex(uint32_t value) &&;
-    PassTimestampWrites& setEndOfPassWriteIndex(uint32_t value) &;
-    PassTimestampWrites&& setEndOfPassWriteIndex(uint32_t value) &&;
-    NextInChain nextInChain;
-    wgpu::QuerySet querySet;
-    uint32_t beginningOfPassWriteIndex;
-    uint32_t endOfPassWriteIndex;
-};
 struct PipelineLayoutDescriptor {
     struct CStruct : public WGPUPipelineLayoutDescriptor {
     };
     PipelineLayoutDescriptor(const WGPUPipelineLayoutDescriptor& native);
-    PipelineLayoutDescriptor() : PipelineLayoutDescriptor(WGPU_PIPELINE_LAYOUT_DESCRIPTOR_INIT) {};
+    PipelineLayoutDescriptor() {};
     CStruct to_cstruct() const;
     template <typename T>
     PipelineLayoutDescriptor& setNextInChain(T&& value) &;
@@ -3050,18 +3107,15 @@ struct PipelineLayoutDescriptor {
     PipelineLayoutDescriptor& setBindGroupLayouts(T&& values) &;
     template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::BindGroupLayout>
     PipelineLayoutDescriptor&& setBindGroupLayouts(T&& values) &&;
-    PipelineLayoutDescriptor& setImmediateSize(uint32_t value) &;
-    PipelineLayoutDescriptor&& setImmediateSize(uint32_t value) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     wgpu::StringView label;
     std::vector<wgpu::BindGroupLayout> bindGroupLayouts;
-    uint32_t immediateSize;
 };
 struct PrimitiveState {
     struct CStruct : public WGPUPrimitiveState {
     };
     PrimitiveState(const WGPUPrimitiveState& native);
-    PrimitiveState() : PrimitiveState(WGPU_PRIMITIVE_STATE_INIT) {};
+    PrimitiveState() {};
     CStruct to_cstruct() const;
     template <typename T>
     PrimitiveState& setNextInChain(T&& value) &;
@@ -3077,7 +3131,7 @@ struct PrimitiveState {
     PrimitiveState&& setCullMode(wgpu::CullMode value) &&;
     PrimitiveState& setUnclippedDepth(wgpu::Bool value) &;
     PrimitiveState&& setUnclippedDepth(wgpu::Bool value) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     wgpu::PrimitiveTopology topology;
     wgpu::IndexFormat stripIndexFormat;
     wgpu::FrontFace frontFace;
@@ -3088,7 +3142,7 @@ struct QuerySetDescriptor {
     struct CStruct : public WGPUQuerySetDescriptor {
     };
     QuerySetDescriptor(const WGPUQuerySetDescriptor& native);
-    QuerySetDescriptor() : QuerySetDescriptor(WGPU_QUERY_SET_DESCRIPTOR_INIT) {};
+    QuerySetDescriptor() {};
     CStruct to_cstruct() const;
     template <typename T>
     QuerySetDescriptor& setNextInChain(T&& value) &;
@@ -3102,7 +3156,7 @@ struct QuerySetDescriptor {
     QuerySetDescriptor&& setType(wgpu::QueryType value) &&;
     QuerySetDescriptor& setCount(uint32_t value) &;
     QuerySetDescriptor&& setCount(uint32_t value) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     wgpu::StringView label;
     wgpu::QueryType type;
     uint32_t count;
@@ -3111,7 +3165,7 @@ struct QueueDescriptor {
     struct CStruct : public WGPUQueueDescriptor {
     };
     QueueDescriptor(const WGPUQueueDescriptor& native);
-    QueueDescriptor() : QueueDescriptor(WGPU_QUEUE_DESCRIPTOR_INIT) {};
+    QueueDescriptor() {};
     CStruct to_cstruct() const;
     template <typename T>
     QueueDescriptor& setNextInChain(T&& value) &;
@@ -3121,14 +3175,14 @@ struct QueueDescriptor {
     QueueDescriptor&& setLabel(const wgpu::StringView& value) &&;
     QueueDescriptor& setLabel(wgpu::StringView&& value) &;
     QueueDescriptor&& setLabel(wgpu::StringView&& value) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     wgpu::StringView label;
 };
 struct RenderBundleDescriptor {
     struct CStruct : public WGPURenderBundleDescriptor {
     };
     RenderBundleDescriptor(const WGPURenderBundleDescriptor& native);
-    RenderBundleDescriptor() : RenderBundleDescriptor(WGPU_RENDER_BUNDLE_DESCRIPTOR_INIT) {};
+    RenderBundleDescriptor() {};
     CStruct to_cstruct() const;
     template <typename T>
     RenderBundleDescriptor& setNextInChain(T&& value) &;
@@ -3138,14 +3192,14 @@ struct RenderBundleDescriptor {
     RenderBundleDescriptor&& setLabel(const wgpu::StringView& value) &&;
     RenderBundleDescriptor& setLabel(wgpu::StringView&& value) &;
     RenderBundleDescriptor&& setLabel(wgpu::StringView&& value) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     wgpu::StringView label;
 };
 struct RenderBundleEncoderDescriptor {
     struct CStruct : public WGPURenderBundleEncoderDescriptor {
     };
     RenderBundleEncoderDescriptor(const WGPURenderBundleEncoderDescriptor& native);
-    RenderBundleEncoderDescriptor() : RenderBundleEncoderDescriptor(WGPU_RENDER_BUNDLE_ENCODER_DESCRIPTOR_INIT) {};
+    RenderBundleEncoderDescriptor() {};
     CStruct to_cstruct() const;
     template <typename T>
     RenderBundleEncoderDescriptor& setNextInChain(T&& value) &;
@@ -3167,7 +3221,7 @@ struct RenderBundleEncoderDescriptor {
     RenderBundleEncoderDescriptor&& setDepthReadOnly(wgpu::Bool value) &&;
     RenderBundleEncoderDescriptor& setStencilReadOnly(wgpu::Bool value) &;
     RenderBundleEncoderDescriptor&& setStencilReadOnly(wgpu::Bool value) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     wgpu::StringView label;
     std::vector<wgpu::TextureFormat> colorFormats;
     wgpu::TextureFormat depthStencilFormat;
@@ -3179,12 +3233,8 @@ struct RenderPassDepthStencilAttachment {
     struct CStruct : public WGPURenderPassDepthStencilAttachment {
     };
     RenderPassDepthStencilAttachment(const WGPURenderPassDepthStencilAttachment& native);
-    RenderPassDepthStencilAttachment() : RenderPassDepthStencilAttachment(WGPU_RENDER_PASS_DEPTH_STENCIL_ATTACHMENT_INIT) {};
+    RenderPassDepthStencilAttachment() {};
     CStruct to_cstruct() const;
-    template <typename T>
-    RenderPassDepthStencilAttachment& setNextInChain(T&& value) &;
-    template <typename T>
-    RenderPassDepthStencilAttachment&& setNextInChain(T&& value) &&;
     RenderPassDepthStencilAttachment& setView(wgpu::TextureView value) &;
     RenderPassDepthStencilAttachment&& setView(wgpu::TextureView value) &&;
     RenderPassDepthStencilAttachment& setDepthLoadOp(wgpu::LoadOp value) &;
@@ -3203,7 +3253,6 @@ struct RenderPassDepthStencilAttachment {
     RenderPassDepthStencilAttachment&& setStencilClearValue(uint32_t value) &&;
     RenderPassDepthStencilAttachment& setStencilReadOnly(wgpu::Bool value) &;
     RenderPassDepthStencilAttachment&& setStencilReadOnly(wgpu::Bool value) &&;
-    NextInChain nextInChain;
     wgpu::TextureView view;
     wgpu::LoadOp depthLoadOp;
     wgpu::StoreOp depthStoreOp;
@@ -3218,7 +3267,7 @@ struct RenderPassMaxDrawCount {
     struct CStruct : public WGPURenderPassMaxDrawCount {
     };
     RenderPassMaxDrawCount(const WGPURenderPassMaxDrawCount& native);
-    RenderPassMaxDrawCount() : RenderPassMaxDrawCount(WGPU_RENDER_PASS_MAX_DRAW_COUNT_INIT) {};
+    RenderPassMaxDrawCount() {};
     CStruct to_cstruct() const;
     template <typename T>
     RenderPassMaxDrawCount& setNext(T&& value) &;
@@ -3229,26 +3278,54 @@ struct RenderPassMaxDrawCount {
     wgpu::ChainedStruct chain;
     uint64_t maxDrawCount;
 };
-struct RequestAdapterWebXROptions {
-    struct CStruct : public WGPURequestAdapterWebXROptions {
+struct RenderPassTimestampWrites {
+    struct CStruct : public WGPURenderPassTimestampWrites {
     };
-    RequestAdapterWebXROptions(const WGPURequestAdapterWebXROptions& native);
-    RequestAdapterWebXROptions() {};
+    RenderPassTimestampWrites(const WGPURenderPassTimestampWrites& native);
+    RenderPassTimestampWrites() {};
+    CStruct to_cstruct() const;
+    RenderPassTimestampWrites& setQuerySet(wgpu::QuerySet value) &;
+    RenderPassTimestampWrites&& setQuerySet(wgpu::QuerySet value) &&;
+    RenderPassTimestampWrites& setBeginningOfPassWriteIndex(uint32_t value) &;
+    RenderPassTimestampWrites&& setBeginningOfPassWriteIndex(uint32_t value) &&;
+    RenderPassTimestampWrites& setEndOfPassWriteIndex(uint32_t value) &;
+    RenderPassTimestampWrites&& setEndOfPassWriteIndex(uint32_t value) &&;
+    wgpu::QuerySet querySet;
+    uint32_t beginningOfPassWriteIndex;
+    uint32_t endOfPassWriteIndex;
+};
+struct RequestAdapterOptions {
+    struct CStruct : public WGPURequestAdapterOptions {
+    };
+    RequestAdapterOptions(const WGPURequestAdapterOptions& native);
+    RequestAdapterOptions() {};
     CStruct to_cstruct() const;
     template <typename T>
-    RequestAdapterWebXROptions& setNext(T&& value) &;
+    RequestAdapterOptions& setNextInChain(T&& value) &;
     template <typename T>
-    RequestAdapterWebXROptions&& setNext(T&& value) &&;
-    RequestAdapterWebXROptions& setXrCompatible(wgpu::Bool value) &;
-    RequestAdapterWebXROptions&& setXrCompatible(wgpu::Bool value) &&;
-    wgpu::ChainedStruct chain;
-    wgpu::Bool xrCompatible;
+    RequestAdapterOptions&& setNextInChain(T&& value) &&;
+    RequestAdapterOptions& setFeatureLevel(wgpu::FeatureLevel value) &;
+    RequestAdapterOptions&& setFeatureLevel(wgpu::FeatureLevel value) &&;
+    RequestAdapterOptions& setPowerPreference(wgpu::PowerPreference value) &;
+    RequestAdapterOptions&& setPowerPreference(wgpu::PowerPreference value) &&;
+    RequestAdapterOptions& setForceFallbackAdapter(wgpu::Bool value) &;
+    RequestAdapterOptions&& setForceFallbackAdapter(wgpu::Bool value) &&;
+    RequestAdapterOptions& setBackendType(wgpu::BackendType value) &;
+    RequestAdapterOptions&& setBackendType(wgpu::BackendType value) &&;
+    RequestAdapterOptions& setCompatibleSurface(wgpu::Surface value) &;
+    RequestAdapterOptions&& setCompatibleSurface(wgpu::Surface value) &&;
+    NextInChain<WGPUChainedStruct const> nextInChain;
+    wgpu::FeatureLevel featureLevel;
+    wgpu::PowerPreference powerPreference;
+    wgpu::Bool forceFallbackAdapter;
+    wgpu::BackendType backendType;
+    wgpu::Surface compatibleSurface;
 };
 struct SamplerBindingLayout {
     struct CStruct : public WGPUSamplerBindingLayout {
     };
     SamplerBindingLayout(const WGPUSamplerBindingLayout& native);
-    SamplerBindingLayout() : SamplerBindingLayout(WGPU_SAMPLER_BINDING_LAYOUT_INIT) {};
+    SamplerBindingLayout() {};
     CStruct to_cstruct() const;
     template <typename T>
     SamplerBindingLayout& setNextInChain(T&& value) &;
@@ -3256,14 +3333,14 @@ struct SamplerBindingLayout {
     SamplerBindingLayout&& setNextInChain(T&& value) &&;
     SamplerBindingLayout& setType(wgpu::SamplerBindingType value) &;
     SamplerBindingLayout&& setType(wgpu::SamplerBindingType value) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     wgpu::SamplerBindingType type;
 };
 struct SamplerDescriptor {
     struct CStruct : public WGPUSamplerDescriptor {
     };
     SamplerDescriptor(const WGPUSamplerDescriptor& native);
-    SamplerDescriptor() : SamplerDescriptor(WGPU_SAMPLER_DESCRIPTOR_INIT) {};
+    SamplerDescriptor() {};
     CStruct to_cstruct() const;
     template <typename T>
     SamplerDescriptor& setNextInChain(T&& value) &;
@@ -3293,7 +3370,7 @@ struct SamplerDescriptor {
     SamplerDescriptor&& setCompare(wgpu::CompareFunction value) &&;
     SamplerDescriptor& setMaxAnisotropy(uint16_t value) &;
     SamplerDescriptor&& setMaxAnisotropy(uint16_t value) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     wgpu::StringView label;
     wgpu::AddressMode addressModeU;
     wgpu::AddressMode addressModeV;
@@ -3305,6 +3382,23 @@ struct SamplerDescriptor {
     float lodMaxClamp;
     wgpu::CompareFunction compare;
     uint16_t maxAnisotropy;
+};
+struct ShaderModuleDescriptor {
+    struct CStruct : public WGPUShaderModuleDescriptor {
+    };
+    ShaderModuleDescriptor(const WGPUShaderModuleDescriptor& native);
+    ShaderModuleDescriptor() {};
+    CStruct to_cstruct() const;
+    template <typename T>
+    ShaderModuleDescriptor& setNextInChain(T&& value) &;
+    template <typename T>
+    ShaderModuleDescriptor&& setNextInChain(T&& value) &&;
+    ShaderModuleDescriptor& setLabel(const wgpu::StringView& value) &;
+    ShaderModuleDescriptor&& setLabel(const wgpu::StringView& value) &&;
+    ShaderModuleDescriptor& setLabel(wgpu::StringView&& value) &;
+    ShaderModuleDescriptor&& setLabel(wgpu::StringView&& value) &&;
+    NextInChain<WGPUChainedStruct const> nextInChain;
+    wgpu::StringView label;
 };
 struct ShaderSourceSPIRV {
     struct CStruct : public WGPUShaderSourceSPIRV {
@@ -3345,7 +3439,7 @@ struct StencilFaceState {
     struct CStruct : public WGPUStencilFaceState {
     };
     StencilFaceState(const WGPUStencilFaceState& native);
-    StencilFaceState() : StencilFaceState(WGPU_STENCIL_FACE_STATE_INIT) {};
+    StencilFaceState() {};
     CStruct to_cstruct() const;
     StencilFaceState& setCompare(wgpu::CompareFunction value) &;
     StencilFaceState&& setCompare(wgpu::CompareFunction value) &&;
@@ -3364,7 +3458,7 @@ struct StorageTextureBindingLayout {
     struct CStruct : public WGPUStorageTextureBindingLayout {
     };
     StorageTextureBindingLayout(const WGPUStorageTextureBindingLayout& native);
-    StorageTextureBindingLayout() : StorageTextureBindingLayout(WGPU_STORAGE_TEXTURE_BINDING_LAYOUT_INIT) {};
+    StorageTextureBindingLayout() {};
     CStruct to_cstruct() const;
     template <typename T>
     StorageTextureBindingLayout& setNextInChain(T&& value) &;
@@ -3376,7 +3470,7 @@ struct StorageTextureBindingLayout {
     StorageTextureBindingLayout&& setFormat(wgpu::TextureFormat value) &&;
     StorageTextureBindingLayout& setViewDimension(wgpu::TextureViewDimension value) &;
     StorageTextureBindingLayout&& setViewDimension(wgpu::TextureViewDimension value) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     wgpu::StorageTextureAccess access;
     wgpu::TextureFormat format;
     wgpu::TextureViewDimension viewDimension;
@@ -3385,25 +3479,13 @@ struct SupportedFeatures {
     struct CStruct : public WGPUSupportedFeatures {
     };
     SupportedFeatures(const WGPUSupportedFeatures& native);
-    SupportedFeatures() : SupportedFeatures(WGPU_SUPPORTED_FEATURES_INIT) {};
+    SupportedFeatures() {};
     CStruct to_cstruct() const;
     template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::FeatureName>
     SupportedFeatures& setFeatures(T&& values) &;
     template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::FeatureName>
     SupportedFeatures&& setFeatures(T&& values) &&;
     std::vector<wgpu::FeatureName> features;
-};
-struct SupportedInstanceFeatures {
-    struct CStruct : public WGPUSupportedInstanceFeatures {
-    };
-    SupportedInstanceFeatures(const WGPUSupportedInstanceFeatures& native);
-    SupportedInstanceFeatures() : SupportedInstanceFeatures(WGPU_SUPPORTED_INSTANCE_FEATURES_INIT) {};
-    CStruct to_cstruct() const;
-    template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::InstanceFeatureName>
-    SupportedInstanceFeatures& setFeatures(T&& values) &;
-    template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::InstanceFeatureName>
-    SupportedInstanceFeatures&& setFeatures(T&& values) &&;
-    std::vector<wgpu::InstanceFeatureName> features;
 };
 struct SupportedWGSLLanguageFeatures {
     struct CStruct : public WGPUSupportedWGSLLanguageFeatures {
@@ -3421,7 +3503,7 @@ struct SurfaceCapabilities {
     struct CStruct : public WGPUSurfaceCapabilities {
     };
     SurfaceCapabilities(const WGPUSurfaceCapabilities& native);
-    SurfaceCapabilities() : SurfaceCapabilities(WGPU_SURFACE_CAPABILITIES_INIT) {};
+    SurfaceCapabilities() {};
     CStruct to_cstruct() const;
     template <typename T>
     SurfaceCapabilities& setNextInChain(T&& value) &;
@@ -3441,35 +3523,17 @@ struct SurfaceCapabilities {
     SurfaceCapabilities& setAlphaModes(T&& values) &;
     template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::CompositeAlphaMode>
     SurfaceCapabilities&& setAlphaModes(T&& values) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStructOut> nextInChain;
     wgpu::TextureUsage usages;
     std::vector<wgpu::TextureFormat> formats;
     std::vector<wgpu::PresentMode> presentModes;
     std::vector<wgpu::CompositeAlphaMode> alphaModes;
 };
-struct SurfaceColorManagement {
-    struct CStruct : public WGPUSurfaceColorManagement {
-    };
-    SurfaceColorManagement(const WGPUSurfaceColorManagement& native);
-    SurfaceColorManagement() : SurfaceColorManagement(WGPU_SURFACE_COLOR_MANAGEMENT_INIT) {};
-    CStruct to_cstruct() const;
-    template <typename T>
-    SurfaceColorManagement& setNext(T&& value) &;
-    template <typename T>
-    SurfaceColorManagement&& setNext(T&& value) &&;
-    SurfaceColorManagement& setColorSpace(wgpu::PredefinedColorSpace value) &;
-    SurfaceColorManagement&& setColorSpace(wgpu::PredefinedColorSpace value) &&;
-    SurfaceColorManagement& setToneMappingMode(wgpu::ToneMappingMode value) &;
-    SurfaceColorManagement&& setToneMappingMode(wgpu::ToneMappingMode value) &&;
-    wgpu::ChainedStruct chain;
-    wgpu::PredefinedColorSpace colorSpace;
-    wgpu::ToneMappingMode toneMappingMode;
-};
 struct SurfaceConfiguration {
     struct CStruct : public WGPUSurfaceConfiguration {
     };
     SurfaceConfiguration(const WGPUSurfaceConfiguration& native);
-    SurfaceConfiguration() : SurfaceConfiguration(WGPU_SURFACE_CONFIGURATION_INIT) {};
+    SurfaceConfiguration() {};
     CStruct to_cstruct() const;
     template <typename T>
     SurfaceConfiguration& setNextInChain(T&& value) &;
@@ -3493,7 +3557,7 @@ struct SurfaceConfiguration {
     SurfaceConfiguration&& setAlphaMode(wgpu::CompositeAlphaMode value) &&;
     SurfaceConfiguration& setPresentMode(wgpu::PresentMode value) &;
     SurfaceConfiguration&& setPresentMode(wgpu::PresentMode value) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     wgpu::Device device;
     wgpu::TextureFormat format;
     wgpu::TextureUsage usage;
@@ -3503,11 +3567,28 @@ struct SurfaceConfiguration {
     wgpu::CompositeAlphaMode alphaMode;
     wgpu::PresentMode presentMode;
 };
+struct SurfaceDescriptor {
+    struct CStruct : public WGPUSurfaceDescriptor {
+    };
+    SurfaceDescriptor(const WGPUSurfaceDescriptor& native);
+    SurfaceDescriptor() {};
+    CStruct to_cstruct() const;
+    template <typename T>
+    SurfaceDescriptor& setNextInChain(T&& value) &;
+    template <typename T>
+    SurfaceDescriptor&& setNextInChain(T&& value) &&;
+    SurfaceDescriptor& setLabel(const wgpu::StringView& value) &;
+    SurfaceDescriptor&& setLabel(const wgpu::StringView& value) &&;
+    SurfaceDescriptor& setLabel(wgpu::StringView&& value) &;
+    SurfaceDescriptor&& setLabel(wgpu::StringView&& value) &&;
+    NextInChain<WGPUChainedStruct const> nextInChain;
+    wgpu::StringView label;
+};
 struct SurfaceSourceAndroidNativeWindow {
     struct CStruct : public WGPUSurfaceSourceAndroidNativeWindow {
     };
     SurfaceSourceAndroidNativeWindow(const WGPUSurfaceSourceAndroidNativeWindow& native);
-    SurfaceSourceAndroidNativeWindow() : SurfaceSourceAndroidNativeWindow(WGPU_SURFACE_SOURCE_ANDROID_NATIVE_WINDOW_INIT) {};
+    SurfaceSourceAndroidNativeWindow() {};
     CStruct to_cstruct() const;
     template <typename T>
     SurfaceSourceAndroidNativeWindow& setNext(T&& value) &;
@@ -3522,7 +3603,7 @@ struct SurfaceSourceMetalLayer {
     struct CStruct : public WGPUSurfaceSourceMetalLayer {
     };
     SurfaceSourceMetalLayer(const WGPUSurfaceSourceMetalLayer& native);
-    SurfaceSourceMetalLayer() : SurfaceSourceMetalLayer(WGPU_SURFACE_SOURCE_METAL_LAYER_INIT) {};
+    SurfaceSourceMetalLayer() {};
     CStruct to_cstruct() const;
     template <typename T>
     SurfaceSourceMetalLayer& setNext(T&& value) &;
@@ -3537,7 +3618,7 @@ struct SurfaceSourceWaylandSurface {
     struct CStruct : public WGPUSurfaceSourceWaylandSurface {
     };
     SurfaceSourceWaylandSurface(const WGPUSurfaceSourceWaylandSurface& native);
-    SurfaceSourceWaylandSurface() : SurfaceSourceWaylandSurface(WGPU_SURFACE_SOURCE_WAYLAND_SURFACE_INIT) {};
+    SurfaceSourceWaylandSurface() {};
     CStruct to_cstruct() const;
     template <typename T>
     SurfaceSourceWaylandSurface& setNext(T&& value) &;
@@ -3591,7 +3672,7 @@ struct SurfaceSourceXlibWindow {
     struct CStruct : public WGPUSurfaceSourceXlibWindow {
     };
     SurfaceSourceXlibWindow(const WGPUSurfaceSourceXlibWindow& native);
-    SurfaceSourceXlibWindow() : SurfaceSourceXlibWindow(WGPU_SURFACE_SOURCE_XLIB_WINDOW_INIT) {};
+    SurfaceSourceXlibWindow() {};
     CStruct to_cstruct() const;
     template <typename T>
     SurfaceSourceXlibWindow& setNext(T&& value) &;
@@ -3609,7 +3690,7 @@ struct SurfaceTexture {
     struct CStruct : public WGPUSurfaceTexture {
     };
     SurfaceTexture(const WGPUSurfaceTexture& native);
-    SurfaceTexture() : SurfaceTexture(WGPU_SURFACE_TEXTURE_INIT) {};
+    SurfaceTexture() {};
     CStruct to_cstruct() const;
     template <typename T>
     SurfaceTexture& setNextInChain(T&& value) &;
@@ -3619,7 +3700,7 @@ struct SurfaceTexture {
     SurfaceTexture&& setTexture(wgpu::Texture value) &&;
     SurfaceTexture& setStatus(wgpu::SurfaceGetCurrentTextureStatus value) &;
     SurfaceTexture&& setStatus(wgpu::SurfaceGetCurrentTextureStatus value) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStructOut> nextInChain;
     wgpu::Texture texture;
     wgpu::SurfaceGetCurrentTextureStatus status;
 };
@@ -3627,7 +3708,7 @@ struct TexelCopyBufferLayout {
     struct CStruct : public WGPUTexelCopyBufferLayout {
     };
     TexelCopyBufferLayout(const WGPUTexelCopyBufferLayout& native);
-    TexelCopyBufferLayout() : TexelCopyBufferLayout(WGPU_TEXEL_COPY_BUFFER_LAYOUT_INIT) {};
+    TexelCopyBufferLayout() {};
     CStruct to_cstruct() const;
     TexelCopyBufferLayout& setOffset(uint64_t value) &;
     TexelCopyBufferLayout&& setOffset(uint64_t value) &&;
@@ -3643,7 +3724,7 @@ struct TextureBindingLayout {
     struct CStruct : public WGPUTextureBindingLayout {
     };
     TextureBindingLayout(const WGPUTextureBindingLayout& native);
-    TextureBindingLayout() : TextureBindingLayout(WGPU_TEXTURE_BINDING_LAYOUT_INIT) {};
+    TextureBindingLayout() {};
     CStruct to_cstruct() const;
     template <typename T>
     TextureBindingLayout& setNextInChain(T&& value) &;
@@ -3655,35 +3736,16 @@ struct TextureBindingLayout {
     TextureBindingLayout&& setViewDimension(wgpu::TextureViewDimension value) &&;
     TextureBindingLayout& setMultisampled(wgpu::Bool value) &;
     TextureBindingLayout&& setMultisampled(wgpu::Bool value) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     wgpu::TextureSampleType sampleType;
     wgpu::TextureViewDimension viewDimension;
     wgpu::Bool multisampled;
-};
-struct TextureComponentSwizzle {
-    struct CStruct : public WGPUTextureComponentSwizzle {
-    };
-    TextureComponentSwizzle(const WGPUTextureComponentSwizzle& native);
-    TextureComponentSwizzle() : TextureComponentSwizzle(WGPU_TEXTURE_COMPONENT_SWIZZLE_INIT) {};
-    CStruct to_cstruct() const;
-    TextureComponentSwizzle& setR(wgpu::ComponentSwizzle value) &;
-    TextureComponentSwizzle&& setR(wgpu::ComponentSwizzle value) &&;
-    TextureComponentSwizzle& setG(wgpu::ComponentSwizzle value) &;
-    TextureComponentSwizzle&& setG(wgpu::ComponentSwizzle value) &&;
-    TextureComponentSwizzle& setB(wgpu::ComponentSwizzle value) &;
-    TextureComponentSwizzle&& setB(wgpu::ComponentSwizzle value) &&;
-    TextureComponentSwizzle& setA(wgpu::ComponentSwizzle value) &;
-    TextureComponentSwizzle&& setA(wgpu::ComponentSwizzle value) &&;
-    wgpu::ComponentSwizzle r;
-    wgpu::ComponentSwizzle g;
-    wgpu::ComponentSwizzle b;
-    wgpu::ComponentSwizzle a;
 };
 struct TextureViewDescriptor {
     struct CStruct : public WGPUTextureViewDescriptor {
     };
     TextureViewDescriptor(const WGPUTextureViewDescriptor& native);
-    TextureViewDescriptor() : TextureViewDescriptor(WGPU_TEXTURE_VIEW_DESCRIPTOR_INIT) {};
+    TextureViewDescriptor() {};
     CStruct to_cstruct() const;
     template <typename T>
     TextureViewDescriptor& setNextInChain(T&& value) &;
@@ -3709,7 +3771,7 @@ struct TextureViewDescriptor {
     TextureViewDescriptor&& setAspect(wgpu::TextureAspect value) &&;
     TextureViewDescriptor& setUsage(wgpu::TextureUsage value) &;
     TextureViewDescriptor&& setUsage(wgpu::TextureUsage value) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     wgpu::StringView label;
     wgpu::TextureFormat format;
     wgpu::TextureViewDimension dimension;
@@ -3724,58 +3786,49 @@ struct VertexAttribute {
     struct CStruct : public WGPUVertexAttribute {
     };
     VertexAttribute(const WGPUVertexAttribute& native);
-    VertexAttribute() : VertexAttribute(WGPU_VERTEX_ATTRIBUTE_INIT) {};
+    VertexAttribute() {};
     CStruct to_cstruct() const;
-    template <typename T>
-    VertexAttribute& setNextInChain(T&& value) &;
-    template <typename T>
-    VertexAttribute&& setNextInChain(T&& value) &&;
     VertexAttribute& setFormat(wgpu::VertexFormat value) &;
     VertexAttribute&& setFormat(wgpu::VertexFormat value) &&;
     VertexAttribute& setOffset(uint64_t value) &;
     VertexAttribute&& setOffset(uint64_t value) &&;
     VertexAttribute& setShaderLocation(uint32_t value) &;
     VertexAttribute&& setShaderLocation(uint32_t value) &&;
-    NextInChain nextInChain;
     wgpu::VertexFormat format;
     uint64_t offset;
     uint32_t shaderLocation;
 };
-struct BindGroupEntry {
-    struct CStruct : public WGPUBindGroupEntry {
+struct BindGroupDescriptor {
+    struct CStruct : public WGPUBindGroupDescriptor {
+        std::vector<WGPUBindGroupEntry> entries_vec;
     };
-    BindGroupEntry(const WGPUBindGroupEntry& native);
-    BindGroupEntry() : BindGroupEntry(WGPU_BIND_GROUP_ENTRY_INIT) {};
+    BindGroupDescriptor(const WGPUBindGroupDescriptor& native);
+    BindGroupDescriptor() {};
     CStruct to_cstruct() const;
     template <typename T>
-    BindGroupEntry& setNextInChain(T&& value) &;
+    BindGroupDescriptor& setNextInChain(T&& value) &;
     template <typename T>
-    BindGroupEntry&& setNextInChain(T&& value) &&;
-    BindGroupEntry& setBinding(uint32_t value) &;
-    BindGroupEntry&& setBinding(uint32_t value) &&;
-    BindGroupEntry& setBuffer(wgpu::Buffer value) &;
-    BindGroupEntry&& setBuffer(wgpu::Buffer value) &&;
-    BindGroupEntry& setOffset(uint64_t value) &;
-    BindGroupEntry&& setOffset(uint64_t value) &&;
-    BindGroupEntry& setSize(uint64_t value) &;
-    BindGroupEntry&& setSize(uint64_t value) &&;
-    BindGroupEntry& setSampler(wgpu::Sampler value) &;
-    BindGroupEntry&& setSampler(wgpu::Sampler value) &&;
-    BindGroupEntry& setTextureView(wgpu::TextureView value) &;
-    BindGroupEntry&& setTextureView(wgpu::TextureView value) &&;
-    NextInChain nextInChain;
-    uint32_t binding;
-    wgpu::Buffer buffer;
-    uint64_t offset;
-    uint64_t size;
-    wgpu::Sampler sampler;
-    wgpu::TextureView textureView;
+    BindGroupDescriptor&& setNextInChain(T&& value) &&;
+    BindGroupDescriptor& setLabel(const wgpu::StringView& value) &;
+    BindGroupDescriptor&& setLabel(const wgpu::StringView& value) &&;
+    BindGroupDescriptor& setLabel(wgpu::StringView&& value) &;
+    BindGroupDescriptor&& setLabel(wgpu::StringView&& value) &&;
+    BindGroupDescriptor& setLayout(wgpu::BindGroupLayout value) &;
+    BindGroupDescriptor&& setLayout(wgpu::BindGroupLayout value) &&;
+    template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::BindGroupEntry>
+    BindGroupDescriptor& setEntries(T&& values) &;
+    template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::BindGroupEntry>
+    BindGroupDescriptor&& setEntries(T&& values) &&;
+    NextInChain<WGPUChainedStruct const> nextInChain;
+    wgpu::StringView label;
+    wgpu::BindGroupLayout layout;
+    std::vector<wgpu::BindGroupEntry> entries;
 };
 struct BindGroupLayoutEntry {
     struct CStruct : public WGPUBindGroupLayoutEntry {
     };
     BindGroupLayoutEntry(const WGPUBindGroupLayoutEntry& native);
-    BindGroupLayoutEntry() : BindGroupLayoutEntry(WGPU_BIND_GROUP_LAYOUT_ENTRY_INIT) {};
+    BindGroupLayoutEntry() {};
     CStruct to_cstruct() const;
     template <typename T>
     BindGroupLayoutEntry& setNextInChain(T&& value) &;
@@ -3785,8 +3838,6 @@ struct BindGroupLayoutEntry {
     BindGroupLayoutEntry&& setBinding(uint32_t value) &&;
     BindGroupLayoutEntry& setVisibility(wgpu::ShaderStage value) &;
     BindGroupLayoutEntry&& setVisibility(wgpu::ShaderStage value) &&;
-    BindGroupLayoutEntry& setBindingArraySize(uint32_t value) &;
-    BindGroupLayoutEntry&& setBindingArraySize(uint32_t value) &&;
     BindGroupLayoutEntry& setBuffer(const wgpu::BufferBindingLayout& value) &;
     BindGroupLayoutEntry&& setBuffer(const wgpu::BufferBindingLayout& value) &&;
     BindGroupLayoutEntry& setBuffer(wgpu::BufferBindingLayout&& value) &;
@@ -3803,10 +3854,9 @@ struct BindGroupLayoutEntry {
     BindGroupLayoutEntry&& setStorageTexture(const wgpu::StorageTextureBindingLayout& value) &&;
     BindGroupLayoutEntry& setStorageTexture(wgpu::StorageTextureBindingLayout&& value) &;
     BindGroupLayoutEntry&& setStorageTexture(wgpu::StorageTextureBindingLayout&& value) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     uint32_t binding;
     wgpu::ShaderStage visibility;
-    uint32_t bindingArraySize;
     wgpu::BufferBindingLayout buffer;
     wgpu::SamplerBindingLayout sampler;
     wgpu::TextureBindingLayout texture;
@@ -3816,7 +3866,7 @@ struct BlendState {
     struct CStruct : public WGPUBlendState {
     };
     BlendState(const WGPUBlendState& native);
-    BlendState() : BlendState(WGPU_BLEND_STATE_INIT) {};
+    BlendState() {};
     CStruct to_cstruct() const;
     BlendState& setColor(const wgpu::BlendComponent& value) &;
     BlendState&& setColor(const wgpu::BlendComponent& value) &&;
@@ -3834,7 +3884,7 @@ struct CompilationInfo {
         std::vector<WGPUCompilationMessage> messages_vec;
     };
     CompilationInfo(const WGPUCompilationInfo& native);
-    CompilationInfo() : CompilationInfo(WGPU_COMPILATION_INFO_INIT) {};
+    CompilationInfo() {};
     CStruct to_cstruct() const;
     template <typename T>
     CompilationInfo& setNextInChain(T&& value) &;
@@ -3844,15 +3894,14 @@ struct CompilationInfo {
     CompilationInfo& setMessages(T&& values) &;
     template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::CompilationMessage>
     CompilationInfo&& setMessages(T&& values) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     std::vector<wgpu::CompilationMessage> messages;
 };
 struct ComputePassDescriptor {
     struct CStruct : public WGPUComputePassDescriptor {
-        wgpu::PassTimestampWrites::CStruct timestampWrites_cstruct;
     };
     ComputePassDescriptor(const WGPUComputePassDescriptor& native);
-    ComputePassDescriptor() : ComputePassDescriptor(WGPU_COMPUTE_PASS_DESCRIPTOR_INIT) {};
+    ComputePassDescriptor() {};
     CStruct to_cstruct() const;
     template <typename T>
     ComputePassDescriptor& setNextInChain(T&& value) &;
@@ -3862,45 +3911,19 @@ struct ComputePassDescriptor {
     ComputePassDescriptor&& setLabel(const wgpu::StringView& value) &&;
     ComputePassDescriptor& setLabel(wgpu::StringView&& value) &;
     ComputePassDescriptor&& setLabel(wgpu::StringView&& value) &&;
-    ComputePassDescriptor& setTimestampWrites(const wgpu::PassTimestampWrites& value) &;
-    ComputePassDescriptor&& setTimestampWrites(const wgpu::PassTimestampWrites& value) &&;
-    ComputePassDescriptor& setTimestampWrites(wgpu::PassTimestampWrites&& value) &;
-    ComputePassDescriptor&& setTimestampWrites(wgpu::PassTimestampWrites&& value) &&;
-    NextInChain nextInChain;
+    ComputePassDescriptor& setTimestampWrites(const wgpu::ComputePassTimestampWrites& value) &;
+    ComputePassDescriptor&& setTimestampWrites(const wgpu::ComputePassTimestampWrites& value) &&;
+    ComputePassDescriptor& setTimestampWrites(wgpu::ComputePassTimestampWrites&& value) &;
+    ComputePassDescriptor&& setTimestampWrites(wgpu::ComputePassTimestampWrites&& value) &&;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     wgpu::StringView label;
-    std::optional<wgpu::PassTimestampWrites> timestampWrites;
-};
-struct ComputeState {
-    struct CStruct : public WGPUComputeState {
-        std::vector<WGPUConstantEntry> constants_vec;
-    };
-    ComputeState(const WGPUComputeState& native);
-    ComputeState() : ComputeState(WGPU_COMPUTE_STATE_INIT) {};
-    CStruct to_cstruct() const;
-    template <typename T>
-    ComputeState& setNextInChain(T&& value) &;
-    template <typename T>
-    ComputeState&& setNextInChain(T&& value) &&;
-    ComputeState& setModule(wgpu::ShaderModule value) &;
-    ComputeState&& setModule(wgpu::ShaderModule value) &&;
-    ComputeState& setEntryPoint(const wgpu::StringView& value) &;
-    ComputeState&& setEntryPoint(const wgpu::StringView& value) &&;
-    ComputeState& setEntryPoint(wgpu::StringView&& value) &;
-    ComputeState&& setEntryPoint(wgpu::StringView&& value) &&;
-    template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::ConstantEntry>
-    ComputeState& setConstants(T&& values) &;
-    template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::ConstantEntry>
-    ComputeState&& setConstants(T&& values) &&;
-    NextInChain nextInChain;
-    wgpu::ShaderModule module;
-    wgpu::StringView entryPoint;
-    std::vector<wgpu::ConstantEntry> constants;
+    std::optional<wgpu::ComputePassTimestampWrites> timestampWrites;
 };
 struct DepthStencilState {
     struct CStruct : public WGPUDepthStencilState {
     };
     DepthStencilState(const WGPUDepthStencilState& native);
-    DepthStencilState() : DepthStencilState(WGPU_DEPTH_STENCIL_STATE_INIT) {};
+    DepthStencilState() {};
     CStruct to_cstruct() const;
     template <typename T>
     DepthStencilState& setNextInChain(T&& value) &;
@@ -3930,7 +3953,7 @@ struct DepthStencilState {
     DepthStencilState&& setDepthBiasSlopeScale(float value) &&;
     DepthStencilState& setDepthBiasClamp(float value) &;
     DepthStencilState&& setDepthBiasClamp(float value) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     wgpu::TextureFormat format;
     wgpu::OptionalBool depthWriteEnabled;
     wgpu::CompareFunction depthCompare;
@@ -3947,7 +3970,7 @@ struct DeviceDescriptor {
         wgpu::Limits::CStruct requiredLimits_cstruct;
     };
     DeviceDescriptor(const WGPUDeviceDescriptor& native);
-    DeviceDescriptor() : DeviceDescriptor(WGPU_DEVICE_DESCRIPTOR_INIT) {};
+    DeviceDescriptor() {};
     CStruct to_cstruct() const;
     template <typename T>
     DeviceDescriptor& setNextInChain(T&& value) &;
@@ -3977,7 +4000,7 @@ struct DeviceDescriptor {
     DeviceDescriptor&& setUncapturedErrorCallbackInfo(const wgpu::UncapturedErrorCallbackInfo& value) &&;
     DeviceDescriptor& setUncapturedErrorCallbackInfo(wgpu::UncapturedErrorCallbackInfo&& value) &;
     DeviceDescriptor&& setUncapturedErrorCallbackInfo(wgpu::UncapturedErrorCallbackInfo&& value) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     wgpu::StringView label;
     std::vector<wgpu::FeatureName> requiredFeatures;
     std::optional<wgpu::Limits> requiredLimits;
@@ -3989,7 +4012,7 @@ struct FutureWaitInfo {
     struct CStruct : public WGPUFutureWaitInfo {
     };
     FutureWaitInfo(const WGPUFutureWaitInfo& native);
-    FutureWaitInfo() : FutureWaitInfo(WGPU_FUTURE_WAIT_INFO_INIT) {};
+    FutureWaitInfo() {};
     CStruct to_cstruct() const;
     FutureWaitInfo& setFuture(const wgpu::Future& value) &;
     FutureWaitInfo&& setFuture(const wgpu::Future& value) &&;
@@ -4002,32 +4025,52 @@ struct FutureWaitInfo {
 };
 struct InstanceDescriptor {
     struct CStruct : public WGPUInstanceDescriptor {
-        wgpu::InstanceLimits::CStruct requiredLimits_cstruct;
     };
     InstanceDescriptor(const WGPUInstanceDescriptor& native);
-    InstanceDescriptor() : InstanceDescriptor(WGPU_INSTANCE_DESCRIPTOR_INIT) {};
+    InstanceDescriptor() {};
     CStruct to_cstruct() const;
     template <typename T>
     InstanceDescriptor& setNextInChain(T&& value) &;
     template <typename T>
     InstanceDescriptor&& setNextInChain(T&& value) &&;
-    template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::InstanceFeatureName>
-    InstanceDescriptor& setRequiredFeatures(T&& values) &;
-    template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::InstanceFeatureName>
-    InstanceDescriptor&& setRequiredFeatures(T&& values) &&;
-    InstanceDescriptor& setRequiredLimits(const wgpu::InstanceLimits& value) &;
-    InstanceDescriptor&& setRequiredLimits(const wgpu::InstanceLimits& value) &&;
-    InstanceDescriptor& setRequiredLimits(wgpu::InstanceLimits&& value) &;
-    InstanceDescriptor&& setRequiredLimits(wgpu::InstanceLimits&& value) &&;
-    NextInChain nextInChain;
-    std::vector<wgpu::InstanceFeatureName> requiredFeatures;
-    std::optional<wgpu::InstanceLimits> requiredLimits;
+    InstanceDescriptor& setFeatures(const wgpu::InstanceCapabilities& value) &;
+    InstanceDescriptor&& setFeatures(const wgpu::InstanceCapabilities& value) &&;
+    InstanceDescriptor& setFeatures(wgpu::InstanceCapabilities&& value) &;
+    InstanceDescriptor&& setFeatures(wgpu::InstanceCapabilities&& value) &&;
+    NextInChain<WGPUChainedStruct const> nextInChain;
+    wgpu::InstanceCapabilities features;
+};
+struct ProgrammableStageDescriptor {
+    struct CStruct : public WGPUProgrammableStageDescriptor {
+        std::vector<WGPUConstantEntry> constants_vec;
+    };
+    ProgrammableStageDescriptor(const WGPUProgrammableStageDescriptor& native);
+    ProgrammableStageDescriptor() {};
+    CStruct to_cstruct() const;
+    template <typename T>
+    ProgrammableStageDescriptor& setNextInChain(T&& value) &;
+    template <typename T>
+    ProgrammableStageDescriptor&& setNextInChain(T&& value) &&;
+    ProgrammableStageDescriptor& setModule(wgpu::ShaderModule value) &;
+    ProgrammableStageDescriptor&& setModule(wgpu::ShaderModule value) &&;
+    ProgrammableStageDescriptor& setEntryPoint(const wgpu::StringView& value) &;
+    ProgrammableStageDescriptor&& setEntryPoint(const wgpu::StringView& value) &&;
+    ProgrammableStageDescriptor& setEntryPoint(wgpu::StringView&& value) &;
+    ProgrammableStageDescriptor&& setEntryPoint(wgpu::StringView&& value) &&;
+    template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::ConstantEntry>
+    ProgrammableStageDescriptor& setConstants(T&& values) &;
+    template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::ConstantEntry>
+    ProgrammableStageDescriptor&& setConstants(T&& values) &&;
+    NextInChain<WGPUChainedStruct const> nextInChain;
+    wgpu::ShaderModule module;
+    wgpu::StringView entryPoint;
+    std::vector<wgpu::ConstantEntry> constants;
 };
 struct RenderPassColorAttachment {
     struct CStruct : public WGPURenderPassColorAttachment {
     };
     RenderPassColorAttachment(const WGPURenderPassColorAttachment& native);
-    RenderPassColorAttachment() : RenderPassColorAttachment(WGPU_RENDER_PASS_COLOR_ATTACHMENT_INIT) {};
+    RenderPassColorAttachment() {};
     CStruct to_cstruct() const;
     template <typename T>
     RenderPassColorAttachment& setNextInChain(T&& value) &;
@@ -4047,7 +4090,7 @@ struct RenderPassColorAttachment {
     RenderPassColorAttachment&& setClearValue(const wgpu::Color& value) &&;
     RenderPassColorAttachment& setClearValue(wgpu::Color&& value) &;
     RenderPassColorAttachment&& setClearValue(wgpu::Color&& value) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     wgpu::TextureView view;
     uint32_t depthSlice;
     wgpu::TextureView resolveTarget;
@@ -4055,72 +4098,11 @@ struct RenderPassColorAttachment {
     wgpu::StoreOp storeOp;
     wgpu::Color clearValue;
 };
-struct RequestAdapterOptions {
-    struct CStruct : public WGPURequestAdapterOptions {
-    };
-    RequestAdapterOptions(const WGPURequestAdapterOptions& native);
-    RequestAdapterOptions() : RequestAdapterOptions(WGPU_REQUEST_ADAPTER_OPTIONS_INIT) {};
-    CStruct to_cstruct() const;
-    template <typename T>
-    RequestAdapterOptions& setNextInChain(T&& value) &;
-    template <typename T>
-    RequestAdapterOptions&& setNextInChain(T&& value) &&;
-    RequestAdapterOptions& setFeatureLevel(wgpu::FeatureLevel value) &;
-    RequestAdapterOptions&& setFeatureLevel(wgpu::FeatureLevel value) &&;
-    RequestAdapterOptions& setPowerPreference(wgpu::PowerPreference value) &;
-    RequestAdapterOptions&& setPowerPreference(wgpu::PowerPreference value) &&;
-    RequestAdapterOptions& setForceFallbackAdapter(wgpu::Bool value) &;
-    RequestAdapterOptions&& setForceFallbackAdapter(wgpu::Bool value) &&;
-    RequestAdapterOptions& setBackendType(wgpu::BackendType value) &;
-    RequestAdapterOptions&& setBackendType(wgpu::BackendType value) &&;
-    RequestAdapterOptions& setCompatibleSurface(wgpu::Surface value) &;
-    RequestAdapterOptions&& setCompatibleSurface(wgpu::Surface value) &&;
-    NextInChain nextInChain;
-    wgpu::FeatureLevel featureLevel;
-    wgpu::PowerPreference powerPreference;
-    wgpu::Bool forceFallbackAdapter;
-    wgpu::BackendType backendType;
-    wgpu::Surface compatibleSurface;
-};
-struct ShaderModuleDescriptor {
-    struct CStruct : public WGPUShaderModuleDescriptor {
-    };
-    ShaderModuleDescriptor(const WGPUShaderModuleDescriptor& native);
-    ShaderModuleDescriptor() : ShaderModuleDescriptor(WGPU_SHADER_MODULE_DESCRIPTOR_INIT) {};
-    CStruct to_cstruct() const;
-    template <typename T>
-    ShaderModuleDescriptor& setNextInChain(T&& value) &;
-    template <typename T>
-    ShaderModuleDescriptor&& setNextInChain(T&& value) &&;
-    ShaderModuleDescriptor& setLabel(const wgpu::StringView& value) &;
-    ShaderModuleDescriptor&& setLabel(const wgpu::StringView& value) &&;
-    ShaderModuleDescriptor& setLabel(wgpu::StringView&& value) &;
-    ShaderModuleDescriptor&& setLabel(wgpu::StringView&& value) &&;
-    NextInChain nextInChain;
-    wgpu::StringView label;
-};
-struct SurfaceDescriptor {
-    struct CStruct : public WGPUSurfaceDescriptor {
-    };
-    SurfaceDescriptor(const WGPUSurfaceDescriptor& native);
-    SurfaceDescriptor() : SurfaceDescriptor(WGPU_SURFACE_DESCRIPTOR_INIT) {};
-    CStruct to_cstruct() const;
-    template <typename T>
-    SurfaceDescriptor& setNextInChain(T&& value) &;
-    template <typename T>
-    SurfaceDescriptor&& setNextInChain(T&& value) &&;
-    SurfaceDescriptor& setLabel(const wgpu::StringView& value) &;
-    SurfaceDescriptor&& setLabel(const wgpu::StringView& value) &&;
-    SurfaceDescriptor& setLabel(wgpu::StringView&& value) &;
-    SurfaceDescriptor&& setLabel(wgpu::StringView&& value) &&;
-    NextInChain nextInChain;
-    wgpu::StringView label;
-};
 struct TexelCopyBufferInfo {
     struct CStruct : public WGPUTexelCopyBufferInfo {
     };
     TexelCopyBufferInfo(const WGPUTexelCopyBufferInfo& native);
-    TexelCopyBufferInfo() : TexelCopyBufferInfo(WGPU_TEXEL_COPY_BUFFER_INFO_INIT) {};
+    TexelCopyBufferInfo() {};
     CStruct to_cstruct() const;
     TexelCopyBufferInfo& setLayout(const wgpu::TexelCopyBufferLayout& value) &;
     TexelCopyBufferInfo&& setLayout(const wgpu::TexelCopyBufferLayout& value) &&;
@@ -4135,7 +4117,7 @@ struct TexelCopyTextureInfo {
     struct CStruct : public WGPUTexelCopyTextureInfo {
     };
     TexelCopyTextureInfo(const WGPUTexelCopyTextureInfo& native);
-    TexelCopyTextureInfo() : TexelCopyTextureInfo(WGPU_TEXEL_COPY_TEXTURE_INFO_INIT) {};
+    TexelCopyTextureInfo() {};
     CStruct to_cstruct() const;
     TexelCopyTextureInfo& setTexture(wgpu::Texture value) &;
     TexelCopyTextureInfo&& setTexture(wgpu::Texture value) &&;
@@ -4152,28 +4134,11 @@ struct TexelCopyTextureInfo {
     wgpu::Origin3D origin;
     wgpu::TextureAspect aspect;
 };
-struct TextureComponentSwizzleDescriptor {
-    struct CStruct : public WGPUTextureComponentSwizzleDescriptor {
-    };
-    TextureComponentSwizzleDescriptor(const WGPUTextureComponentSwizzleDescriptor& native);
-    TextureComponentSwizzleDescriptor() : TextureComponentSwizzleDescriptor(WGPU_TEXTURE_COMPONENT_SWIZZLE_DESCRIPTOR_INIT) {};
-    CStruct to_cstruct() const;
-    template <typename T>
-    TextureComponentSwizzleDescriptor& setNext(T&& value) &;
-    template <typename T>
-    TextureComponentSwizzleDescriptor&& setNext(T&& value) &&;
-    TextureComponentSwizzleDescriptor& setSwizzle(const wgpu::TextureComponentSwizzle& value) &;
-    TextureComponentSwizzleDescriptor&& setSwizzle(const wgpu::TextureComponentSwizzle& value) &&;
-    TextureComponentSwizzleDescriptor& setSwizzle(wgpu::TextureComponentSwizzle&& value) &;
-    TextureComponentSwizzleDescriptor&& setSwizzle(wgpu::TextureComponentSwizzle&& value) &&;
-    wgpu::ChainedStruct chain;
-    wgpu::TextureComponentSwizzle swizzle;
-};
 struct TextureDescriptor {
     struct CStruct : public WGPUTextureDescriptor {
     };
     TextureDescriptor(const WGPUTextureDescriptor& native);
-    TextureDescriptor() : TextureDescriptor(WGPU_TEXTURE_DESCRIPTOR_INIT) {};
+    TextureDescriptor() {};
     CStruct to_cstruct() const;
     template <typename T>
     TextureDescriptor& setNextInChain(T&& value) &;
@@ -4201,7 +4166,7 @@ struct TextureDescriptor {
     TextureDescriptor& setViewFormats(T&& values) &;
     template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::TextureFormat>
     TextureDescriptor&& setViewFormats(T&& values) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     wgpu::StringView label;
     wgpu::TextureUsage usage;
     wgpu::TextureDimension dimension;
@@ -4213,15 +4178,10 @@ struct TextureDescriptor {
 };
 struct VertexBufferLayout {
     struct CStruct : public WGPUVertexBufferLayout {
-        std::vector<WGPUVertexAttribute> attributes_vec;
     };
     VertexBufferLayout(const WGPUVertexBufferLayout& native);
-    VertexBufferLayout() : VertexBufferLayout(WGPU_VERTEX_BUFFER_LAYOUT_INIT) {};
+    VertexBufferLayout() {};
     CStruct to_cstruct() const;
-    template <typename T>
-    VertexBufferLayout& setNextInChain(T&& value) &;
-    template <typename T>
-    VertexBufferLayout&& setNextInChain(T&& value) &&;
     VertexBufferLayout& setStepMode(wgpu::VertexStepMode value) &;
     VertexBufferLayout&& setStepMode(wgpu::VertexStepMode value) &&;
     VertexBufferLayout& setArrayStride(uint64_t value) &;
@@ -4230,43 +4190,16 @@ struct VertexBufferLayout {
     VertexBufferLayout& setAttributes(T&& values) &;
     template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::VertexAttribute>
     VertexBufferLayout&& setAttributes(T&& values) &&;
-    NextInChain nextInChain;
     wgpu::VertexStepMode stepMode;
     uint64_t arrayStride;
     std::vector<wgpu::VertexAttribute> attributes;
-};
-struct BindGroupDescriptor {
-    struct CStruct : public WGPUBindGroupDescriptor {
-        std::vector<WGPUBindGroupEntry> entries_vec;
-    };
-    BindGroupDescriptor(const WGPUBindGroupDescriptor& native);
-    BindGroupDescriptor() : BindGroupDescriptor(WGPU_BIND_GROUP_DESCRIPTOR_INIT) {};
-    CStruct to_cstruct() const;
-    template <typename T>
-    BindGroupDescriptor& setNextInChain(T&& value) &;
-    template <typename T>
-    BindGroupDescriptor&& setNextInChain(T&& value) &&;
-    BindGroupDescriptor& setLabel(const wgpu::StringView& value) &;
-    BindGroupDescriptor&& setLabel(const wgpu::StringView& value) &&;
-    BindGroupDescriptor& setLabel(wgpu::StringView&& value) &;
-    BindGroupDescriptor&& setLabel(wgpu::StringView&& value) &&;
-    BindGroupDescriptor& setLayout(wgpu::BindGroupLayout value) &;
-    BindGroupDescriptor&& setLayout(wgpu::BindGroupLayout value) &&;
-    template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::BindGroupEntry>
-    BindGroupDescriptor& setEntries(T&& values) &;
-    template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::BindGroupEntry>
-    BindGroupDescriptor&& setEntries(T&& values) &&;
-    NextInChain nextInChain;
-    wgpu::StringView label;
-    wgpu::BindGroupLayout layout;
-    std::vector<wgpu::BindGroupEntry> entries;
 };
 struct BindGroupLayoutDescriptor {
     struct CStruct : public WGPUBindGroupLayoutDescriptor {
         std::vector<WGPUBindGroupLayoutEntry> entries_vec;
     };
     BindGroupLayoutDescriptor(const WGPUBindGroupLayoutDescriptor& native);
-    BindGroupLayoutDescriptor() : BindGroupLayoutDescriptor(WGPU_BIND_GROUP_LAYOUT_DESCRIPTOR_INIT) {};
+    BindGroupLayoutDescriptor() {};
     CStruct to_cstruct() const;
     template <typename T>
     BindGroupLayoutDescriptor& setNextInChain(T&& value) &;
@@ -4280,7 +4213,7 @@ struct BindGroupLayoutDescriptor {
     BindGroupLayoutDescriptor& setEntries(T&& values) &;
     template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::BindGroupLayoutEntry>
     BindGroupLayoutDescriptor&& setEntries(T&& values) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     wgpu::StringView label;
     std::vector<wgpu::BindGroupLayoutEntry> entries;
 };
@@ -4288,7 +4221,7 @@ struct ColorTargetState {
     struct CStruct : public WGPUColorTargetState {
     };
     ColorTargetState(const WGPUColorTargetState& native);
-    ColorTargetState() : ColorTargetState(WGPU_COLOR_TARGET_STATE_INIT) {};
+    ColorTargetState() {};
     CStruct to_cstruct() const;
     template <typename T>
     ColorTargetState& setNextInChain(T&& value) &;
@@ -4302,17 +4235,17 @@ struct ColorTargetState {
     ColorTargetState&& setBlend(wgpu::BlendState&& value) &&;
     ColorTargetState& setWriteMask(wgpu::ColorWriteMask value) &;
     ColorTargetState&& setWriteMask(wgpu::ColorWriteMask value) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     wgpu::TextureFormat format;
     std::optional<wgpu::BlendState> blend;
     wgpu::ColorWriteMask writeMask;
 };
 struct ComputePipelineDescriptor {
     struct CStruct : public WGPUComputePipelineDescriptor {
-        wgpu::ComputeState::CStruct compute_cstruct;
+        wgpu::ProgrammableStageDescriptor::CStruct compute_cstruct;
     };
     ComputePipelineDescriptor(const WGPUComputePipelineDescriptor& native);
-    ComputePipelineDescriptor() : ComputePipelineDescriptor(WGPU_COMPUTE_PIPELINE_DESCRIPTOR_INIT) {};
+    ComputePipelineDescriptor() {};
     CStruct to_cstruct() const;
     template <typename T>
     ComputePipelineDescriptor& setNextInChain(T&& value) &;
@@ -4324,23 +4257,21 @@ struct ComputePipelineDescriptor {
     ComputePipelineDescriptor&& setLabel(wgpu::StringView&& value) &&;
     ComputePipelineDescriptor& setLayout(wgpu::PipelineLayout value) &;
     ComputePipelineDescriptor&& setLayout(wgpu::PipelineLayout value) &&;
-    ComputePipelineDescriptor& setCompute(const wgpu::ComputeState& value) &;
-    ComputePipelineDescriptor&& setCompute(const wgpu::ComputeState& value) &&;
-    ComputePipelineDescriptor& setCompute(wgpu::ComputeState&& value) &;
-    ComputePipelineDescriptor&& setCompute(wgpu::ComputeState&& value) &&;
-    NextInChain nextInChain;
+    ComputePipelineDescriptor& setCompute(const wgpu::ProgrammableStageDescriptor& value) &;
+    ComputePipelineDescriptor&& setCompute(const wgpu::ProgrammableStageDescriptor& value) &&;
+    ComputePipelineDescriptor& setCompute(wgpu::ProgrammableStageDescriptor&& value) &;
+    ComputePipelineDescriptor&& setCompute(wgpu::ProgrammableStageDescriptor&& value) &&;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     wgpu::StringView label;
     wgpu::PipelineLayout layout;
-    wgpu::ComputeState compute;
+    wgpu::ProgrammableStageDescriptor compute;
 };
 struct RenderPassDescriptor {
     struct CStruct : public WGPURenderPassDescriptor {
         std::vector<WGPURenderPassColorAttachment> colorAttachments_vec;
-        wgpu::RenderPassDepthStencilAttachment::CStruct depthStencilAttachment_cstruct;
-        wgpu::PassTimestampWrites::CStruct timestampWrites_cstruct;
     };
     RenderPassDescriptor(const WGPURenderPassDescriptor& native);
-    RenderPassDescriptor() : RenderPassDescriptor(WGPU_RENDER_PASS_DESCRIPTOR_INIT) {};
+    RenderPassDescriptor() {};
     CStruct to_cstruct() const;
     template <typename T>
     RenderPassDescriptor& setNextInChain(T&& value) &;
@@ -4360,25 +4291,24 @@ struct RenderPassDescriptor {
     RenderPassDescriptor&& setDepthStencilAttachment(wgpu::RenderPassDepthStencilAttachment&& value) &&;
     RenderPassDescriptor& setOcclusionQuerySet(wgpu::QuerySet value) &;
     RenderPassDescriptor&& setOcclusionQuerySet(wgpu::QuerySet value) &&;
-    RenderPassDescriptor& setTimestampWrites(const wgpu::PassTimestampWrites& value) &;
-    RenderPassDescriptor&& setTimestampWrites(const wgpu::PassTimestampWrites& value) &&;
-    RenderPassDescriptor& setTimestampWrites(wgpu::PassTimestampWrites&& value) &;
-    RenderPassDescriptor&& setTimestampWrites(wgpu::PassTimestampWrites&& value) &&;
-    NextInChain nextInChain;
+    RenderPassDescriptor& setTimestampWrites(const wgpu::RenderPassTimestampWrites& value) &;
+    RenderPassDescriptor&& setTimestampWrites(const wgpu::RenderPassTimestampWrites& value) &&;
+    RenderPassDescriptor& setTimestampWrites(wgpu::RenderPassTimestampWrites&& value) &;
+    RenderPassDescriptor&& setTimestampWrites(wgpu::RenderPassTimestampWrites&& value) &&;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     wgpu::StringView label;
     std::vector<wgpu::RenderPassColorAttachment> colorAttachments;
     std::optional<wgpu::RenderPassDepthStencilAttachment> depthStencilAttachment;
     wgpu::QuerySet occlusionQuerySet;
-    std::optional<wgpu::PassTimestampWrites> timestampWrites;
+    std::optional<wgpu::RenderPassTimestampWrites> timestampWrites;
 };
 struct VertexState {
     struct CStruct : public WGPUVertexState {
         std::vector<WGPUConstantEntry> constants_vec;
-        std::vector<wgpu::VertexBufferLayout::CStruct> buffers_cstruct_vec;
         std::vector<WGPUVertexBufferLayout> buffers_vec;
     };
     VertexState(const WGPUVertexState& native);
-    VertexState() : VertexState(WGPU_VERTEX_STATE_INIT) {};
+    VertexState() {};
     CStruct to_cstruct() const;
     template <typename T>
     VertexState& setNextInChain(T&& value) &;
@@ -4398,7 +4328,7 @@ struct VertexState {
     VertexState& setBuffers(T&& values) &;
     template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::VertexBufferLayout>
     VertexState&& setBuffers(T&& values) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     wgpu::ShaderModule module;
     wgpu::StringView entryPoint;
     std::vector<wgpu::ConstantEntry> constants;
@@ -4410,7 +4340,7 @@ struct FragmentState {
         std::vector<WGPUColorTargetState> targets_vec;
     };
     FragmentState(const WGPUFragmentState& native);
-    FragmentState() : FragmentState(WGPU_FRAGMENT_STATE_INIT) {};
+    FragmentState() {};
     CStruct to_cstruct() const;
     template <typename T>
     FragmentState& setNextInChain(T&& value) &;
@@ -4430,7 +4360,7 @@ struct FragmentState {
     FragmentState& setTargets(T&& values) &;
     template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::ColorTargetState>
     FragmentState&& setTargets(T&& values) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     wgpu::ShaderModule module;
     wgpu::StringView entryPoint;
     std::vector<wgpu::ConstantEntry> constants;
@@ -4443,7 +4373,7 @@ struct RenderPipelineDescriptor {
         wgpu::FragmentState::CStruct fragment_cstruct;
     };
     RenderPipelineDescriptor(const WGPURenderPipelineDescriptor& native);
-    RenderPipelineDescriptor() : RenderPipelineDescriptor(WGPU_RENDER_PIPELINE_DESCRIPTOR_INIT) {};
+    RenderPipelineDescriptor() {};
     CStruct to_cstruct() const;
     template <typename T>
     RenderPipelineDescriptor& setNextInChain(T&& value) &;
@@ -4475,7 +4405,7 @@ struct RenderPipelineDescriptor {
     RenderPipelineDescriptor&& setFragment(const wgpu::FragmentState& value) &&;
     RenderPipelineDescriptor& setFragment(wgpu::FragmentState&& value) &;
     RenderPipelineDescriptor&& setFragment(wgpu::FragmentState&& value) &&;
-    NextInChain nextInChain;
+    NextInChain<WGPUChainedStruct const> nextInChain;
     wgpu::StringView label;
     wgpu::PipelineLayout layout;
     wgpu::VertexState vertex;
@@ -4484,14 +4414,391 @@ struct RenderPipelineDescriptor {
     wgpu::MultisampleState multisample;
     std::optional<wgpu::FragmentState> fragment;
 };
+struct InstanceExtras {
+    struct CStruct : public WGPUInstanceExtras {
+    };
+    InstanceExtras(const WGPUInstanceExtras& native);
+    InstanceExtras() {};
+    CStruct to_cstruct() const;
+    template <typename T>
+    InstanceExtras& setNext(T&& value) &;
+    template <typename T>
+    InstanceExtras&& setNext(T&& value) &&;
+    InstanceExtras& setBackends(wgpu::InstanceBackend value) &;
+    InstanceExtras&& setBackends(wgpu::InstanceBackend value) &&;
+    InstanceExtras& setFlags(wgpu::InstanceFlag value) &;
+    InstanceExtras&& setFlags(wgpu::InstanceFlag value) &&;
+    InstanceExtras& setDx12ShaderCompiler(wgpu::Dx12Compiler value) &;
+    InstanceExtras&& setDx12ShaderCompiler(wgpu::Dx12Compiler value) &&;
+    InstanceExtras& setGles3MinorVersion(wgpu::Gles3MinorVersion value) &;
+    InstanceExtras&& setGles3MinorVersion(wgpu::Gles3MinorVersion value) &&;
+    InstanceExtras& setDxilPath(const wgpu::StringView& value) &;
+    InstanceExtras&& setDxilPath(const wgpu::StringView& value) &&;
+    InstanceExtras& setDxilPath(wgpu::StringView&& value) &;
+    InstanceExtras&& setDxilPath(wgpu::StringView&& value) &&;
+    InstanceExtras& setDxcPath(const wgpu::StringView& value) &;
+    InstanceExtras&& setDxcPath(const wgpu::StringView& value) &&;
+    InstanceExtras& setDxcPath(wgpu::StringView&& value) &;
+    InstanceExtras&& setDxcPath(wgpu::StringView&& value) &&;
+    wgpu::ChainedStruct chain;
+    wgpu::InstanceBackend backends;
+    wgpu::InstanceFlag flags;
+    wgpu::Dx12Compiler dx12ShaderCompiler;
+    wgpu::Gles3MinorVersion gles3MinorVersion;
+    wgpu::StringView dxilPath;
+    wgpu::StringView dxcPath;
+};
+struct DeviceExtras {
+    struct CStruct : public WGPUDeviceExtras {
+    };
+    DeviceExtras(const WGPUDeviceExtras& native);
+    DeviceExtras() {};
+    CStruct to_cstruct() const;
+    template <typename T>
+    DeviceExtras& setNext(T&& value) &;
+    template <typename T>
+    DeviceExtras&& setNext(T&& value) &&;
+    DeviceExtras& setTracePath(const wgpu::StringView& value) &;
+    DeviceExtras&& setTracePath(const wgpu::StringView& value) &&;
+    DeviceExtras& setTracePath(wgpu::StringView&& value) &;
+    DeviceExtras&& setTracePath(wgpu::StringView&& value) &&;
+    wgpu::ChainedStruct chain;
+    wgpu::StringView tracePath;
+};
+struct NativeLimits {
+    struct CStruct : public WGPUNativeLimits {
+    };
+    NativeLimits(const WGPUNativeLimits& native);
+    NativeLimits() {};
+    CStruct to_cstruct() const;
+    NativeLimits& setChain(const wgpu::ChainedStructOut& value) &;
+    NativeLimits&& setChain(const wgpu::ChainedStructOut& value) &&;
+    NativeLimits& setChain(wgpu::ChainedStructOut&& value) &;
+    NativeLimits&& setChain(wgpu::ChainedStructOut&& value) &&;
+    NativeLimits& setMaxPushConstantSize(uint32_t value) &;
+    NativeLimits&& setMaxPushConstantSize(uint32_t value) &&;
+    NativeLimits& setMaxNonSamplerBindings(uint32_t value) &;
+    NativeLimits&& setMaxNonSamplerBindings(uint32_t value) &&;
+    wgpu::ChainedStructOut chain;
+    uint32_t maxPushConstantSize;
+    uint32_t maxNonSamplerBindings;
+};
+struct PushConstantRange {
+    struct CStruct : public WGPUPushConstantRange {
+    };
+    PushConstantRange(const WGPUPushConstantRange& native);
+    PushConstantRange() {};
+    CStruct to_cstruct() const;
+    PushConstantRange& setStages(wgpu::ShaderStage value) &;
+    PushConstantRange&& setStages(wgpu::ShaderStage value) &&;
+    PushConstantRange& setStart(uint32_t value) &;
+    PushConstantRange&& setStart(uint32_t value) &&;
+    PushConstantRange& setEnd(uint32_t value) &;
+    PushConstantRange&& setEnd(uint32_t value) &&;
+    wgpu::ShaderStage stages;
+    uint32_t start;
+    uint32_t end;
+};
+struct PipelineLayoutExtras {
+    struct CStruct : public WGPUPipelineLayoutExtras {
+    };
+    PipelineLayoutExtras(const WGPUPipelineLayoutExtras& native);
+    PipelineLayoutExtras() {};
+    CStruct to_cstruct() const;
+    template <typename T>
+    PipelineLayoutExtras& setNext(T&& value) &;
+    template <typename T>
+    PipelineLayoutExtras&& setNext(T&& value) &&;
+    template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::PushConstantRange>
+    PipelineLayoutExtras& setPushConstantRanges(T&& values) &;
+    template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::PushConstantRange>
+    PipelineLayoutExtras&& setPushConstantRanges(T&& values) &&;
+    wgpu::ChainedStruct chain;
+    std::vector<wgpu::PushConstantRange> pushConstantRanges;
+};
+struct ShaderDefine {
+    struct CStruct : public WGPUShaderDefine {
+    };
+    ShaderDefine(const WGPUShaderDefine& native);
+    ShaderDefine() {};
+    CStruct to_cstruct() const;
+    ShaderDefine& setName(const wgpu::StringView& value) &;
+    ShaderDefine&& setName(const wgpu::StringView& value) &&;
+    ShaderDefine& setName(wgpu::StringView&& value) &;
+    ShaderDefine&& setName(wgpu::StringView&& value) &&;
+    ShaderDefine& setValue(const wgpu::StringView& value) &;
+    ShaderDefine&& setValue(const wgpu::StringView& value) &&;
+    ShaderDefine& setValue(wgpu::StringView&& value) &;
+    ShaderDefine&& setValue(wgpu::StringView&& value) &&;
+    wgpu::StringView name;
+    wgpu::StringView value;
+};
+struct ShaderModuleGLSLDescriptor {
+    struct CStruct : public WGPUShaderModuleGLSLDescriptor {
+    };
+    ShaderModuleGLSLDescriptor(const WGPUShaderModuleGLSLDescriptor& native);
+    ShaderModuleGLSLDescriptor() {};
+    CStruct to_cstruct() const;
+    template <typename T>
+    ShaderModuleGLSLDescriptor& setNext(T&& value) &;
+    template <typename T>
+    ShaderModuleGLSLDescriptor&& setNext(T&& value) &&;
+    ShaderModuleGLSLDescriptor& setStage(wgpu::ShaderStage value) &;
+    ShaderModuleGLSLDescriptor&& setStage(wgpu::ShaderStage value) &&;
+    ShaderModuleGLSLDescriptor& setCode(const wgpu::StringView& value) &;
+    ShaderModuleGLSLDescriptor&& setCode(const wgpu::StringView& value) &&;
+    ShaderModuleGLSLDescriptor& setCode(wgpu::StringView&& value) &;
+    ShaderModuleGLSLDescriptor&& setCode(wgpu::StringView&& value) &&;
+    template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::ShaderDefine>
+    ShaderModuleGLSLDescriptor& setDefines(T&& values) &;
+    template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::ShaderDefine>
+    ShaderModuleGLSLDescriptor&& setDefines(T&& values) &&;
+    wgpu::ChainedStruct chain;
+    wgpu::ShaderStage stage;
+    wgpu::StringView code;
+    mutable std::vector<wgpu::ShaderDefine> defines;
+};
+struct ShaderModuleDescriptorSpirV {
+    struct CStruct : public WGPUShaderModuleDescriptorSpirV {
+    };
+    ShaderModuleDescriptorSpirV(const WGPUShaderModuleDescriptorSpirV& native);
+    ShaderModuleDescriptorSpirV() {};
+    CStruct to_cstruct() const;
+    ShaderModuleDescriptorSpirV& setLabel(const wgpu::StringView& value) &;
+    ShaderModuleDescriptorSpirV&& setLabel(const wgpu::StringView& value) &&;
+    ShaderModuleDescriptorSpirV& setLabel(wgpu::StringView&& value) &;
+    ShaderModuleDescriptorSpirV&& setLabel(wgpu::StringView&& value) &&;
+    ShaderModuleDescriptorSpirV& setSourceSize(uint32_t value) &;
+    ShaderModuleDescriptorSpirV&& setSourceSize(uint32_t value) &&;
+    ShaderModuleDescriptorSpirV& setSource(uint32_t const* value) &;
+    ShaderModuleDescriptorSpirV&& setSource(uint32_t const* value) &&;
+    wgpu::StringView label;
+    uint32_t sourceSize;
+    uint32_t const* source;
+};
+struct RegistryReport {
+    struct CStruct : public WGPURegistryReport {
+    };
+    RegistryReport(const WGPURegistryReport& native);
+    RegistryReport() {};
+    CStruct to_cstruct() const;
+    RegistryReport& setNumAllocated(size_t value) &;
+    RegistryReport&& setNumAllocated(size_t value) &&;
+    RegistryReport& setNumKeptFromUser(size_t value) &;
+    RegistryReport&& setNumKeptFromUser(size_t value) &&;
+    RegistryReport& setNumReleasedFromUser(size_t value) &;
+    RegistryReport&& setNumReleasedFromUser(size_t value) &&;
+    RegistryReport& setElementSize(size_t value) &;
+    RegistryReport&& setElementSize(size_t value) &&;
+    size_t numAllocated;
+    size_t numKeptFromUser;
+    size_t numReleasedFromUser;
+    size_t elementSize;
+};
+struct HubReport {
+    struct CStruct : public WGPUHubReport {
+    };
+    HubReport(const WGPUHubReport& native);
+    HubReport() {};
+    CStruct to_cstruct() const;
+    HubReport& setAdapters(const wgpu::RegistryReport& value) &;
+    HubReport&& setAdapters(const wgpu::RegistryReport& value) &&;
+    HubReport& setAdapters(wgpu::RegistryReport&& value) &;
+    HubReport&& setAdapters(wgpu::RegistryReport&& value) &&;
+    HubReport& setDevices(const wgpu::RegistryReport& value) &;
+    HubReport&& setDevices(const wgpu::RegistryReport& value) &&;
+    HubReport& setDevices(wgpu::RegistryReport&& value) &;
+    HubReport&& setDevices(wgpu::RegistryReport&& value) &&;
+    HubReport& setQueues(const wgpu::RegistryReport& value) &;
+    HubReport&& setQueues(const wgpu::RegistryReport& value) &&;
+    HubReport& setQueues(wgpu::RegistryReport&& value) &;
+    HubReport&& setQueues(wgpu::RegistryReport&& value) &&;
+    HubReport& setPipelineLayouts(const wgpu::RegistryReport& value) &;
+    HubReport&& setPipelineLayouts(const wgpu::RegistryReport& value) &&;
+    HubReport& setPipelineLayouts(wgpu::RegistryReport&& value) &;
+    HubReport&& setPipelineLayouts(wgpu::RegistryReport&& value) &&;
+    HubReport& setShaderModules(const wgpu::RegistryReport& value) &;
+    HubReport&& setShaderModules(const wgpu::RegistryReport& value) &&;
+    HubReport& setShaderModules(wgpu::RegistryReport&& value) &;
+    HubReport&& setShaderModules(wgpu::RegistryReport&& value) &&;
+    HubReport& setBindGroupLayouts(const wgpu::RegistryReport& value) &;
+    HubReport&& setBindGroupLayouts(const wgpu::RegistryReport& value) &&;
+    HubReport& setBindGroupLayouts(wgpu::RegistryReport&& value) &;
+    HubReport&& setBindGroupLayouts(wgpu::RegistryReport&& value) &&;
+    HubReport& setBindGroups(const wgpu::RegistryReport& value) &;
+    HubReport&& setBindGroups(const wgpu::RegistryReport& value) &&;
+    HubReport& setBindGroups(wgpu::RegistryReport&& value) &;
+    HubReport&& setBindGroups(wgpu::RegistryReport&& value) &&;
+    HubReport& setCommandBuffers(const wgpu::RegistryReport& value) &;
+    HubReport&& setCommandBuffers(const wgpu::RegistryReport& value) &&;
+    HubReport& setCommandBuffers(wgpu::RegistryReport&& value) &;
+    HubReport&& setCommandBuffers(wgpu::RegistryReport&& value) &&;
+    HubReport& setRenderBundles(const wgpu::RegistryReport& value) &;
+    HubReport&& setRenderBundles(const wgpu::RegistryReport& value) &&;
+    HubReport& setRenderBundles(wgpu::RegistryReport&& value) &;
+    HubReport&& setRenderBundles(wgpu::RegistryReport&& value) &&;
+    HubReport& setRenderPipelines(const wgpu::RegistryReport& value) &;
+    HubReport&& setRenderPipelines(const wgpu::RegistryReport& value) &&;
+    HubReport& setRenderPipelines(wgpu::RegistryReport&& value) &;
+    HubReport&& setRenderPipelines(wgpu::RegistryReport&& value) &&;
+    HubReport& setComputePipelines(const wgpu::RegistryReport& value) &;
+    HubReport&& setComputePipelines(const wgpu::RegistryReport& value) &&;
+    HubReport& setComputePipelines(wgpu::RegistryReport&& value) &;
+    HubReport&& setComputePipelines(wgpu::RegistryReport&& value) &&;
+    HubReport& setPipelineCaches(const wgpu::RegistryReport& value) &;
+    HubReport&& setPipelineCaches(const wgpu::RegistryReport& value) &&;
+    HubReport& setPipelineCaches(wgpu::RegistryReport&& value) &;
+    HubReport&& setPipelineCaches(wgpu::RegistryReport&& value) &&;
+    HubReport& setQuerySets(const wgpu::RegistryReport& value) &;
+    HubReport&& setQuerySets(const wgpu::RegistryReport& value) &&;
+    HubReport& setQuerySets(wgpu::RegistryReport&& value) &;
+    HubReport&& setQuerySets(wgpu::RegistryReport&& value) &&;
+    HubReport& setBuffers(const wgpu::RegistryReport& value) &;
+    HubReport&& setBuffers(const wgpu::RegistryReport& value) &&;
+    HubReport& setBuffers(wgpu::RegistryReport&& value) &;
+    HubReport&& setBuffers(wgpu::RegistryReport&& value) &&;
+    HubReport& setTextures(const wgpu::RegistryReport& value) &;
+    HubReport&& setTextures(const wgpu::RegistryReport& value) &&;
+    HubReport& setTextures(wgpu::RegistryReport&& value) &;
+    HubReport&& setTextures(wgpu::RegistryReport&& value) &&;
+    HubReport& setTextureViews(const wgpu::RegistryReport& value) &;
+    HubReport&& setTextureViews(const wgpu::RegistryReport& value) &&;
+    HubReport& setTextureViews(wgpu::RegistryReport&& value) &;
+    HubReport&& setTextureViews(wgpu::RegistryReport&& value) &&;
+    HubReport& setSamplers(const wgpu::RegistryReport& value) &;
+    HubReport&& setSamplers(const wgpu::RegistryReport& value) &&;
+    HubReport& setSamplers(wgpu::RegistryReport&& value) &;
+    HubReport&& setSamplers(wgpu::RegistryReport&& value) &&;
+    wgpu::RegistryReport adapters;
+    wgpu::RegistryReport devices;
+    wgpu::RegistryReport queues;
+    wgpu::RegistryReport pipelineLayouts;
+    wgpu::RegistryReport shaderModules;
+    wgpu::RegistryReport bindGroupLayouts;
+    wgpu::RegistryReport bindGroups;
+    wgpu::RegistryReport commandBuffers;
+    wgpu::RegistryReport renderBundles;
+    wgpu::RegistryReport renderPipelines;
+    wgpu::RegistryReport computePipelines;
+    wgpu::RegistryReport pipelineCaches;
+    wgpu::RegistryReport querySets;
+    wgpu::RegistryReport buffers;
+    wgpu::RegistryReport textures;
+    wgpu::RegistryReport textureViews;
+    wgpu::RegistryReport samplers;
+};
+struct GlobalReport {
+    struct CStruct : public WGPUGlobalReport {
+    };
+    GlobalReport(const WGPUGlobalReport& native);
+    GlobalReport() {};
+    CStruct to_cstruct() const;
+    GlobalReport& setSurfaces(const wgpu::RegistryReport& value) &;
+    GlobalReport&& setSurfaces(const wgpu::RegistryReport& value) &&;
+    GlobalReport& setSurfaces(wgpu::RegistryReport&& value) &;
+    GlobalReport&& setSurfaces(wgpu::RegistryReport&& value) &&;
+    GlobalReport& setHub(const wgpu::HubReport& value) &;
+    GlobalReport&& setHub(const wgpu::HubReport& value) &&;
+    GlobalReport& setHub(wgpu::HubReport&& value) &;
+    GlobalReport&& setHub(wgpu::HubReport&& value) &&;
+    wgpu::RegistryReport surfaces;
+    wgpu::HubReport hub;
+};
+struct InstanceEnumerateAdapterOptions {
+    struct CStruct : public WGPUInstanceEnumerateAdapterOptions {
+    };
+    InstanceEnumerateAdapterOptions(const WGPUInstanceEnumerateAdapterOptions& native);
+    InstanceEnumerateAdapterOptions() {};
+    CStruct to_cstruct() const;
+    template <typename T>
+    InstanceEnumerateAdapterOptions& setNextInChain(T&& value) &;
+    template <typename T>
+    InstanceEnumerateAdapterOptions&& setNextInChain(T&& value) &&;
+    InstanceEnumerateAdapterOptions& setBackends(wgpu::InstanceBackend value) &;
+    InstanceEnumerateAdapterOptions&& setBackends(wgpu::InstanceBackend value) &&;
+    NextInChain<WGPUChainedStruct const> nextInChain;
+    wgpu::InstanceBackend backends;
+};
+struct BindGroupEntryExtras {
+    struct CStruct : public WGPUBindGroupEntryExtras {
+    };
+    BindGroupEntryExtras(const WGPUBindGroupEntryExtras& native);
+    BindGroupEntryExtras() {};
+    CStruct to_cstruct() const;
+    template <typename T>
+    BindGroupEntryExtras& setNext(T&& value) &;
+    template <typename T>
+    BindGroupEntryExtras&& setNext(T&& value) &&;
+    template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::Buffer>
+    BindGroupEntryExtras& setBuffers(T&& values) &;
+    template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::Buffer>
+    BindGroupEntryExtras&& setBuffers(T&& values) &&;
+    template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::Sampler>
+    BindGroupEntryExtras& setSamplers(T&& values) &;
+    template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::Sampler>
+    BindGroupEntryExtras&& setSamplers(T&& values) &&;
+    template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::TextureView>
+    BindGroupEntryExtras& setTextureViews(T&& values) &;
+    template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::TextureView>
+    BindGroupEntryExtras&& setTextureViews(T&& values) &&;
+    wgpu::ChainedStruct chain;
+    std::vector<wgpu::Buffer> buffers;
+    std::vector<wgpu::Sampler> samplers;
+    std::vector<wgpu::TextureView> textureViews;
+};
+struct BindGroupLayoutEntryExtras {
+    struct CStruct : public WGPUBindGroupLayoutEntryExtras {
+    };
+    BindGroupLayoutEntryExtras(const WGPUBindGroupLayoutEntryExtras& native);
+    BindGroupLayoutEntryExtras() {};
+    CStruct to_cstruct() const;
+    template <typename T>
+    BindGroupLayoutEntryExtras& setNext(T&& value) &;
+    template <typename T>
+    BindGroupLayoutEntryExtras&& setNext(T&& value) &&;
+    BindGroupLayoutEntryExtras& setCount(uint32_t value) &;
+    BindGroupLayoutEntryExtras&& setCount(uint32_t value) &&;
+    wgpu::ChainedStruct chain;
+    uint32_t count;
+};
+struct QuerySetDescriptorExtras {
+    struct CStruct : public WGPUQuerySetDescriptorExtras {
+    };
+    QuerySetDescriptorExtras(const WGPUQuerySetDescriptorExtras& native);
+    QuerySetDescriptorExtras() {};
+    CStruct to_cstruct() const;
+    template <typename T>
+    QuerySetDescriptorExtras& setNext(T&& value) &;
+    template <typename T>
+    QuerySetDescriptorExtras&& setNext(T&& value) &&;
+    template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::PipelineStatisticName>
+    QuerySetDescriptorExtras& setPipelineStatistics(T&& values) &;
+    template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::PipelineStatisticName>
+    QuerySetDescriptorExtras&& setPipelineStatistics(T&& values) &&;
+    wgpu::ChainedStruct chain;
+    std::vector<wgpu::PipelineStatisticName> pipelineStatistics;
+};
+struct SurfaceConfigurationExtras {
+    struct CStruct : public WGPUSurfaceConfigurationExtras {
+    };
+    SurfaceConfigurationExtras(const WGPUSurfaceConfigurationExtras& native);
+    SurfaceConfigurationExtras() {};
+    CStruct to_cstruct() const;
+    template <typename T>
+    SurfaceConfigurationExtras& setNext(T&& value) &;
+    template <typename T>
+    SurfaceConfigurationExtras&& setNext(T&& value) &&;
+    SurfaceConfigurationExtras& setDesiredMaximumFrameLatency(uint32_t value) &;
+    SurfaceConfigurationExtras&& setDesiredMaximumFrameLatency(uint32_t value) &&;
+    wgpu::ChainedStruct chain;
+    uint32_t desiredMaximumFrameLatency;
+};
 }
 // Non member functions
 namespace wgpu {
 wgpu::Instance createInstance(wgpu::InstanceDescriptor const& descriptor);
 wgpu::Instance createInstance();
-void getInstanceFeatures(wgpu::SupportedInstanceFeatures& features);
-wgpu::Status getInstanceLimits(wgpu::InstanceLimits& limits);
-wgpu::Bool hasInstanceFeature(wgpu::InstanceFeatureName feature);
+wgpu::Status getInstanceCapabilities(wgpu::InstanceCapabilities& capabilities);
 }
 }
 namespace wgpu {
@@ -4502,6 +4809,16 @@ ChainedStruct& ChainedStruct::setNext(T&& value) & {
 }
 template <typename T>
 ChainedStruct&& ChainedStruct::setNext(T&& value) && {
+    this->next.setNext(std::forward<T>(value));
+    return std::move(*this);
+}
+template <typename T>
+ChainedStructOut& ChainedStructOut::setNext(T&& value) & {
+    this->next.setNext(std::forward<T>(value));
+    return *this;
+}
+template <typename T>
+ChainedStructOut&& ChainedStructOut::setNext(T&& value) && {
     this->next.setNext(std::forward<T>(value));
     return std::move(*this);
 }
@@ -4616,6 +4933,16 @@ AdapterInfo&& AdapterInfo::setNextInChain(T&& value) && {
     return std::move(*this);
 }
 template <typename T>
+BindGroupEntry& BindGroupEntry::setNextInChain(T&& value) & {
+    this->nextInChain.setNext(std::forward<T>(value));
+    return *this;
+}
+template <typename T>
+BindGroupEntry&& BindGroupEntry::setNextInChain(T&& value) && {
+    this->nextInChain.setNext(std::forward<T>(value));
+    return std::move(*this);
+}
+template <typename T>
 BufferBindingLayout& BufferBindingLayout::setNextInChain(T&& value) & {
     this->nextInChain.setNext(std::forward<T>(value));
     return *this;
@@ -4676,32 +5003,12 @@ ConstantEntry&& ConstantEntry::setNextInChain(T&& value) && {
     return std::move(*this);
 }
 template <typename T>
-ExternalTextureBindingEntry& ExternalTextureBindingEntry::setNext(T&& value) & {
-    this->chain.setNext(std::forward<T>(value));
-    return *this;
-}
-template <typename T>
-ExternalTextureBindingEntry&& ExternalTextureBindingEntry::setNext(T&& value) && {
-    this->chain.setNext(std::forward<T>(value));
-    return std::move(*this);
-}
-template <typename T>
-ExternalTextureBindingLayout& ExternalTextureBindingLayout::setNext(T&& value) & {
-    this->chain.setNext(std::forward<T>(value));
-    return *this;
-}
-template <typename T>
-ExternalTextureBindingLayout&& ExternalTextureBindingLayout::setNext(T&& value) && {
-    this->chain.setNext(std::forward<T>(value));
-    return std::move(*this);
-}
-template <typename T>
-InstanceLimits& InstanceLimits::setNextInChain(T&& value) & {
+InstanceCapabilities& InstanceCapabilities::setNextInChain(T&& value) & {
     this->nextInChain.setNext(std::forward<T>(value));
     return *this;
 }
 template <typename T>
-InstanceLimits&& InstanceLimits::setNextInChain(T&& value) && {
+InstanceCapabilities&& InstanceCapabilities::setNextInChain(T&& value) && {
     this->nextInChain.setNext(std::forward<T>(value));
     return std::move(*this);
 }
@@ -4722,16 +5029,6 @@ MultisampleState& MultisampleState::setNextInChain(T&& value) & {
 }
 template <typename T>
 MultisampleState&& MultisampleState::setNextInChain(T&& value) && {
-    this->nextInChain.setNext(std::forward<T>(value));
-    return std::move(*this);
-}
-template <typename T>
-PassTimestampWrites& PassTimestampWrites::setNextInChain(T&& value) & {
-    this->nextInChain.setNext(std::forward<T>(value));
-    return *this;
-}
-template <typename T>
-PassTimestampWrites&& PassTimestampWrites::setNextInChain(T&& value) && {
     this->nextInChain.setNext(std::forward<T>(value));
     return std::move(*this);
 }
@@ -4816,16 +5113,6 @@ RenderBundleEncoderDescriptor&& RenderBundleEncoderDescriptor::setColorFormats(T
     return std::move(*this);
 }
 template <typename T>
-RenderPassDepthStencilAttachment& RenderPassDepthStencilAttachment::setNextInChain(T&& value) & {
-    this->nextInChain.setNext(std::forward<T>(value));
-    return *this;
-}
-template <typename T>
-RenderPassDepthStencilAttachment&& RenderPassDepthStencilAttachment::setNextInChain(T&& value) && {
-    this->nextInChain.setNext(std::forward<T>(value));
-    return std::move(*this);
-}
-template <typename T>
 RenderPassMaxDrawCount& RenderPassMaxDrawCount::setNext(T&& value) & {
     this->chain.setNext(std::forward<T>(value));
     return *this;
@@ -4836,13 +5123,13 @@ RenderPassMaxDrawCount&& RenderPassMaxDrawCount::setNext(T&& value) && {
     return std::move(*this);
 }
 template <typename T>
-RequestAdapterWebXROptions& RequestAdapterWebXROptions::setNext(T&& value) & {
-    this->chain.setNext(std::forward<T>(value));
+RequestAdapterOptions& RequestAdapterOptions::setNextInChain(T&& value) & {
+    this->nextInChain.setNext(std::forward<T>(value));
     return *this;
 }
 template <typename T>
-RequestAdapterWebXROptions&& RequestAdapterWebXROptions::setNext(T&& value) && {
-    this->chain.setNext(std::forward<T>(value));
+RequestAdapterOptions&& RequestAdapterOptions::setNextInChain(T&& value) && {
+    this->nextInChain.setNext(std::forward<T>(value));
     return std::move(*this);
 }
 template <typename T>
@@ -4862,6 +5149,16 @@ SamplerDescriptor& SamplerDescriptor::setNextInChain(T&& value) & {
 }
 template <typename T>
 SamplerDescriptor&& SamplerDescriptor::setNextInChain(T&& value) && {
+    this->nextInChain.setNext(std::forward<T>(value));
+    return std::move(*this);
+}
+template <typename T>
+ShaderModuleDescriptor& ShaderModuleDescriptor::setNextInChain(T&& value) & {
+    this->nextInChain.setNext(std::forward<T>(value));
+    return *this;
+}
+template <typename T>
+ShaderModuleDescriptor&& ShaderModuleDescriptor::setNextInChain(T&& value) && {
     this->nextInChain.setNext(std::forward<T>(value));
     return std::move(*this);
 }
@@ -4903,16 +5200,6 @@ SupportedFeatures& SupportedFeatures::setFeatures(T&& values) & {
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::FeatureName>
 SupportedFeatures&& SupportedFeatures::setFeatures(T&& values) && {
     this->features = values | std::views::transform([](auto&& e) { return static_cast<wgpu::FeatureName>(e); }) | std::ranges::to<std::vector<wgpu::FeatureName>>();
-    return std::move(*this);
-}
-template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::InstanceFeatureName>
-SupportedInstanceFeatures& SupportedInstanceFeatures::setFeatures(T&& values) & {
-    this->features = values | std::views::transform([](auto&& e) { return static_cast<wgpu::InstanceFeatureName>(e); }) | std::ranges::to<std::vector<wgpu::InstanceFeatureName>>();
-    return *this;
-}
-template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::InstanceFeatureName>
-SupportedInstanceFeatures&& SupportedInstanceFeatures::setFeatures(T&& values) && {
-    this->features = values | std::views::transform([](auto&& e) { return static_cast<wgpu::InstanceFeatureName>(e); }) | std::ranges::to<std::vector<wgpu::InstanceFeatureName>>();
     return std::move(*this);
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::WGSLLanguageFeatureName>
@@ -4966,16 +5253,6 @@ SurfaceCapabilities&& SurfaceCapabilities::setAlphaModes(T&& values) && {
     return std::move(*this);
 }
 template <typename T>
-SurfaceColorManagement& SurfaceColorManagement::setNext(T&& value) & {
-    this->chain.setNext(std::forward<T>(value));
-    return *this;
-}
-template <typename T>
-SurfaceColorManagement&& SurfaceColorManagement::setNext(T&& value) && {
-    this->chain.setNext(std::forward<T>(value));
-    return std::move(*this);
-}
-template <typename T>
 SurfaceConfiguration& SurfaceConfiguration::setNextInChain(T&& value) & {
     this->nextInChain.setNext(std::forward<T>(value));
     return *this;
@@ -4993,6 +5270,16 @@ SurfaceConfiguration& SurfaceConfiguration::setViewFormats(T&& values) & {
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::TextureFormat>
 SurfaceConfiguration&& SurfaceConfiguration::setViewFormats(T&& values) && {
     this->viewFormats = values | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureFormat>(e); }) | std::ranges::to<std::vector<wgpu::TextureFormat>>();
+    return std::move(*this);
+}
+template <typename T>
+SurfaceDescriptor& SurfaceDescriptor::setNextInChain(T&& value) & {
+    this->nextInChain.setNext(std::forward<T>(value));
+    return *this;
+}
+template <typename T>
+SurfaceDescriptor&& SurfaceDescriptor::setNextInChain(T&& value) && {
+    this->nextInChain.setNext(std::forward<T>(value));
     return std::move(*this);
 }
 template <typename T>
@@ -5086,23 +5373,23 @@ TextureViewDescriptor&& TextureViewDescriptor::setNextInChain(T&& value) && {
     return std::move(*this);
 }
 template <typename T>
-VertexAttribute& VertexAttribute::setNextInChain(T&& value) & {
+BindGroupDescriptor& BindGroupDescriptor::setNextInChain(T&& value) & {
     this->nextInChain.setNext(std::forward<T>(value));
     return *this;
 }
 template <typename T>
-VertexAttribute&& VertexAttribute::setNextInChain(T&& value) && {
+BindGroupDescriptor&& BindGroupDescriptor::setNextInChain(T&& value) && {
     this->nextInChain.setNext(std::forward<T>(value));
     return std::move(*this);
 }
-template <typename T>
-BindGroupEntry& BindGroupEntry::setNextInChain(T&& value) & {
-    this->nextInChain.setNext(std::forward<T>(value));
+template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::BindGroupEntry>
+BindGroupDescriptor& BindGroupDescriptor::setEntries(T&& values) & {
+    this->entries = values | std::views::transform([](auto&& e) { return static_cast<wgpu::BindGroupEntry>(e); }) | std::ranges::to<std::vector<wgpu::BindGroupEntry>>();
     return *this;
 }
-template <typename T>
-BindGroupEntry&& BindGroupEntry::setNextInChain(T&& value) && {
-    this->nextInChain.setNext(std::forward<T>(value));
+template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::BindGroupEntry>
+BindGroupDescriptor&& BindGroupDescriptor::setEntries(T&& values) && {
+    this->entries = values | std::views::transform([](auto&& e) { return static_cast<wgpu::BindGroupEntry>(e); }) | std::ranges::to<std::vector<wgpu::BindGroupEntry>>();
     return std::move(*this);
 }
 template <typename T>
@@ -5146,26 +5433,6 @@ ComputePassDescriptor&& ComputePassDescriptor::setNextInChain(T&& value) && {
     return std::move(*this);
 }
 template <typename T>
-ComputeState& ComputeState::setNextInChain(T&& value) & {
-    this->nextInChain.setNext(std::forward<T>(value));
-    return *this;
-}
-template <typename T>
-ComputeState&& ComputeState::setNextInChain(T&& value) && {
-    this->nextInChain.setNext(std::forward<T>(value));
-    return std::move(*this);
-}
-template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::ConstantEntry>
-ComputeState& ComputeState::setConstants(T&& values) & {
-    this->constants = values | std::views::transform([](auto&& e) { return static_cast<wgpu::ConstantEntry>(e); }) | std::ranges::to<std::vector<wgpu::ConstantEntry>>();
-    return *this;
-}
-template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::ConstantEntry>
-ComputeState&& ComputeState::setConstants(T&& values) && {
-    this->constants = values | std::views::transform([](auto&& e) { return static_cast<wgpu::ConstantEntry>(e); }) | std::ranges::to<std::vector<wgpu::ConstantEntry>>();
-    return std::move(*this);
-}
-template <typename T>
 DepthStencilState& DepthStencilState::setNextInChain(T&& value) & {
     this->nextInChain.setNext(std::forward<T>(value));
     return *this;
@@ -5205,14 +5472,24 @@ InstanceDescriptor&& InstanceDescriptor::setNextInChain(T&& value) && {
     this->nextInChain.setNext(std::forward<T>(value));
     return std::move(*this);
 }
-template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::InstanceFeatureName>
-InstanceDescriptor& InstanceDescriptor::setRequiredFeatures(T&& values) & {
-    this->requiredFeatures = values | std::views::transform([](auto&& e) { return static_cast<wgpu::InstanceFeatureName>(e); }) | std::ranges::to<std::vector<wgpu::InstanceFeatureName>>();
+template <typename T>
+ProgrammableStageDescriptor& ProgrammableStageDescriptor::setNextInChain(T&& value) & {
+    this->nextInChain.setNext(std::forward<T>(value));
     return *this;
 }
-template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::InstanceFeatureName>
-InstanceDescriptor&& InstanceDescriptor::setRequiredFeatures(T&& values) && {
-    this->requiredFeatures = values | std::views::transform([](auto&& e) { return static_cast<wgpu::InstanceFeatureName>(e); }) | std::ranges::to<std::vector<wgpu::InstanceFeatureName>>();
+template <typename T>
+ProgrammableStageDescriptor&& ProgrammableStageDescriptor::setNextInChain(T&& value) && {
+    this->nextInChain.setNext(std::forward<T>(value));
+    return std::move(*this);
+}
+template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::ConstantEntry>
+ProgrammableStageDescriptor& ProgrammableStageDescriptor::setConstants(T&& values) & {
+    this->constants = values | std::views::transform([](auto&& e) { return static_cast<wgpu::ConstantEntry>(e); }) | std::ranges::to<std::vector<wgpu::ConstantEntry>>();
+    return *this;
+}
+template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::ConstantEntry>
+ProgrammableStageDescriptor&& ProgrammableStageDescriptor::setConstants(T&& values) && {
+    this->constants = values | std::views::transform([](auto&& e) { return static_cast<wgpu::ConstantEntry>(e); }) | std::ranges::to<std::vector<wgpu::ConstantEntry>>();
     return std::move(*this);
 }
 template <typename T>
@@ -5223,46 +5500,6 @@ RenderPassColorAttachment& RenderPassColorAttachment::setNextInChain(T&& value) 
 template <typename T>
 RenderPassColorAttachment&& RenderPassColorAttachment::setNextInChain(T&& value) && {
     this->nextInChain.setNext(std::forward<T>(value));
-    return std::move(*this);
-}
-template <typename T>
-RequestAdapterOptions& RequestAdapterOptions::setNextInChain(T&& value) & {
-    this->nextInChain.setNext(std::forward<T>(value));
-    return *this;
-}
-template <typename T>
-RequestAdapterOptions&& RequestAdapterOptions::setNextInChain(T&& value) && {
-    this->nextInChain.setNext(std::forward<T>(value));
-    return std::move(*this);
-}
-template <typename T>
-ShaderModuleDescriptor& ShaderModuleDescriptor::setNextInChain(T&& value) & {
-    this->nextInChain.setNext(std::forward<T>(value));
-    return *this;
-}
-template <typename T>
-ShaderModuleDescriptor&& ShaderModuleDescriptor::setNextInChain(T&& value) && {
-    this->nextInChain.setNext(std::forward<T>(value));
-    return std::move(*this);
-}
-template <typename T>
-SurfaceDescriptor& SurfaceDescriptor::setNextInChain(T&& value) & {
-    this->nextInChain.setNext(std::forward<T>(value));
-    return *this;
-}
-template <typename T>
-SurfaceDescriptor&& SurfaceDescriptor::setNextInChain(T&& value) && {
-    this->nextInChain.setNext(std::forward<T>(value));
-    return std::move(*this);
-}
-template <typename T>
-TextureComponentSwizzleDescriptor& TextureComponentSwizzleDescriptor::setNext(T&& value) & {
-    this->chain.setNext(std::forward<T>(value));
-    return *this;
-}
-template <typename T>
-TextureComponentSwizzleDescriptor&& TextureComponentSwizzleDescriptor::setNext(T&& value) && {
-    this->chain.setNext(std::forward<T>(value));
     return std::move(*this);
 }
 template <typename T>
@@ -5285,16 +5522,6 @@ TextureDescriptor&& TextureDescriptor::setViewFormats(T&& values) && {
     this->viewFormats = values | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureFormat>(e); }) | std::ranges::to<std::vector<wgpu::TextureFormat>>();
     return std::move(*this);
 }
-template <typename T>
-VertexBufferLayout& VertexBufferLayout::setNextInChain(T&& value) & {
-    this->nextInChain.setNext(std::forward<T>(value));
-    return *this;
-}
-template <typename T>
-VertexBufferLayout&& VertexBufferLayout::setNextInChain(T&& value) && {
-    this->nextInChain.setNext(std::forward<T>(value));
-    return std::move(*this);
-}
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::VertexAttribute>
 VertexBufferLayout& VertexBufferLayout::setAttributes(T&& values) & {
     this->attributes = values | std::views::transform([](auto&& e) { return static_cast<wgpu::VertexAttribute>(e); }) | std::ranges::to<std::vector<wgpu::VertexAttribute>>();
@@ -5303,26 +5530,6 @@ VertexBufferLayout& VertexBufferLayout::setAttributes(T&& values) & {
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::VertexAttribute>
 VertexBufferLayout&& VertexBufferLayout::setAttributes(T&& values) && {
     this->attributes = values | std::views::transform([](auto&& e) { return static_cast<wgpu::VertexAttribute>(e); }) | std::ranges::to<std::vector<wgpu::VertexAttribute>>();
-    return std::move(*this);
-}
-template <typename T>
-BindGroupDescriptor& BindGroupDescriptor::setNextInChain(T&& value) & {
-    this->nextInChain.setNext(std::forward<T>(value));
-    return *this;
-}
-template <typename T>
-BindGroupDescriptor&& BindGroupDescriptor::setNextInChain(T&& value) && {
-    this->nextInChain.setNext(std::forward<T>(value));
-    return std::move(*this);
-}
-template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::BindGroupEntry>
-BindGroupDescriptor& BindGroupDescriptor::setEntries(T&& values) & {
-    this->entries = values | std::views::transform([](auto&& e) { return static_cast<wgpu::BindGroupEntry>(e); }) | std::ranges::to<std::vector<wgpu::BindGroupEntry>>();
-    return *this;
-}
-template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::BindGroupEntry>
-BindGroupDescriptor&& BindGroupDescriptor::setEntries(T&& values) && {
-    this->entries = values | std::views::transform([](auto&& e) { return static_cast<wgpu::BindGroupEntry>(e); }) | std::ranges::to<std::vector<wgpu::BindGroupEntry>>();
     return std::move(*this);
 }
 template <typename T>
@@ -5455,6 +5662,156 @@ RenderPipelineDescriptor&& RenderPipelineDescriptor::setNextInChain(T&& value) &
     this->nextInChain.setNext(std::forward<T>(value));
     return std::move(*this);
 }
+template <typename T>
+InstanceExtras& InstanceExtras::setNext(T&& value) & {
+    this->chain.setNext(std::forward<T>(value));
+    return *this;
+}
+template <typename T>
+InstanceExtras&& InstanceExtras::setNext(T&& value) && {
+    this->chain.setNext(std::forward<T>(value));
+    return std::move(*this);
+}
+template <typename T>
+DeviceExtras& DeviceExtras::setNext(T&& value) & {
+    this->chain.setNext(std::forward<T>(value));
+    return *this;
+}
+template <typename T>
+DeviceExtras&& DeviceExtras::setNext(T&& value) && {
+    this->chain.setNext(std::forward<T>(value));
+    return std::move(*this);
+}
+template <typename T>
+PipelineLayoutExtras& PipelineLayoutExtras::setNext(T&& value) & {
+    this->chain.setNext(std::forward<T>(value));
+    return *this;
+}
+template <typename T>
+PipelineLayoutExtras&& PipelineLayoutExtras::setNext(T&& value) && {
+    this->chain.setNext(std::forward<T>(value));
+    return std::move(*this);
+}
+template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::PushConstantRange>
+PipelineLayoutExtras& PipelineLayoutExtras::setPushConstantRanges(T&& values) & {
+    this->pushConstantRanges = values | std::views::transform([](auto&& e) { return static_cast<wgpu::PushConstantRange>(e); }) | std::ranges::to<std::vector<wgpu::PushConstantRange>>();
+    return *this;
+}
+template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::PushConstantRange>
+PipelineLayoutExtras&& PipelineLayoutExtras::setPushConstantRanges(T&& values) && {
+    this->pushConstantRanges = values | std::views::transform([](auto&& e) { return static_cast<wgpu::PushConstantRange>(e); }) | std::ranges::to<std::vector<wgpu::PushConstantRange>>();
+    return std::move(*this);
+}
+template <typename T>
+ShaderModuleGLSLDescriptor& ShaderModuleGLSLDescriptor::setNext(T&& value) & {
+    this->chain.setNext(std::forward<T>(value));
+    return *this;
+}
+template <typename T>
+ShaderModuleGLSLDescriptor&& ShaderModuleGLSLDescriptor::setNext(T&& value) && {
+    this->chain.setNext(std::forward<T>(value));
+    return std::move(*this);
+}
+template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::ShaderDefine>
+ShaderModuleGLSLDescriptor& ShaderModuleGLSLDescriptor::setDefines(T&& values) & {
+    this->defines = values | std::views::transform([](auto&& e) { return static_cast<wgpu::ShaderDefine>(e); }) | std::ranges::to<std::vector<wgpu::ShaderDefine>>();
+    return *this;
+}
+template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::ShaderDefine>
+ShaderModuleGLSLDescriptor&& ShaderModuleGLSLDescriptor::setDefines(T&& values) && {
+    this->defines = values | std::views::transform([](auto&& e) { return static_cast<wgpu::ShaderDefine>(e); }) | std::ranges::to<std::vector<wgpu::ShaderDefine>>();
+    return std::move(*this);
+}
+template <typename T>
+InstanceEnumerateAdapterOptions& InstanceEnumerateAdapterOptions::setNextInChain(T&& value) & {
+    this->nextInChain.setNext(std::forward<T>(value));
+    return *this;
+}
+template <typename T>
+InstanceEnumerateAdapterOptions&& InstanceEnumerateAdapterOptions::setNextInChain(T&& value) && {
+    this->nextInChain.setNext(std::forward<T>(value));
+    return std::move(*this);
+}
+template <typename T>
+BindGroupEntryExtras& BindGroupEntryExtras::setNext(T&& value) & {
+    this->chain.setNext(std::forward<T>(value));
+    return *this;
+}
+template <typename T>
+BindGroupEntryExtras&& BindGroupEntryExtras::setNext(T&& value) && {
+    this->chain.setNext(std::forward<T>(value));
+    return std::move(*this);
+}
+template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::Buffer>
+BindGroupEntryExtras& BindGroupEntryExtras::setBuffers(T&& values) & {
+    this->buffers = values | std::views::transform([](auto&& e) { return static_cast<wgpu::Buffer>(e); }) | std::ranges::to<std::vector<wgpu::Buffer>>();
+    return *this;
+}
+template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::Buffer>
+BindGroupEntryExtras&& BindGroupEntryExtras::setBuffers(T&& values) && {
+    this->buffers = values | std::views::transform([](auto&& e) { return static_cast<wgpu::Buffer>(e); }) | std::ranges::to<std::vector<wgpu::Buffer>>();
+    return std::move(*this);
+}
+template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::Sampler>
+BindGroupEntryExtras& BindGroupEntryExtras::setSamplers(T&& values) & {
+    this->samplers = values | std::views::transform([](auto&& e) { return static_cast<wgpu::Sampler>(e); }) | std::ranges::to<std::vector<wgpu::Sampler>>();
+    return *this;
+}
+template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::Sampler>
+BindGroupEntryExtras&& BindGroupEntryExtras::setSamplers(T&& values) && {
+    this->samplers = values | std::views::transform([](auto&& e) { return static_cast<wgpu::Sampler>(e); }) | std::ranges::to<std::vector<wgpu::Sampler>>();
+    return std::move(*this);
+}
+template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::TextureView>
+BindGroupEntryExtras& BindGroupEntryExtras::setTextureViews(T&& values) & {
+    this->textureViews = values | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureView>(e); }) | std::ranges::to<std::vector<wgpu::TextureView>>();
+    return *this;
+}
+template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::TextureView>
+BindGroupEntryExtras&& BindGroupEntryExtras::setTextureViews(T&& values) && {
+    this->textureViews = values | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureView>(e); }) | std::ranges::to<std::vector<wgpu::TextureView>>();
+    return std::move(*this);
+}
+template <typename T>
+BindGroupLayoutEntryExtras& BindGroupLayoutEntryExtras::setNext(T&& value) & {
+    this->chain.setNext(std::forward<T>(value));
+    return *this;
+}
+template <typename T>
+BindGroupLayoutEntryExtras&& BindGroupLayoutEntryExtras::setNext(T&& value) && {
+    this->chain.setNext(std::forward<T>(value));
+    return std::move(*this);
+}
+template <typename T>
+QuerySetDescriptorExtras& QuerySetDescriptorExtras::setNext(T&& value) & {
+    this->chain.setNext(std::forward<T>(value));
+    return *this;
+}
+template <typename T>
+QuerySetDescriptorExtras&& QuerySetDescriptorExtras::setNext(T&& value) && {
+    this->chain.setNext(std::forward<T>(value));
+    return std::move(*this);
+}
+template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::PipelineStatisticName>
+QuerySetDescriptorExtras& QuerySetDescriptorExtras::setPipelineStatistics(T&& values) & {
+    this->pipelineStatistics = values | std::views::transform([](auto&& e) { return static_cast<wgpu::PipelineStatisticName>(e); }) | std::ranges::to<std::vector<wgpu::PipelineStatisticName>>();
+    return *this;
+}
+template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::PipelineStatisticName>
+QuerySetDescriptorExtras&& QuerySetDescriptorExtras::setPipelineStatistics(T&& values) && {
+    this->pipelineStatistics = values | std::views::transform([](auto&& e) { return static_cast<wgpu::PipelineStatisticName>(e); }) | std::ranges::to<std::vector<wgpu::PipelineStatisticName>>();
+    return std::move(*this);
+}
+template <typename T>
+SurfaceConfigurationExtras& SurfaceConfigurationExtras::setNext(T&& value) & {
+    this->chain.setNext(std::forward<T>(value));
+    return *this;
+}
+template <typename T>
+SurfaceConfigurationExtras&& SurfaceConfigurationExtras::setNext(T&& value) && {
+    this->chain.setNext(std::forward<T>(value));
+    return std::move(*this);
+}
 }
 namespace wgpu::raw {
 }
@@ -5507,13 +5864,13 @@ template <typename F>
 void PopErrorScopeCallback::ControlImpl<F>::invoke(wgpu::PopErrorScopeStatus status, wgpu::ErrorType type, wgpu::StringView message) const {
     func(status, type, message);
 }
-template <std::invocable<wgpu::QueueWorkDoneStatus, wgpu::StringView> F>
+template <std::invocable<wgpu::QueueWorkDoneStatus> F>
 QueueWorkDoneCallback::QueueWorkDoneCallback(const F& f) {
     data = new ControlImpl<F>(f);
 }
 template <typename F>
-void QueueWorkDoneCallback::ControlImpl<F>::invoke(wgpu::QueueWorkDoneStatus status, wgpu::StringView message) const {
-    func(status, message);
+void QueueWorkDoneCallback::ControlImpl<F>::invoke(wgpu::QueueWorkDoneStatus status) const {
+    func(status);
 }
 template <std::invocable<wgpu::RequestAdapterStatus, wgpu::Adapter const&, wgpu::StringView> F>
 RequestAdapterCallback::RequestAdapterCallback(const F& f) {
@@ -5659,7 +6016,9 @@ std::string_view to_string(CompareFunction value) {
 std::string_view to_string(CompilationInfoRequestStatus value) {
     switch (value) {
         case CompilationInfoRequestStatus::eSuccess: return "Success";
-        case CompilationInfoRequestStatus::eCallbackCancelled: return "CallbackCancelled";
+        case CompilationInfoRequestStatus::eInstanceDropped: return "InstanceDropped";
+        case CompilationInfoRequestStatus::eError: return "Error";
+        case CompilationInfoRequestStatus::eUnknown: return "Unknown";
         case CompilationInfoRequestStatus::eForce32: return "Force32";
         default: return "Unknown";
     }
@@ -5670,19 +6029,6 @@ std::string_view to_string(CompilationMessageType value) {
         case CompilationMessageType::eWarning: return "Warning";
         case CompilationMessageType::eInfo: return "Info";
         case CompilationMessageType::eForce32: return "Force32";
-        default: return "Unknown";
-    }
-}
-std::string_view to_string(ComponentSwizzle value) {
-    switch (value) {
-        case ComponentSwizzle::eUndefined: return "Undefined";
-        case ComponentSwizzle::eZero: return "Zero";
-        case ComponentSwizzle::eOne: return "One";
-        case ComponentSwizzle::eR: return "R";
-        case ComponentSwizzle::eG: return "G";
-        case ComponentSwizzle::eB: return "B";
-        case ComponentSwizzle::eA: return "A";
-        case ComponentSwizzle::eForce32: return "Force32";
         default: return "Unknown";
     }
 }
@@ -5700,9 +6046,10 @@ std::string_view to_string(CompositeAlphaMode value) {
 std::string_view to_string(CreatePipelineAsyncStatus value) {
     switch (value) {
         case CreatePipelineAsyncStatus::eSuccess: return "Success";
-        case CreatePipelineAsyncStatus::eCallbackCancelled: return "CallbackCancelled";
+        case CreatePipelineAsyncStatus::eInstanceDropped: return "InstanceDropped";
         case CreatePipelineAsyncStatus::eValidationError: return "ValidationError";
         case CreatePipelineAsyncStatus::eInternalError: return "InternalError";
+        case CreatePipelineAsyncStatus::eUnknown: return "Unknown";
         case CreatePipelineAsyncStatus::eForce32: return "Force32";
         default: return "Unknown";
     }
@@ -5721,7 +6068,7 @@ std::string_view to_string(DeviceLostReason value) {
     switch (value) {
         case DeviceLostReason::eUnknown: return "Unknown";
         case DeviceLostReason::eDestroyed: return "Destroyed";
-        case DeviceLostReason::eCallbackCancelled: return "CallbackCancelled";
+        case DeviceLostReason::eInstanceDropped: return "InstanceDropped";
         case DeviceLostReason::eFailedCreation: return "FailedCreation";
         case DeviceLostReason::eForce32: return "Force32";
         default: return "Unknown";
@@ -5749,7 +6096,6 @@ std::string_view to_string(ErrorType value) {
 }
 std::string_view to_string(FeatureLevel value) {
     switch (value) {
-        case FeatureLevel::eUndefined: return "Undefined";
         case FeatureLevel::eCompatibility: return "Compatibility";
         case FeatureLevel::eCore: return "Core";
         case FeatureLevel::eForce32: return "Force32";
@@ -5758,15 +6104,15 @@ std::string_view to_string(FeatureLevel value) {
 }
 std::string_view to_string(FeatureName value) {
     switch (value) {
-        case FeatureName::eCoreFeaturesAndLimits: return "CoreFeaturesAndLimits";
+        case FeatureName::eUndefined: return "Undefined";
         case FeatureName::eDepthClipControl: return "DepthClipControl";
         case FeatureName::eDepth32FloatStencil8: return "Depth32FloatStencil8";
+        case FeatureName::eTimestampQuery: return "TimestampQuery";
         case FeatureName::eTextureCompressionBC: return "TextureCompressionBC";
         case FeatureName::eTextureCompressionBCSliced3D: return "TextureCompressionBCSliced3D";
         case FeatureName::eTextureCompressionETC2: return "TextureCompressionETC2";
         case FeatureName::eTextureCompressionASTC: return "TextureCompressionASTC";
         case FeatureName::eTextureCompressionASTCSliced3D: return "TextureCompressionASTCSliced3D";
-        case FeatureName::eTimestampQuery: return "TimestampQuery";
         case FeatureName::eIndirectFirstInstance: return "IndirectFirstInstance";
         case FeatureName::eShaderF16: return "ShaderF16";
         case FeatureName::eRG11B10UfloatRenderable: return "RG11B10UfloatRenderable";
@@ -5775,11 +6121,6 @@ std::string_view to_string(FeatureName value) {
         case FeatureName::eFloat32Blendable: return "Float32Blendable";
         case FeatureName::eClipDistances: return "ClipDistances";
         case FeatureName::eDualSourceBlending: return "DualSourceBlending";
-        case FeatureName::eSubgroups: return "Subgroups";
-        case FeatureName::eTextureFormatsTier1: return "TextureFormatsTier1";
-        case FeatureName::eTextureFormatsTier2: return "TextureFormatsTier2";
-        case FeatureName::ePrimitiveIndex: return "PrimitiveIndex";
-        case FeatureName::eTextureComponentSwizzle: return "TextureComponentSwizzle";
         case FeatureName::eForce32: return "Force32";
         default: return "Unknown";
     }
@@ -5811,15 +6152,6 @@ std::string_view to_string(IndexFormat value) {
         default: return "Unknown";
     }
 }
-std::string_view to_string(InstanceFeatureName value) {
-    switch (value) {
-        case InstanceFeatureName::eTimedWaitAny: return "TimedWaitAny";
-        case InstanceFeatureName::eShaderSourceSPIRV: return "ShaderSourceSPIRV";
-        case InstanceFeatureName::eMultipleDevicesPerAdapter: return "MultipleDevicesPerAdapter";
-        case InstanceFeatureName::eForce32: return "Force32";
-        default: return "Unknown";
-    }
-}
 std::string_view to_string(LoadOp value) {
     switch (value) {
         case LoadOp::eUndefined: return "Undefined";
@@ -5832,9 +6164,10 @@ std::string_view to_string(LoadOp value) {
 std::string_view to_string(MapAsyncStatus value) {
     switch (value) {
         case MapAsyncStatus::eSuccess: return "Success";
-        case MapAsyncStatus::eCallbackCancelled: return "CallbackCancelled";
+        case MapAsyncStatus::eInstanceDropped: return "InstanceDropped";
         case MapAsyncStatus::eError: return "Error";
         case MapAsyncStatus::eAborted: return "Aborted";
+        case MapAsyncStatus::eUnknown: return "Unknown";
         case MapAsyncStatus::eForce32: return "Force32";
         default: return "Unknown";
     }
@@ -5860,8 +6193,8 @@ std::string_view to_string(OptionalBool value) {
 std::string_view to_string(PopErrorScopeStatus value) {
     switch (value) {
         case PopErrorScopeStatus::eSuccess: return "Success";
-        case PopErrorScopeStatus::eCallbackCancelled: return "CallbackCancelled";
-        case PopErrorScopeStatus::eError: return "Error";
+        case PopErrorScopeStatus::eInstanceDropped: return "InstanceDropped";
+        case PopErrorScopeStatus::eEmptyStack: return "EmptyStack";
         case PopErrorScopeStatus::eForce32: return "Force32";
         default: return "Unknown";
     }
@@ -5872,14 +6205,6 @@ std::string_view to_string(PowerPreference value) {
         case PowerPreference::eLowPower: return "LowPower";
         case PowerPreference::eHighPerformance: return "HighPerformance";
         case PowerPreference::eForce32: return "Force32";
-        default: return "Unknown";
-    }
-}
-std::string_view to_string(PredefinedColorSpace value) {
-    switch (value) {
-        case PredefinedColorSpace::eSRGB: return "SRGB";
-        case PredefinedColorSpace::eDisplayP3: return "DisplayP3";
-        case PredefinedColorSpace::eForce32: return "Force32";
         default: return "Unknown";
     }
 }
@@ -5917,8 +6242,9 @@ std::string_view to_string(QueryType value) {
 std::string_view to_string(QueueWorkDoneStatus value) {
     switch (value) {
         case QueueWorkDoneStatus::eSuccess: return "Success";
-        case QueueWorkDoneStatus::eCallbackCancelled: return "CallbackCancelled";
+        case QueueWorkDoneStatus::eInstanceDropped: return "InstanceDropped";
         case QueueWorkDoneStatus::eError: return "Error";
+        case QueueWorkDoneStatus::eUnknown: return "Unknown";
         case QueueWorkDoneStatus::eForce32: return "Force32";
         default: return "Unknown";
     }
@@ -5926,9 +6252,10 @@ std::string_view to_string(QueueWorkDoneStatus value) {
 std::string_view to_string(RequestAdapterStatus value) {
     switch (value) {
         case RequestAdapterStatus::eSuccess: return "Success";
-        case RequestAdapterStatus::eCallbackCancelled: return "CallbackCancelled";
+        case RequestAdapterStatus::eInstanceDropped: return "InstanceDropped";
         case RequestAdapterStatus::eUnavailable: return "Unavailable";
         case RequestAdapterStatus::eError: return "Error";
+        case RequestAdapterStatus::eUnknown: return "Unknown";
         case RequestAdapterStatus::eForce32: return "Force32";
         default: return "Unknown";
     }
@@ -5936,9 +6263,25 @@ std::string_view to_string(RequestAdapterStatus value) {
 std::string_view to_string(RequestDeviceStatus value) {
     switch (value) {
         case RequestDeviceStatus::eSuccess: return "Success";
-        case RequestDeviceStatus::eCallbackCancelled: return "CallbackCancelled";
+        case RequestDeviceStatus::eInstanceDropped: return "InstanceDropped";
         case RequestDeviceStatus::eError: return "Error";
+        case RequestDeviceStatus::eUnknown: return "Unknown";
         case RequestDeviceStatus::eForce32: return "Force32";
+        default: return "Unknown";
+    }
+}
+std::string_view to_string(SType value) {
+    switch (value) {
+        case SType::eShaderSourceSPIRV: return "ShaderSourceSPIRV";
+        case SType::eShaderSourceWGSL: return "ShaderSourceWGSL";
+        case SType::eRenderPassMaxDrawCount: return "RenderPassMaxDrawCount";
+        case SType::eSurfaceSourceMetalLayer: return "SurfaceSourceMetalLayer";
+        case SType::eSurfaceSourceWindowsHWND: return "SurfaceSourceWindowsHWND";
+        case SType::eSurfaceSourceXlibWindow: return "SurfaceSourceXlibWindow";
+        case SType::eSurfaceSourceWaylandSurface: return "SurfaceSourceWaylandSurface";
+        case SType::eSurfaceSourceAndroidNativeWindow: return "SurfaceSourceAndroidNativeWindow";
+        case SType::eSurfaceSourceXCBWindow: return "SurfaceSourceXCBWindow";
+        case SType::eForce32: return "Force32";
         default: return "Unknown";
     }
 }
@@ -5996,26 +6339,6 @@ std::string_view to_string(StoreOp value) {
         default: return "Unknown";
     }
 }
-std::string_view to_string(SType value) {
-    switch (value) {
-        case SType::eShaderSourceSPIRV: return "ShaderSourceSPIRV";
-        case SType::eShaderSourceWGSL: return "ShaderSourceWGSL";
-        case SType::eRenderPassMaxDrawCount: return "RenderPassMaxDrawCount";
-        case SType::eSurfaceSourceMetalLayer: return "SurfaceSourceMetalLayer";
-        case SType::eSurfaceSourceWindowsHWND: return "SurfaceSourceWindowsHWND";
-        case SType::eSurfaceSourceXlibWindow: return "SurfaceSourceXlibWindow";
-        case SType::eSurfaceSourceWaylandSurface: return "SurfaceSourceWaylandSurface";
-        case SType::eSurfaceSourceAndroidNativeWindow: return "SurfaceSourceAndroidNativeWindow";
-        case SType::eSurfaceSourceXCBWindow: return "SurfaceSourceXCBWindow";
-        case SType::eSurfaceColorManagement: return "SurfaceColorManagement";
-        case SType::eRequestAdapterWebXROptions: return "RequestAdapterWebXROptions";
-        case SType::eTextureComponentSwizzleDescriptor: return "TextureComponentSwizzleDescriptor";
-        case SType::eExternalTextureBindingLayout: return "ExternalTextureBindingLayout";
-        case SType::eExternalTextureBindingEntry: return "ExternalTextureBindingEntry";
-        case SType::eForce32: return "Force32";
-        default: return "Unknown";
-    }
-}
 std::string_view to_string(SurfaceGetCurrentTextureStatus value) {
     switch (value) {
         case SurfaceGetCurrentTextureStatus::eSuccessOptimal: return "SuccessOptimal";
@@ -6023,6 +6346,8 @@ std::string_view to_string(SurfaceGetCurrentTextureStatus value) {
         case SurfaceGetCurrentTextureStatus::eTimeout: return "Timeout";
         case SurfaceGetCurrentTextureStatus::eOutdated: return "Outdated";
         case SurfaceGetCurrentTextureStatus::eLost: return "Lost";
+        case SurfaceGetCurrentTextureStatus::eOutOfMemory: return "OutOfMemory";
+        case SurfaceGetCurrentTextureStatus::eDeviceLost: return "DeviceLost";
         case SurfaceGetCurrentTextureStatus::eError: return "Error";
         case SurfaceGetCurrentTextureStatus::eForce32: return "Force32";
         default: return "Unknown";
@@ -6055,8 +6380,6 @@ std::string_view to_string(TextureFormat value) {
         case TextureFormat::eR8Snorm: return "R8Snorm";
         case TextureFormat::eR8Uint: return "R8Uint";
         case TextureFormat::eR8Sint: return "R8Sint";
-        case TextureFormat::eR16Unorm: return "R16Unorm";
-        case TextureFormat::eR16Snorm: return "R16Snorm";
         case TextureFormat::eR16Uint: return "R16Uint";
         case TextureFormat::eR16Sint: return "R16Sint";
         case TextureFormat::eR16Float: return "R16Float";
@@ -6067,8 +6390,6 @@ std::string_view to_string(TextureFormat value) {
         case TextureFormat::eR32Float: return "R32Float";
         case TextureFormat::eR32Uint: return "R32Uint";
         case TextureFormat::eR32Sint: return "R32Sint";
-        case TextureFormat::eRG16Unorm: return "RG16Unorm";
-        case TextureFormat::eRG16Snorm: return "RG16Snorm";
         case TextureFormat::eRG16Uint: return "RG16Uint";
         case TextureFormat::eRG16Sint: return "RG16Sint";
         case TextureFormat::eRG16Float: return "RG16Float";
@@ -6086,8 +6407,6 @@ std::string_view to_string(TextureFormat value) {
         case TextureFormat::eRG32Float: return "RG32Float";
         case TextureFormat::eRG32Uint: return "RG32Uint";
         case TextureFormat::eRG32Sint: return "RG32Sint";
-        case TextureFormat::eRGBA16Unorm: return "RGBA16Unorm";
-        case TextureFormat::eRGBA16Snorm: return "RGBA16Snorm";
         case TextureFormat::eRGBA16Uint: return "RGBA16Uint";
         case TextureFormat::eRGBA16Sint: return "RGBA16Sint";
         case TextureFormat::eRGBA16Float: return "RGBA16Float";
@@ -6182,14 +6501,6 @@ std::string_view to_string(TextureViewDimension value) {
         default: return "Unknown";
     }
 }
-std::string_view to_string(ToneMappingMode value) {
-    switch (value) {
-        case ToneMappingMode::eStandard: return "Standard";
-        case ToneMappingMode::eExtended: return "Extended";
-        case ToneMappingMode::eForce32: return "Force32";
-        default: return "Unknown";
-    }
-}
 std::string_view to_string(VertexFormat value) {
     switch (value) {
         case VertexFormat::eUint8: return "Uint8";
@@ -6239,19 +6550,11 @@ std::string_view to_string(VertexFormat value) {
 }
 std::string_view to_string(VertexStepMode value) {
     switch (value) {
+        case VertexStepMode::eVertexBufferNotUsed: return "VertexBufferNotUsed";
         case VertexStepMode::eUndefined: return "Undefined";
         case VertexStepMode::eVertex: return "Vertex";
         case VertexStepMode::eInstance: return "Instance";
         case VertexStepMode::eForce32: return "Force32";
-        default: return "Unknown";
-    }
-}
-std::string_view to_string(WaitStatus value) {
-    switch (value) {
-        case WaitStatus::eSuccess: return "Success";
-        case WaitStatus::eTimedOut: return "TimedOut";
-        case WaitStatus::eError: return "Error";
-        case WaitStatus::eForce32: return "Force32";
         default: return "Unknown";
     }
 }
@@ -6261,11 +6564,18 @@ std::string_view to_string(WGSLLanguageFeatureName value) {
         case WGSLLanguageFeatureName::ePacked4x8IntegerDotProduct: return "Packed4x8IntegerDotProduct";
         case WGSLLanguageFeatureName::eUnrestrictedPointerParameters: return "UnrestrictedPointerParameters";
         case WGSLLanguageFeatureName::ePointerCompositeAccess: return "PointerCompositeAccess";
-        case WGSLLanguageFeatureName::eUniformBufferStandardLayout: return "UniformBufferStandardLayout";
-        case WGSLLanguageFeatureName::eSubgroupId: return "SubgroupId";
-        case WGSLLanguageFeatureName::eTextureAndSamplerLet: return "TextureAndSamplerLet";
-        case WGSLLanguageFeatureName::eSubgroupUniformity: return "SubgroupUniformity";
         case WGSLLanguageFeatureName::eForce32: return "Force32";
+        default: return "Unknown";
+    }
+}
+std::string_view to_string(WaitStatus value) {
+    switch (value) {
+        case WaitStatus::eSuccess: return "Success";
+        case WaitStatus::eTimedOut: return "TimedOut";
+        case WaitStatus::eUnsupportedTimeout: return "UnsupportedTimeout";
+        case WaitStatus::eUnsupportedCount: return "UnsupportedCount";
+        case WaitStatus::eUnsupportedMixedSources: return "UnsupportedMixedSources";
+        case WaitStatus::eForce32: return "Force32";
         default: return "Unknown";
     }
 }
@@ -6321,7 +6631,131 @@ std::string_view to_string(TextureUsage value) {
         case TextureUsage::eTextureBinding: return "TextureBinding";
         case TextureUsage::eStorageBinding: return "StorageBinding";
         case TextureUsage::eRenderAttachment: return "RenderAttachment";
-        case TextureUsage::eTransientAttachment: return "TransientAttachment";
+        default: return "Unknown";
+    }
+}
+std::string_view to_string(NativeSType value) {
+    switch (value) {
+        case NativeSType::eDeviceExtras: return "DeviceExtras";
+        case NativeSType::eNativeLimits: return "NativeLimits";
+        case NativeSType::ePipelineLayoutExtras: return "PipelineLayoutExtras";
+        case NativeSType::eShaderModuleGLSLDescriptor: return "ShaderModuleGLSLDescriptor";
+        case NativeSType::eInstanceExtras: return "InstanceExtras";
+        case NativeSType::eBindGroupEntryExtras: return "BindGroupEntryExtras";
+        case NativeSType::eBindGroupLayoutEntryExtras: return "BindGroupLayoutEntryExtras";
+        case NativeSType::eQuerySetDescriptorExtras: return "QuerySetDescriptorExtras";
+        case NativeSType::eSurfaceConfigurationExtras: return "SurfaceConfigurationExtras";
+        case NativeSType::eForce32: return "Force32";
+        default: return "Unknown";
+    }
+}
+std::string_view to_string(NativeFeature value) {
+    switch (value) {
+        case NativeFeature::ePushConstants: return "PushConstants";
+        case NativeFeature::eTextureAdapterSpecificFormatFeatures: return "TextureAdapterSpecificFormatFeatures";
+        case NativeFeature::eMultiDrawIndirect: return "MultiDrawIndirect";
+        case NativeFeature::eMultiDrawIndirectCount: return "MultiDrawIndirectCount";
+        case NativeFeature::eVertexWritableStorage: return "VertexWritableStorage";
+        case NativeFeature::eTextureBindingArray: return "TextureBindingArray";
+        case NativeFeature::eSampledTextureAndStorageBufferArrayNonUniformIndexing: return "SampledTextureAndStorageBufferArrayNonUniformIndexing";
+        case NativeFeature::ePipelineStatisticsQuery: return "PipelineStatisticsQuery";
+        case NativeFeature::eStorageResourceBindingArray: return "StorageResourceBindingArray";
+        case NativeFeature::ePartiallyBoundBindingArray: return "PartiallyBoundBindingArray";
+        case NativeFeature::eTextureFormat16bitNorm: return "TextureFormat16bitNorm";
+        case NativeFeature::eTextureCompressionAstcHdr: return "TextureCompressionAstcHdr";
+        case NativeFeature::eMappablePrimaryBuffers: return "MappablePrimaryBuffers";
+        case NativeFeature::eBufferBindingArray: return "BufferBindingArray";
+        case NativeFeature::eUniformBufferAndStorageTextureArrayNonUniformIndexing: return "UniformBufferAndStorageTextureArrayNonUniformIndexing";
+        case NativeFeature::eSpirvShaderPassthrough: return "SpirvShaderPassthrough";
+        case NativeFeature::eVertexAttribute64bit: return "VertexAttribute64bit";
+        case NativeFeature::eTextureFormatNv12: return "TextureFormatNv12";
+        case NativeFeature::eRayTracingAccelerationStructure: return "RayTracingAccelerationStructure";
+        case NativeFeature::eRayQuery: return "RayQuery";
+        case NativeFeature::eShaderF64: return "ShaderF64";
+        case NativeFeature::eShaderI16: return "ShaderI16";
+        case NativeFeature::eShaderPrimitiveIndex: return "ShaderPrimitiveIndex";
+        case NativeFeature::eShaderEarlyDepthTest: return "ShaderEarlyDepthTest";
+        case NativeFeature::eSubgroup: return "Subgroup";
+        case NativeFeature::eSubgroupVertex: return "SubgroupVertex";
+        case NativeFeature::eSubgroupBarrier: return "SubgroupBarrier";
+        case NativeFeature::eTimestampQueryInsideEncoders: return "TimestampQueryInsideEncoders";
+        case NativeFeature::eTimestampQueryInsidePasses: return "TimestampQueryInsidePasses";
+        case NativeFeature::eForce32: return "Force32";
+        default: return "Unknown";
+    }
+}
+std::string_view to_string(LogLevel value) {
+    switch (value) {
+        case LogLevel::eOff: return "Off";
+        case LogLevel::eError: return "Error";
+        case LogLevel::eWarn: return "Warn";
+        case LogLevel::eInfo: return "Info";
+        case LogLevel::eDebug: return "Debug";
+        case LogLevel::eTrace: return "Trace";
+        case LogLevel::eForce32: return "Force32";
+        default: return "Unknown";
+    }
+}
+std::string_view to_string(InstanceBackend value) {
+    switch (value) {
+        case InstanceBackend::eAll: return "All";
+        case InstanceBackend::eForce32: return "Force32";
+        default: return "Unknown";
+    }
+}
+std::string_view to_string(InstanceFlag value) {
+    switch (value) {
+        case InstanceFlag::eDefault: return "Default";
+        case InstanceFlag::eForce32: return "Force32";
+        default: return "Unknown";
+    }
+}
+std::string_view to_string(Dx12Compiler value) {
+    switch (value) {
+        case Dx12Compiler::eUndefined: return "Undefined";
+        case Dx12Compiler::eFxc: return "Fxc";
+        case Dx12Compiler::eDxc: return "Dxc";
+        case Dx12Compiler::eForce32: return "Force32";
+        default: return "Unknown";
+    }
+}
+std::string_view to_string(Gles3MinorVersion value) {
+    switch (value) {
+        case Gles3MinorVersion::eAutomatic: return "Automatic";
+        case Gles3MinorVersion::eVersion0: return "Version0";
+        case Gles3MinorVersion::eVersion1: return "Version1";
+        case Gles3MinorVersion::eVersion2: return "Version2";
+        case Gles3MinorVersion::eForce32: return "Force32";
+        default: return "Unknown";
+    }
+}
+std::string_view to_string(PipelineStatisticName value) {
+    switch (value) {
+        case PipelineStatisticName::eVertexShaderInvocations: return "VertexShaderInvocations";
+        case PipelineStatisticName::eClipperInvocations: return "ClipperInvocations";
+        case PipelineStatisticName::eClipperPrimitivesOut: return "ClipperPrimitivesOut";
+        case PipelineStatisticName::eFragmentShaderInvocations: return "FragmentShaderInvocations";
+        case PipelineStatisticName::eComputeShaderInvocations: return "ComputeShaderInvocations";
+        case PipelineStatisticName::eForce32: return "Force32";
+        default: return "Unknown";
+    }
+}
+std::string_view to_string(NativeQueryType value) {
+    switch (value) {
+        case NativeQueryType::ePipelineStatistics: return "PipelineStatistics";
+        case NativeQueryType::eForce32: return "Force32";
+        default: return "Unknown";
+    }
+}
+std::string_view to_string(NativeTextureFormat value) {
+    switch (value) {
+        case NativeTextureFormat::eR16Unorm: return "R16Unorm";
+        case NativeTextureFormat::eR16Snorm: return "R16Snorm";
+        case NativeTextureFormat::eRg16Unorm: return "Rg16Unorm";
+        case NativeTextureFormat::eRg16Snorm: return "Rg16Snorm";
+        case NativeTextureFormat::eRgba16Unorm: return "Rgba16Unorm";
+        case NativeTextureFormat::eRgba16Snorm: return "Rgba16Snorm";
+        case NativeTextureFormat::eNV12: return "NV12";
         default: return "Unknown";
     }
 }
@@ -6345,23 +6779,31 @@ TextureUsage operator|(TextureUsage lhs, TextureUsage rhs) {
     using T = std::underlying_type_t<TextureUsage>;
     return static_cast<TextureUsage>(static_cast<T>(lhs) | static_cast<T>(rhs));
 }
+InstanceBackend operator|(InstanceBackend lhs, InstanceBackend rhs) {
+    using T = std::underlying_type_t<InstanceBackend>;
+    return static_cast<InstanceBackend>(static_cast<T>(lhs) | static_cast<T>(rhs));
+}
+InstanceFlag operator|(InstanceFlag lhs, InstanceFlag rhs) {
+    using T = std::underlying_type_t<InstanceFlag>;
+    return static_cast<InstanceFlag>(static_cast<T>(lhs) | static_cast<T>(rhs));
+}
 }
 namespace wgpu {
 StringView::StringView(const WGPUStringView& native) {
-    this->data = static_cast<char const*>(native.data);
+    this->data = static_cast<char   WGPU_NULLABLE const*>(native.data);
     this->length = static_cast<size_t>(native.length);
 }
 StringView::CStruct StringView::to_cstruct() const {
     CStruct cstruct;
-    cstruct.data = static_cast<const char*>(this->data);
+    cstruct.data = static_cast<const char   WGPU_NULLABLE*>(this->data);
     cstruct.length = static_cast<size_t>(this->length);
     return cstruct;
 }
-StringView& StringView::setData(char const* value) & {
+StringView& StringView::setData(char   WGPU_NULLABLE const* value) & {
     this->data = std::move(value);
     return *this;
 }
-StringView&& StringView::setData(char const* value) && {
+StringView&& StringView::setData(char   WGPU_NULLABLE const* value) && {
     this->data = std::move(value);
     return std::move(*this);
 }
@@ -6388,6 +6830,24 @@ ChainedStruct& ChainedStruct::setSType(wgpu::SType value) & {
     return *this;
 }
 ChainedStruct&& ChainedStruct::setSType(wgpu::SType value) && {
+    this->sType = std::move(value);
+    return std::move(*this);
+}
+ChainedStructOut::ChainedStructOut(const WGPUChainedStructOut& native) {
+    this->next.setNext(native.next);
+    this->sType = static_cast<wgpu::SType>(native.sType);
+}
+ChainedStructOut::CStruct ChainedStructOut::to_cstruct() const {
+    CStruct cstruct;
+    cstruct.next = this->next.getNext();
+    cstruct.sType = static_cast<WGPUSType>(this->sType);
+    return cstruct;
+}
+ChainedStructOut& ChainedStructOut::setSType(wgpu::SType value) & {
+    this->sType = std::move(value);
+    return *this;
+}
+ChainedStructOut&& ChainedStructOut::setSType(wgpu::SType value) && {
     this->sType = std::move(value);
     return std::move(*this);
 }
@@ -6631,9 +7091,9 @@ QueueWorkDoneCallbackInfo::CStruct QueueWorkDoneCallbackInfo::to_cstruct() const
     cstruct.nextInChain = this->nextInChain.getNext();
     cstruct.mode = static_cast<WGPUCallbackMode>(this->mode);
     if (this->callback) {
-        cstruct.callback = [](WGPUQueueWorkDoneStatus status, WGPUStringView message, void* userdata1, void* userdata2) {
+        cstruct.callback = [](WGPUQueueWorkDoneStatus status, void* userdata1, void* userdata2) {
             auto callback = std::move(*reinterpret_cast<wgpu::QueueWorkDoneCallback*>(userdata1));
-            callback(status, message);
+            callback(status);
         };
         new (cstruct.userdata1) wgpu::QueueWorkDoneCallback(this->callback);
     } else {
@@ -6771,8 +7231,6 @@ AdapterInfo::AdapterInfo(const WGPUAdapterInfo& native) {
     this->adapterType = static_cast<wgpu::AdapterType>(native.adapterType);
     this->vendorID = static_cast<uint32_t>(native.vendorID);
     this->deviceID = static_cast<uint32_t>(native.deviceID);
-    this->subgroupMinSize = static_cast<uint32_t>(native.subgroupMinSize);
-    this->subgroupMaxSize = static_cast<uint32_t>(native.subgroupMaxSize);
 }
 AdapterInfo::CStruct AdapterInfo::to_cstruct() const {
     CStruct cstruct;
@@ -6785,8 +7243,6 @@ AdapterInfo::CStruct AdapterInfo::to_cstruct() const {
     cstruct.adapterType = static_cast<WGPUAdapterType>(this->adapterType);
     cstruct.vendorID = static_cast<uint32_t>(this->vendorID);
     cstruct.deviceID = static_cast<uint32_t>(this->deviceID);
-    cstruct.subgroupMinSize = static_cast<uint32_t>(this->subgroupMinSize);
-    cstruct.subgroupMaxSize = static_cast<uint32_t>(this->subgroupMaxSize);
     return cstruct;
 }
 AdapterInfo& AdapterInfo::setVendor(const wgpu::StringView& value) & {
@@ -6885,20 +7341,75 @@ AdapterInfo&& AdapterInfo::setDeviceID(uint32_t value) && {
     this->deviceID = std::move(value);
     return std::move(*this);
 }
-AdapterInfo& AdapterInfo::setSubgroupMinSize(uint32_t value) & {
-    this->subgroupMinSize = std::move(value);
+BindGroupEntry::BindGroupEntry(const WGPUBindGroupEntry& native) {
+    this->nextInChain.setNext(native.nextInChain);
+    this->binding = static_cast<uint32_t>(native.binding);
+    this->buffer = static_cast<wgpu::Buffer>(native.buffer);
+    if (this->buffer) this->buffer.addRef();
+    this->offset = static_cast<uint64_t>(native.offset);
+    this->size = static_cast<uint64_t>(native.size);
+    this->sampler = static_cast<wgpu::Sampler>(native.sampler);
+    if (this->sampler) this->sampler.addRef();
+    this->textureView = static_cast<wgpu::TextureView>(native.textureView);
+    if (this->textureView) this->textureView.addRef();
+}
+BindGroupEntry::CStruct BindGroupEntry::to_cstruct() const {
+    CStruct cstruct;
+    cstruct.nextInChain = this->nextInChain.getNext();
+    cstruct.binding = static_cast<uint32_t>(this->binding);
+    cstruct.buffer = static_cast<WGPUBuffer>(this->buffer);
+    cstruct.offset = static_cast<uint64_t>(this->offset);
+    cstruct.size = static_cast<uint64_t>(this->size);
+    cstruct.sampler = static_cast<WGPUSampler>(this->sampler);
+    cstruct.textureView = static_cast<WGPUTextureView>(this->textureView);
+    return cstruct;
+}
+BindGroupEntry& BindGroupEntry::setBinding(uint32_t value) & {
+    this->binding = std::move(value);
     return *this;
 }
-AdapterInfo&& AdapterInfo::setSubgroupMinSize(uint32_t value) && {
-    this->subgroupMinSize = std::move(value);
+BindGroupEntry&& BindGroupEntry::setBinding(uint32_t value) && {
+    this->binding = std::move(value);
     return std::move(*this);
 }
-AdapterInfo& AdapterInfo::setSubgroupMaxSize(uint32_t value) & {
-    this->subgroupMaxSize = std::move(value);
+BindGroupEntry& BindGroupEntry::setBuffer(wgpu::Buffer value) & {
+    this->buffer = std::move(value);
     return *this;
 }
-AdapterInfo&& AdapterInfo::setSubgroupMaxSize(uint32_t value) && {
-    this->subgroupMaxSize = std::move(value);
+BindGroupEntry&& BindGroupEntry::setBuffer(wgpu::Buffer value) && {
+    this->buffer = std::move(value);
+    return std::move(*this);
+}
+BindGroupEntry& BindGroupEntry::setOffset(uint64_t value) & {
+    this->offset = std::move(value);
+    return *this;
+}
+BindGroupEntry&& BindGroupEntry::setOffset(uint64_t value) && {
+    this->offset = std::move(value);
+    return std::move(*this);
+}
+BindGroupEntry& BindGroupEntry::setSize(uint64_t value) & {
+    this->size = std::move(value);
+    return *this;
+}
+BindGroupEntry&& BindGroupEntry::setSize(uint64_t value) && {
+    this->size = std::move(value);
+    return std::move(*this);
+}
+BindGroupEntry& BindGroupEntry::setSampler(wgpu::Sampler value) & {
+    this->sampler = std::move(value);
+    return *this;
+}
+BindGroupEntry&& BindGroupEntry::setSampler(wgpu::Sampler value) && {
+    this->sampler = std::move(value);
+    return std::move(*this);
+}
+BindGroupEntry& BindGroupEntry::setTextureView(wgpu::TextureView value) & {
+    this->textureView = std::move(value);
+    return *this;
+}
+BindGroupEntry&& BindGroupEntry::setTextureView(wgpu::TextureView value) && {
+    this->textureView = std::move(value);
     return std::move(*this);
 }
 BlendComponent::BlendComponent(const WGPUBlendComponent& native) {
@@ -7205,6 +7716,43 @@ CompilationMessage&& CompilationMessage::setLength(uint64_t value) && {
     this->length = std::move(value);
     return std::move(*this);
 }
+ComputePassTimestampWrites::ComputePassTimestampWrites(const WGPUComputePassTimestampWrites& native) {
+    this->querySet = static_cast<wgpu::QuerySet>(native.querySet);
+    if (this->querySet) this->querySet.addRef();
+    this->beginningOfPassWriteIndex = static_cast<uint32_t>(native.beginningOfPassWriteIndex);
+    this->endOfPassWriteIndex = static_cast<uint32_t>(native.endOfPassWriteIndex);
+}
+ComputePassTimestampWrites::CStruct ComputePassTimestampWrites::to_cstruct() const {
+    CStruct cstruct;
+    cstruct.querySet = static_cast<WGPUQuerySet>(this->querySet);
+    cstruct.beginningOfPassWriteIndex = static_cast<uint32_t>(this->beginningOfPassWriteIndex);
+    cstruct.endOfPassWriteIndex = static_cast<uint32_t>(this->endOfPassWriteIndex);
+    return cstruct;
+}
+ComputePassTimestampWrites& ComputePassTimestampWrites::setQuerySet(wgpu::QuerySet value) & {
+    this->querySet = std::move(value);
+    return *this;
+}
+ComputePassTimestampWrites&& ComputePassTimestampWrites::setQuerySet(wgpu::QuerySet value) && {
+    this->querySet = std::move(value);
+    return std::move(*this);
+}
+ComputePassTimestampWrites& ComputePassTimestampWrites::setBeginningOfPassWriteIndex(uint32_t value) & {
+    this->beginningOfPassWriteIndex = std::move(value);
+    return *this;
+}
+ComputePassTimestampWrites&& ComputePassTimestampWrites::setBeginningOfPassWriteIndex(uint32_t value) && {
+    this->beginningOfPassWriteIndex = std::move(value);
+    return std::move(*this);
+}
+ComputePassTimestampWrites& ComputePassTimestampWrites::setEndOfPassWriteIndex(uint32_t value) & {
+    this->endOfPassWriteIndex = std::move(value);
+    return *this;
+}
+ComputePassTimestampWrites&& ComputePassTimestampWrites::setEndOfPassWriteIndex(uint32_t value) && {
+    this->endOfPassWriteIndex = std::move(value);
+    return std::move(*this);
+}
 ConstantEntry::ConstantEntry(const WGPUConstantEntry& native) {
     this->nextInChain.setNext(native.nextInChain);
     this->key = static_cast<wgpu::StringView>(native.key);
@@ -7277,33 +7825,6 @@ Extent3D&& Extent3D::setDepthOrArrayLayers(uint32_t value) && {
     this->depthOrArrayLayers = std::move(value);
     return std::move(*this);
 }
-ExternalTextureBindingEntry::ExternalTextureBindingEntry(const WGPUExternalTextureBindingEntry& native) {
-    this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
-    this->externalTexture = static_cast<wgpu::ExternalTexture>(native.externalTexture);
-    if (this->externalTexture) this->externalTexture.addRef();
-}
-ExternalTextureBindingEntry::CStruct ExternalTextureBindingEntry::to_cstruct() const {
-    CStruct cstruct;
-    cstruct.chain = static_cast<WGPUChainedStruct>(this->chain.to_cstruct());
-    cstruct.externalTexture = static_cast<WGPUExternalTexture>(this->externalTexture);
-    return cstruct;
-}
-ExternalTextureBindingEntry& ExternalTextureBindingEntry::setExternalTexture(wgpu::ExternalTexture value) & {
-    this->externalTexture = std::move(value);
-    return *this;
-}
-ExternalTextureBindingEntry&& ExternalTextureBindingEntry::setExternalTexture(wgpu::ExternalTexture value) && {
-    this->externalTexture = std::move(value);
-    return std::move(*this);
-}
-ExternalTextureBindingLayout::ExternalTextureBindingLayout(const WGPUExternalTextureBindingLayout& native) {
-    this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
-}
-ExternalTextureBindingLayout::CStruct ExternalTextureBindingLayout::to_cstruct() const {
-    CStruct cstruct;
-    cstruct.chain = static_cast<WGPUChainedStruct>(this->chain.to_cstruct());
-    return cstruct;
-}
 Future::Future(const WGPUFuture& native) {
     this->id = static_cast<uint64_t>(native.id);
 }
@@ -7320,21 +7841,31 @@ Future&& Future::setId(uint64_t value) && {
     this->id = std::move(value);
     return std::move(*this);
 }
-InstanceLimits::InstanceLimits(const WGPUInstanceLimits& native) {
+InstanceCapabilities::InstanceCapabilities(const WGPUInstanceCapabilities& native) {
     this->nextInChain.setNext(native.nextInChain);
+    this->timedWaitAnyEnable = static_cast<wgpu::Bool>(native.timedWaitAnyEnable);
     this->timedWaitAnyMaxCount = static_cast<size_t>(native.timedWaitAnyMaxCount);
 }
-InstanceLimits::CStruct InstanceLimits::to_cstruct() const {
+InstanceCapabilities::CStruct InstanceCapabilities::to_cstruct() const {
     CStruct cstruct;
     cstruct.nextInChain = this->nextInChain.getNext();
+    cstruct.timedWaitAnyEnable = static_cast<WGPUBool>(this->timedWaitAnyEnable);
     cstruct.timedWaitAnyMaxCount = static_cast<size_t>(this->timedWaitAnyMaxCount);
     return cstruct;
 }
-InstanceLimits& InstanceLimits::setTimedWaitAnyMaxCount(size_t value) & {
+InstanceCapabilities& InstanceCapabilities::setTimedWaitAnyEnable(wgpu::Bool value) & {
+    this->timedWaitAnyEnable = std::move(value);
+    return *this;
+}
+InstanceCapabilities&& InstanceCapabilities::setTimedWaitAnyEnable(wgpu::Bool value) && {
+    this->timedWaitAnyEnable = std::move(value);
+    return std::move(*this);
+}
+InstanceCapabilities& InstanceCapabilities::setTimedWaitAnyMaxCount(size_t value) & {
     this->timedWaitAnyMaxCount = std::move(value);
     return *this;
 }
-InstanceLimits&& InstanceLimits::setTimedWaitAnyMaxCount(size_t value) && {
+InstanceCapabilities&& InstanceCapabilities::setTimedWaitAnyMaxCount(size_t value) && {
     this->timedWaitAnyMaxCount = std::move(value);
     return std::move(*this);
 }
@@ -7371,7 +7902,6 @@ Limits::Limits(const WGPULimits& native) {
     this->maxComputeWorkgroupSizeY = static_cast<uint32_t>(native.maxComputeWorkgroupSizeY);
     this->maxComputeWorkgroupSizeZ = static_cast<uint32_t>(native.maxComputeWorkgroupSizeZ);
     this->maxComputeWorkgroupsPerDimension = static_cast<uint32_t>(native.maxComputeWorkgroupsPerDimension);
-    this->maxImmediateSize = static_cast<uint32_t>(native.maxImmediateSize);
 }
 Limits::CStruct Limits::to_cstruct() const {
     CStruct cstruct;
@@ -7407,7 +7937,6 @@ Limits::CStruct Limits::to_cstruct() const {
     cstruct.maxComputeWorkgroupSizeY = static_cast<uint32_t>(this->maxComputeWorkgroupSizeY);
     cstruct.maxComputeWorkgroupSizeZ = static_cast<uint32_t>(this->maxComputeWorkgroupSizeZ);
     cstruct.maxComputeWorkgroupsPerDimension = static_cast<uint32_t>(this->maxComputeWorkgroupsPerDimension);
-    cstruct.maxImmediateSize = static_cast<uint32_t>(this->maxImmediateSize);
     return cstruct;
 }
 Limits& Limits::setMaxTextureDimension1D(uint32_t value) & {
@@ -7658,14 +8187,6 @@ Limits&& Limits::setMaxComputeWorkgroupsPerDimension(uint32_t value) && {
     this->maxComputeWorkgroupsPerDimension = std::move(value);
     return std::move(*this);
 }
-Limits& Limits::setMaxImmediateSize(uint32_t value) & {
-    this->maxImmediateSize = std::move(value);
-    return *this;
-}
-Limits&& Limits::setMaxImmediateSize(uint32_t value) && {
-    this->maxImmediateSize = std::move(value);
-    return std::move(*this);
-}
 MultisampleState::MultisampleState(const WGPUMultisampleState& native) {
     this->nextInChain.setNext(native.nextInChain);
     this->count = static_cast<uint32_t>(native.count);
@@ -7740,50 +8261,10 @@ Origin3D&& Origin3D::setZ(uint32_t value) && {
     this->z = std::move(value);
     return std::move(*this);
 }
-PassTimestampWrites::PassTimestampWrites(const WGPUPassTimestampWrites& native) {
-    this->nextInChain.setNext(native.nextInChain);
-    this->querySet = static_cast<wgpu::QuerySet>(native.querySet);
-    if (this->querySet) this->querySet.addRef();
-    this->beginningOfPassWriteIndex = static_cast<uint32_t>(native.beginningOfPassWriteIndex);
-    this->endOfPassWriteIndex = static_cast<uint32_t>(native.endOfPassWriteIndex);
-}
-PassTimestampWrites::CStruct PassTimestampWrites::to_cstruct() const {
-    CStruct cstruct;
-    cstruct.nextInChain = this->nextInChain.getNext();
-    cstruct.querySet = static_cast<WGPUQuerySet>(this->querySet);
-    cstruct.beginningOfPassWriteIndex = static_cast<uint32_t>(this->beginningOfPassWriteIndex);
-    cstruct.endOfPassWriteIndex = static_cast<uint32_t>(this->endOfPassWriteIndex);
-    return cstruct;
-}
-PassTimestampWrites& PassTimestampWrites::setQuerySet(wgpu::QuerySet value) & {
-    this->querySet = std::move(value);
-    return *this;
-}
-PassTimestampWrites&& PassTimestampWrites::setQuerySet(wgpu::QuerySet value) && {
-    this->querySet = std::move(value);
-    return std::move(*this);
-}
-PassTimestampWrites& PassTimestampWrites::setBeginningOfPassWriteIndex(uint32_t value) & {
-    this->beginningOfPassWriteIndex = std::move(value);
-    return *this;
-}
-PassTimestampWrites&& PassTimestampWrites::setBeginningOfPassWriteIndex(uint32_t value) && {
-    this->beginningOfPassWriteIndex = std::move(value);
-    return std::move(*this);
-}
-PassTimestampWrites& PassTimestampWrites::setEndOfPassWriteIndex(uint32_t value) & {
-    this->endOfPassWriteIndex = std::move(value);
-    return *this;
-}
-PassTimestampWrites&& PassTimestampWrites::setEndOfPassWriteIndex(uint32_t value) && {
-    this->endOfPassWriteIndex = std::move(value);
-    return std::move(*this);
-}
 PipelineLayoutDescriptor::PipelineLayoutDescriptor(const WGPUPipelineLayoutDescriptor& native) {
     this->nextInChain.setNext(native.nextInChain);
     this->label = static_cast<wgpu::StringView>(native.label);
     this->bindGroupLayouts = std::span(native.bindGroupLayouts, native.bindGroupLayoutCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::BindGroupLayout>(e); }) | std::ranges::to<std::vector<wgpu::BindGroupLayout>>();
-    this->immediateSize = static_cast<uint32_t>(native.immediateSize);
 }
 PipelineLayoutDescriptor::CStruct PipelineLayoutDescriptor::to_cstruct() const {
     CStruct cstruct;
@@ -7791,7 +8272,6 @@ PipelineLayoutDescriptor::CStruct PipelineLayoutDescriptor::to_cstruct() const {
     cstruct.label = static_cast<WGPUStringView>(this->label.to_cstruct());
     cstruct.bindGroupLayouts = reinterpret_cast<const WGPUBindGroupLayout*>(this->bindGroupLayouts.data());
     cstruct.bindGroupLayoutCount = static_cast<size_t>(this->bindGroupLayouts.size());
-    cstruct.immediateSize = static_cast<uint32_t>(this->immediateSize);
     return cstruct;
 }
 PipelineLayoutDescriptor& PipelineLayoutDescriptor::setLabel(const wgpu::StringView& value) & {
@@ -7808,14 +8288,6 @@ PipelineLayoutDescriptor& PipelineLayoutDescriptor::setLabel(wgpu::StringView&& 
 }
 PipelineLayoutDescriptor&& PipelineLayoutDescriptor::setLabel(wgpu::StringView&& value) && {
     this->label = std::move(value);
-    return std::move(*this);
-}
-PipelineLayoutDescriptor& PipelineLayoutDescriptor::setImmediateSize(uint32_t value) & {
-    this->immediateSize = std::move(value);
-    return *this;
-}
-PipelineLayoutDescriptor&& PipelineLayoutDescriptor::setImmediateSize(uint32_t value) && {
-    this->immediateSize = std::move(value);
     return std::move(*this);
 }
 PrimitiveState::PrimitiveState(const WGPUPrimitiveState& native) {
@@ -8044,7 +8516,6 @@ RenderBundleEncoderDescriptor&& RenderBundleEncoderDescriptor::setStencilReadOnl
     return std::move(*this);
 }
 RenderPassDepthStencilAttachment::RenderPassDepthStencilAttachment(const WGPURenderPassDepthStencilAttachment& native) {
-    this->nextInChain.setNext(native.nextInChain);
     this->view = static_cast<wgpu::TextureView>(native.view);
     if (this->view) this->view.addRef();
     this->depthLoadOp = static_cast<wgpu::LoadOp>(native.depthLoadOp);
@@ -8058,7 +8529,6 @@ RenderPassDepthStencilAttachment::RenderPassDepthStencilAttachment(const WGPURen
 }
 RenderPassDepthStencilAttachment::CStruct RenderPassDepthStencilAttachment::to_cstruct() const {
     CStruct cstruct;
-    cstruct.nextInChain = this->nextInChain.getNext();
     cstruct.view = static_cast<WGPUTextureView>(this->view);
     cstruct.depthLoadOp = static_cast<WGPULoadOp>(this->depthLoadOp);
     cstruct.depthStoreOp = static_cast<WGPUStoreOp>(this->depthStoreOp);
@@ -8160,22 +8630,100 @@ RenderPassMaxDrawCount&& RenderPassMaxDrawCount::setMaxDrawCount(uint64_t value)
     this->maxDrawCount = std::move(value);
     return std::move(*this);
 }
-RequestAdapterWebXROptions::RequestAdapterWebXROptions(const WGPURequestAdapterWebXROptions& native) {
-    this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
-    this->xrCompatible = static_cast<wgpu::Bool>(native.xrCompatible);
+RenderPassTimestampWrites::RenderPassTimestampWrites(const WGPURenderPassTimestampWrites& native) {
+    this->querySet = static_cast<wgpu::QuerySet>(native.querySet);
+    if (this->querySet) this->querySet.addRef();
+    this->beginningOfPassWriteIndex = static_cast<uint32_t>(native.beginningOfPassWriteIndex);
+    this->endOfPassWriteIndex = static_cast<uint32_t>(native.endOfPassWriteIndex);
 }
-RequestAdapterWebXROptions::CStruct RequestAdapterWebXROptions::to_cstruct() const {
+RenderPassTimestampWrites::CStruct RenderPassTimestampWrites::to_cstruct() const {
     CStruct cstruct;
-    cstruct.chain = static_cast<WGPUChainedStruct>(this->chain.to_cstruct());
-    cstruct.xrCompatible = static_cast<WGPUBool>(this->xrCompatible);
+    cstruct.querySet = static_cast<WGPUQuerySet>(this->querySet);
+    cstruct.beginningOfPassWriteIndex = static_cast<uint32_t>(this->beginningOfPassWriteIndex);
+    cstruct.endOfPassWriteIndex = static_cast<uint32_t>(this->endOfPassWriteIndex);
     return cstruct;
 }
-RequestAdapterWebXROptions& RequestAdapterWebXROptions::setXrCompatible(wgpu::Bool value) & {
-    this->xrCompatible = std::move(value);
+RenderPassTimestampWrites& RenderPassTimestampWrites::setQuerySet(wgpu::QuerySet value) & {
+    this->querySet = std::move(value);
     return *this;
 }
-RequestAdapterWebXROptions&& RequestAdapterWebXROptions::setXrCompatible(wgpu::Bool value) && {
-    this->xrCompatible = std::move(value);
+RenderPassTimestampWrites&& RenderPassTimestampWrites::setQuerySet(wgpu::QuerySet value) && {
+    this->querySet = std::move(value);
+    return std::move(*this);
+}
+RenderPassTimestampWrites& RenderPassTimestampWrites::setBeginningOfPassWriteIndex(uint32_t value) & {
+    this->beginningOfPassWriteIndex = std::move(value);
+    return *this;
+}
+RenderPassTimestampWrites&& RenderPassTimestampWrites::setBeginningOfPassWriteIndex(uint32_t value) && {
+    this->beginningOfPassWriteIndex = std::move(value);
+    return std::move(*this);
+}
+RenderPassTimestampWrites& RenderPassTimestampWrites::setEndOfPassWriteIndex(uint32_t value) & {
+    this->endOfPassWriteIndex = std::move(value);
+    return *this;
+}
+RenderPassTimestampWrites&& RenderPassTimestampWrites::setEndOfPassWriteIndex(uint32_t value) && {
+    this->endOfPassWriteIndex = std::move(value);
+    return std::move(*this);
+}
+RequestAdapterOptions::RequestAdapterOptions(const WGPURequestAdapterOptions& native) {
+    this->nextInChain.setNext(native.nextInChain);
+    this->featureLevel = static_cast<wgpu::FeatureLevel>(native.featureLevel);
+    this->powerPreference = static_cast<wgpu::PowerPreference>(native.powerPreference);
+    this->forceFallbackAdapter = static_cast<wgpu::Bool>(native.forceFallbackAdapter);
+    this->backendType = static_cast<wgpu::BackendType>(native.backendType);
+    this->compatibleSurface = static_cast<wgpu::Surface>(native.compatibleSurface);
+    if (this->compatibleSurface) this->compatibleSurface.addRef();
+}
+RequestAdapterOptions::CStruct RequestAdapterOptions::to_cstruct() const {
+    CStruct cstruct;
+    cstruct.nextInChain = this->nextInChain.getNext();
+    cstruct.featureLevel = static_cast<WGPUFeatureLevel>(this->featureLevel);
+    cstruct.powerPreference = static_cast<WGPUPowerPreference>(this->powerPreference);
+    cstruct.forceFallbackAdapter = static_cast<WGPUBool>(this->forceFallbackAdapter);
+    cstruct.backendType = static_cast<WGPUBackendType>(this->backendType);
+    cstruct.compatibleSurface = static_cast<WGPUSurface>(this->compatibleSurface);
+    return cstruct;
+}
+RequestAdapterOptions& RequestAdapterOptions::setFeatureLevel(wgpu::FeatureLevel value) & {
+    this->featureLevel = std::move(value);
+    return *this;
+}
+RequestAdapterOptions&& RequestAdapterOptions::setFeatureLevel(wgpu::FeatureLevel value) && {
+    this->featureLevel = std::move(value);
+    return std::move(*this);
+}
+RequestAdapterOptions& RequestAdapterOptions::setPowerPreference(wgpu::PowerPreference value) & {
+    this->powerPreference = std::move(value);
+    return *this;
+}
+RequestAdapterOptions&& RequestAdapterOptions::setPowerPreference(wgpu::PowerPreference value) && {
+    this->powerPreference = std::move(value);
+    return std::move(*this);
+}
+RequestAdapterOptions& RequestAdapterOptions::setForceFallbackAdapter(wgpu::Bool value) & {
+    this->forceFallbackAdapter = std::move(value);
+    return *this;
+}
+RequestAdapterOptions&& RequestAdapterOptions::setForceFallbackAdapter(wgpu::Bool value) && {
+    this->forceFallbackAdapter = std::move(value);
+    return std::move(*this);
+}
+RequestAdapterOptions& RequestAdapterOptions::setBackendType(wgpu::BackendType value) & {
+    this->backendType = std::move(value);
+    return *this;
+}
+RequestAdapterOptions&& RequestAdapterOptions::setBackendType(wgpu::BackendType value) && {
+    this->backendType = std::move(value);
+    return std::move(*this);
+}
+RequestAdapterOptions& RequestAdapterOptions::setCompatibleSurface(wgpu::Surface value) & {
+    this->compatibleSurface = std::move(value);
+    return *this;
+}
+RequestAdapterOptions&& RequestAdapterOptions::setCompatibleSurface(wgpu::Surface value) && {
+    this->compatibleSurface = std::move(value);
     return std::move(*this);
 }
 SamplerBindingLayout::SamplerBindingLayout(const WGPUSamplerBindingLayout& native) {
@@ -8320,6 +8868,32 @@ SamplerDescriptor& SamplerDescriptor::setMaxAnisotropy(uint16_t value) & {
 }
 SamplerDescriptor&& SamplerDescriptor::setMaxAnisotropy(uint16_t value) && {
     this->maxAnisotropy = std::move(value);
+    return std::move(*this);
+}
+ShaderModuleDescriptor::ShaderModuleDescriptor(const WGPUShaderModuleDescriptor& native) {
+    this->nextInChain.setNext(native.nextInChain);
+    this->label = static_cast<wgpu::StringView>(native.label);
+}
+ShaderModuleDescriptor::CStruct ShaderModuleDescriptor::to_cstruct() const {
+    CStruct cstruct;
+    cstruct.nextInChain = this->nextInChain.getNext();
+    cstruct.label = static_cast<WGPUStringView>(this->label.to_cstruct());
+    return cstruct;
+}
+ShaderModuleDescriptor& ShaderModuleDescriptor::setLabel(const wgpu::StringView& value) & {
+    this->label = value;
+    return *this;
+}
+ShaderModuleDescriptor&& ShaderModuleDescriptor::setLabel(const wgpu::StringView& value) && {
+    this->label = value;
+    return std::move(*this);
+}
+ShaderModuleDescriptor& ShaderModuleDescriptor::setLabel(wgpu::StringView&& value) & {
+    this->label = std::move(value);
+    return *this;
+}
+ShaderModuleDescriptor&& ShaderModuleDescriptor::setLabel(wgpu::StringView&& value) && {
+    this->label = std::move(value);
     return std::move(*this);
 }
 ShaderSourceSPIRV::ShaderSourceSPIRV(const WGPUShaderSourceSPIRV& native) {
@@ -8469,15 +9043,6 @@ SupportedFeatures::CStruct SupportedFeatures::to_cstruct() const {
     cstruct.featureCount = static_cast<size_t>(this->features.size());
     return cstruct;
 }
-SupportedInstanceFeatures::SupportedInstanceFeatures(const WGPUSupportedInstanceFeatures& native) {
-    this->features = std::span(native.features, native.featureCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::InstanceFeatureName>(e); }) | std::ranges::to<std::vector<wgpu::InstanceFeatureName>>();
-}
-SupportedInstanceFeatures::CStruct SupportedInstanceFeatures::to_cstruct() const {
-    CStruct cstruct;
-    cstruct.features = reinterpret_cast<const WGPUInstanceFeatureName*>(this->features.data());
-    cstruct.featureCount = static_cast<size_t>(this->features.size());
-    return cstruct;
-}
 SupportedWGSLLanguageFeatures::SupportedWGSLLanguageFeatures(const WGPUSupportedWGSLLanguageFeatures& native) {
     this->features = std::span(native.features, native.featureCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::WGSLLanguageFeatureName>(e); }) | std::ranges::to<std::vector<wgpu::WGSLLanguageFeatureName>>();
 }
@@ -8512,34 +9077,6 @@ SurfaceCapabilities& SurfaceCapabilities::setUsages(wgpu::TextureUsage value) & 
 }
 SurfaceCapabilities&& SurfaceCapabilities::setUsages(wgpu::TextureUsage value) && {
     this->usages = std::move(value);
-    return std::move(*this);
-}
-SurfaceColorManagement::SurfaceColorManagement(const WGPUSurfaceColorManagement& native) {
-    this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
-    this->colorSpace = static_cast<wgpu::PredefinedColorSpace>(native.colorSpace);
-    this->toneMappingMode = static_cast<wgpu::ToneMappingMode>(native.toneMappingMode);
-}
-SurfaceColorManagement::CStruct SurfaceColorManagement::to_cstruct() const {
-    CStruct cstruct;
-    cstruct.chain = static_cast<WGPUChainedStruct>(this->chain.to_cstruct());
-    cstruct.colorSpace = static_cast<WGPUPredefinedColorSpace>(this->colorSpace);
-    cstruct.toneMappingMode = static_cast<WGPUToneMappingMode>(this->toneMappingMode);
-    return cstruct;
-}
-SurfaceColorManagement& SurfaceColorManagement::setColorSpace(wgpu::PredefinedColorSpace value) & {
-    this->colorSpace = std::move(value);
-    return *this;
-}
-SurfaceColorManagement&& SurfaceColorManagement::setColorSpace(wgpu::PredefinedColorSpace value) && {
-    this->colorSpace = std::move(value);
-    return std::move(*this);
-}
-SurfaceColorManagement& SurfaceColorManagement::setToneMappingMode(wgpu::ToneMappingMode value) & {
-    this->toneMappingMode = std::move(value);
-    return *this;
-}
-SurfaceColorManagement&& SurfaceColorManagement::setToneMappingMode(wgpu::ToneMappingMode value) && {
-    this->toneMappingMode = std::move(value);
     return std::move(*this);
 }
 SurfaceConfiguration::SurfaceConfiguration(const WGPUSurfaceConfiguration& native) {
@@ -8622,6 +9159,32 @@ SurfaceConfiguration& SurfaceConfiguration::setPresentMode(wgpu::PresentMode val
 }
 SurfaceConfiguration&& SurfaceConfiguration::setPresentMode(wgpu::PresentMode value) && {
     this->presentMode = std::move(value);
+    return std::move(*this);
+}
+SurfaceDescriptor::SurfaceDescriptor(const WGPUSurfaceDescriptor& native) {
+    this->nextInChain.setNext(native.nextInChain);
+    this->label = static_cast<wgpu::StringView>(native.label);
+}
+SurfaceDescriptor::CStruct SurfaceDescriptor::to_cstruct() const {
+    CStruct cstruct;
+    cstruct.nextInChain = this->nextInChain.getNext();
+    cstruct.label = static_cast<WGPUStringView>(this->label.to_cstruct());
+    return cstruct;
+}
+SurfaceDescriptor& SurfaceDescriptor::setLabel(const wgpu::StringView& value) & {
+    this->label = value;
+    return *this;
+}
+SurfaceDescriptor&& SurfaceDescriptor::setLabel(const wgpu::StringView& value) && {
+    this->label = value;
+    return std::move(*this);
+}
+SurfaceDescriptor& SurfaceDescriptor::setLabel(wgpu::StringView&& value) & {
+    this->label = std::move(value);
+    return *this;
+}
+SurfaceDescriptor&& SurfaceDescriptor::setLabel(wgpu::StringView&& value) && {
+    this->label = std::move(value);
     return std::move(*this);
 }
 SurfaceSourceAndroidNativeWindow::SurfaceSourceAndroidNativeWindow(const WGPUSurfaceSourceAndroidNativeWindow& native) {
@@ -8874,52 +9437,6 @@ TextureBindingLayout&& TextureBindingLayout::setMultisampled(wgpu::Bool value) &
     this->multisampled = std::move(value);
     return std::move(*this);
 }
-TextureComponentSwizzle::TextureComponentSwizzle(const WGPUTextureComponentSwizzle& native) {
-    this->r = static_cast<wgpu::ComponentSwizzle>(native.r);
-    this->g = static_cast<wgpu::ComponentSwizzle>(native.g);
-    this->b = static_cast<wgpu::ComponentSwizzle>(native.b);
-    this->a = static_cast<wgpu::ComponentSwizzle>(native.a);
-}
-TextureComponentSwizzle::CStruct TextureComponentSwizzle::to_cstruct() const {
-    CStruct cstruct;
-    cstruct.r = static_cast<WGPUComponentSwizzle>(this->r);
-    cstruct.g = static_cast<WGPUComponentSwizzle>(this->g);
-    cstruct.b = static_cast<WGPUComponentSwizzle>(this->b);
-    cstruct.a = static_cast<WGPUComponentSwizzle>(this->a);
-    return cstruct;
-}
-TextureComponentSwizzle& TextureComponentSwizzle::setR(wgpu::ComponentSwizzle value) & {
-    this->r = std::move(value);
-    return *this;
-}
-TextureComponentSwizzle&& TextureComponentSwizzle::setR(wgpu::ComponentSwizzle value) && {
-    this->r = std::move(value);
-    return std::move(*this);
-}
-TextureComponentSwizzle& TextureComponentSwizzle::setG(wgpu::ComponentSwizzle value) & {
-    this->g = std::move(value);
-    return *this;
-}
-TextureComponentSwizzle&& TextureComponentSwizzle::setG(wgpu::ComponentSwizzle value) && {
-    this->g = std::move(value);
-    return std::move(*this);
-}
-TextureComponentSwizzle& TextureComponentSwizzle::setB(wgpu::ComponentSwizzle value) & {
-    this->b = std::move(value);
-    return *this;
-}
-TextureComponentSwizzle&& TextureComponentSwizzle::setB(wgpu::ComponentSwizzle value) && {
-    this->b = std::move(value);
-    return std::move(*this);
-}
-TextureComponentSwizzle& TextureComponentSwizzle::setA(wgpu::ComponentSwizzle value) & {
-    this->a = std::move(value);
-    return *this;
-}
-TextureComponentSwizzle&& TextureComponentSwizzle::setA(wgpu::ComponentSwizzle value) && {
-    this->a = std::move(value);
-    return std::move(*this);
-}
 TextureViewDescriptor::TextureViewDescriptor(const WGPUTextureViewDescriptor& native) {
     this->nextInChain.setNext(native.nextInChain);
     this->label = static_cast<wgpu::StringView>(native.label);
@@ -9027,14 +9544,12 @@ TextureViewDescriptor&& TextureViewDescriptor::setUsage(wgpu::TextureUsage value
     return std::move(*this);
 }
 VertexAttribute::VertexAttribute(const WGPUVertexAttribute& native) {
-    this->nextInChain.setNext(native.nextInChain);
     this->format = static_cast<wgpu::VertexFormat>(native.format);
     this->offset = static_cast<uint64_t>(native.offset);
     this->shaderLocation = static_cast<uint32_t>(native.shaderLocation);
 }
 VertexAttribute::CStruct VertexAttribute::to_cstruct() const {
     CStruct cstruct;
-    cstruct.nextInChain = this->nextInChain.getNext();
     cstruct.format = static_cast<WGPUVertexFormat>(this->format);
     cstruct.offset = static_cast<uint64_t>(this->offset);
     cstruct.shaderLocation = static_cast<uint32_t>(this->shaderLocation);
@@ -9064,82 +9579,51 @@ VertexAttribute&& VertexAttribute::setShaderLocation(uint32_t value) && {
     this->shaderLocation = std::move(value);
     return std::move(*this);
 }
-BindGroupEntry::BindGroupEntry(const WGPUBindGroupEntry& native) {
+BindGroupDescriptor::BindGroupDescriptor(const WGPUBindGroupDescriptor& native) {
     this->nextInChain.setNext(native.nextInChain);
-    this->binding = static_cast<uint32_t>(native.binding);
-    this->buffer = static_cast<wgpu::Buffer>(native.buffer);
-    if (this->buffer) this->buffer.addRef();
-    this->offset = static_cast<uint64_t>(native.offset);
-    this->size = static_cast<uint64_t>(native.size);
-    this->sampler = static_cast<wgpu::Sampler>(native.sampler);
-    if (this->sampler) this->sampler.addRef();
-    this->textureView = static_cast<wgpu::TextureView>(native.textureView);
-    if (this->textureView) this->textureView.addRef();
+    this->label = static_cast<wgpu::StringView>(native.label);
+    this->layout = static_cast<wgpu::BindGroupLayout>(native.layout);
+    if (this->layout) this->layout.addRef();
+    this->entries = std::span(native.entries, native.entryCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::BindGroupEntry>(e); }) | std::ranges::to<std::vector<wgpu::BindGroupEntry>>();
 }
-BindGroupEntry::CStruct BindGroupEntry::to_cstruct() const {
+BindGroupDescriptor::CStruct BindGroupDescriptor::to_cstruct() const {
     CStruct cstruct;
     cstruct.nextInChain = this->nextInChain.getNext();
-    cstruct.binding = static_cast<uint32_t>(this->binding);
-    cstruct.buffer = static_cast<WGPUBuffer>(this->buffer);
-    cstruct.offset = static_cast<uint64_t>(this->offset);
-    cstruct.size = static_cast<uint64_t>(this->size);
-    cstruct.sampler = static_cast<WGPUSampler>(this->sampler);
-    cstruct.textureView = static_cast<WGPUTextureView>(this->textureView);
+    cstruct.label = static_cast<WGPUStringView>(this->label.to_cstruct());
+    cstruct.layout = static_cast<WGPUBindGroupLayout>(this->layout);
+    cstruct.entries_vec = this->entries | std::views::transform([](auto&& e) { return static_cast<WGPUBindGroupEntry>(e.to_cstruct()); }) | std::ranges::to<std::vector<WGPUBindGroupEntry>>();
+    cstruct.entries = cstruct.entries_vec.data();
+    cstruct.entryCount = static_cast<size_t>(cstruct.entries_vec.size());
     return cstruct;
 }
-BindGroupEntry& BindGroupEntry::setBinding(uint32_t value) & {
-    this->binding = std::move(value);
+BindGroupDescriptor& BindGroupDescriptor::setLabel(const wgpu::StringView& value) & {
+    this->label = value;
     return *this;
 }
-BindGroupEntry&& BindGroupEntry::setBinding(uint32_t value) && {
-    this->binding = std::move(value);
+BindGroupDescriptor&& BindGroupDescriptor::setLabel(const wgpu::StringView& value) && {
+    this->label = value;
     return std::move(*this);
 }
-BindGroupEntry& BindGroupEntry::setBuffer(wgpu::Buffer value) & {
-    this->buffer = std::move(value);
+BindGroupDescriptor& BindGroupDescriptor::setLabel(wgpu::StringView&& value) & {
+    this->label = std::move(value);
     return *this;
 }
-BindGroupEntry&& BindGroupEntry::setBuffer(wgpu::Buffer value) && {
-    this->buffer = std::move(value);
+BindGroupDescriptor&& BindGroupDescriptor::setLabel(wgpu::StringView&& value) && {
+    this->label = std::move(value);
     return std::move(*this);
 }
-BindGroupEntry& BindGroupEntry::setOffset(uint64_t value) & {
-    this->offset = std::move(value);
+BindGroupDescriptor& BindGroupDescriptor::setLayout(wgpu::BindGroupLayout value) & {
+    this->layout = std::move(value);
     return *this;
 }
-BindGroupEntry&& BindGroupEntry::setOffset(uint64_t value) && {
-    this->offset = std::move(value);
-    return std::move(*this);
-}
-BindGroupEntry& BindGroupEntry::setSize(uint64_t value) & {
-    this->size = std::move(value);
-    return *this;
-}
-BindGroupEntry&& BindGroupEntry::setSize(uint64_t value) && {
-    this->size = std::move(value);
-    return std::move(*this);
-}
-BindGroupEntry& BindGroupEntry::setSampler(wgpu::Sampler value) & {
-    this->sampler = std::move(value);
-    return *this;
-}
-BindGroupEntry&& BindGroupEntry::setSampler(wgpu::Sampler value) && {
-    this->sampler = std::move(value);
-    return std::move(*this);
-}
-BindGroupEntry& BindGroupEntry::setTextureView(wgpu::TextureView value) & {
-    this->textureView = std::move(value);
-    return *this;
-}
-BindGroupEntry&& BindGroupEntry::setTextureView(wgpu::TextureView value) && {
-    this->textureView = std::move(value);
+BindGroupDescriptor&& BindGroupDescriptor::setLayout(wgpu::BindGroupLayout value) && {
+    this->layout = std::move(value);
     return std::move(*this);
 }
 BindGroupLayoutEntry::BindGroupLayoutEntry(const WGPUBindGroupLayoutEntry& native) {
     this->nextInChain.setNext(native.nextInChain);
     this->binding = static_cast<uint32_t>(native.binding);
     this->visibility = static_cast<wgpu::ShaderStage>(native.visibility);
-    this->bindingArraySize = static_cast<uint32_t>(native.bindingArraySize);
     this->buffer = static_cast<wgpu::BufferBindingLayout>(native.buffer);
     this->sampler = static_cast<wgpu::SamplerBindingLayout>(native.sampler);
     this->texture = static_cast<wgpu::TextureBindingLayout>(native.texture);
@@ -9150,7 +9634,6 @@ BindGroupLayoutEntry::CStruct BindGroupLayoutEntry::to_cstruct() const {
     cstruct.nextInChain = this->nextInChain.getNext();
     cstruct.binding = static_cast<uint32_t>(this->binding);
     cstruct.visibility = static_cast<WGPUShaderStage>(this->visibility);
-    cstruct.bindingArraySize = static_cast<uint32_t>(this->bindingArraySize);
     cstruct.buffer = static_cast<WGPUBufferBindingLayout>(this->buffer.to_cstruct());
     cstruct.sampler = static_cast<WGPUSamplerBindingLayout>(this->sampler.to_cstruct());
     cstruct.texture = static_cast<WGPUTextureBindingLayout>(this->texture.to_cstruct());
@@ -9171,14 +9654,6 @@ BindGroupLayoutEntry& BindGroupLayoutEntry::setVisibility(wgpu::ShaderStage valu
 }
 BindGroupLayoutEntry&& BindGroupLayoutEntry::setVisibility(wgpu::ShaderStage value) && {
     this->visibility = std::move(value);
-    return std::move(*this);
-}
-BindGroupLayoutEntry& BindGroupLayoutEntry::setBindingArraySize(uint32_t value) & {
-    this->bindingArraySize = std::move(value);
-    return *this;
-}
-BindGroupLayoutEntry&& BindGroupLayoutEntry::setBindingArraySize(uint32_t value) && {
-    this->bindingArraySize = std::move(value);
     return std::move(*this);
 }
 BindGroupLayoutEntry& BindGroupLayoutEntry::setBuffer(const wgpu::BufferBindingLayout& value) & {
@@ -9303,7 +9778,7 @@ ComputePassDescriptor::ComputePassDescriptor(const WGPUComputePassDescriptor& na
     this->nextInChain.setNext(native.nextInChain);
     this->label = static_cast<wgpu::StringView>(native.label);
     if (native.timestampWrites != nullptr) {
-        this->timestampWrites = static_cast<wgpu::PassTimestampWrites>(*(native.timestampWrites));
+        this->timestampWrites = static_cast<wgpu::ComputePassTimestampWrites>(*(native.timestampWrites));
     } else {
         this->timestampWrites.reset();
     }
@@ -9313,8 +9788,7 @@ ComputePassDescriptor::CStruct ComputePassDescriptor::to_cstruct() const {
     cstruct.nextInChain = this->nextInChain.getNext();
     cstruct.label = static_cast<WGPUStringView>(this->label.to_cstruct());
     if (this->timestampWrites.has_value()) {
-        cstruct.timestampWrites_cstruct = this->timestampWrites->to_cstruct();
-        cstruct.timestampWrites = &(cstruct.timestampWrites_cstruct);
+        cstruct.timestampWrites = reinterpret_cast<const WGPUComputePassTimestampWrites*>(&(*(this->timestampWrites)));
     } else {
         cstruct.timestampWrites = nullptr;
     }
@@ -9336,61 +9810,20 @@ ComputePassDescriptor&& ComputePassDescriptor::setLabel(wgpu::StringView&& value
     this->label = std::move(value);
     return std::move(*this);
 }
-ComputePassDescriptor& ComputePassDescriptor::setTimestampWrites(const wgpu::PassTimestampWrites& value) & {
+ComputePassDescriptor& ComputePassDescriptor::setTimestampWrites(const wgpu::ComputePassTimestampWrites& value) & {
     this->timestampWrites.emplace(value);
     return *this;
 }
-ComputePassDescriptor&& ComputePassDescriptor::setTimestampWrites(const wgpu::PassTimestampWrites& value) && {
+ComputePassDescriptor&& ComputePassDescriptor::setTimestampWrites(const wgpu::ComputePassTimestampWrites& value) && {
     this->timestampWrites.emplace(value);
     return std::move(*this);
 }
-ComputePassDescriptor& ComputePassDescriptor::setTimestampWrites(wgpu::PassTimestampWrites&& value) & {
+ComputePassDescriptor& ComputePassDescriptor::setTimestampWrites(wgpu::ComputePassTimestampWrites&& value) & {
     this->timestampWrites.emplace(std::move(value));
     return *this;
 }
-ComputePassDescriptor&& ComputePassDescriptor::setTimestampWrites(wgpu::PassTimestampWrites&& value) && {
+ComputePassDescriptor&& ComputePassDescriptor::setTimestampWrites(wgpu::ComputePassTimestampWrites&& value) && {
     this->timestampWrites.emplace(std::move(value));
-    return std::move(*this);
-}
-ComputeState::ComputeState(const WGPUComputeState& native) {
-    this->nextInChain.setNext(native.nextInChain);
-    this->module = static_cast<wgpu::ShaderModule>(native.module);
-    if (this->module) this->module.addRef();
-    this->entryPoint = static_cast<wgpu::StringView>(native.entryPoint);
-    this->constants = std::span(native.constants, native.constantCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::ConstantEntry>(e); }) | std::ranges::to<std::vector<wgpu::ConstantEntry>>();
-}
-ComputeState::CStruct ComputeState::to_cstruct() const {
-    CStruct cstruct;
-    cstruct.nextInChain = this->nextInChain.getNext();
-    cstruct.module = static_cast<WGPUShaderModule>(this->module);
-    cstruct.entryPoint = static_cast<WGPUStringView>(this->entryPoint.to_cstruct());
-    cstruct.constants_vec = this->constants | std::views::transform([](auto&& e) { return static_cast<WGPUConstantEntry>(e.to_cstruct()); }) | std::ranges::to<std::vector<WGPUConstantEntry>>();
-    cstruct.constants = cstruct.constants_vec.data();
-    cstruct.constantCount = static_cast<size_t>(cstruct.constants_vec.size());
-    return cstruct;
-}
-ComputeState& ComputeState::setModule(wgpu::ShaderModule value) & {
-    this->module = std::move(value);
-    return *this;
-}
-ComputeState&& ComputeState::setModule(wgpu::ShaderModule value) && {
-    this->module = std::move(value);
-    return std::move(*this);
-}
-ComputeState& ComputeState::setEntryPoint(const wgpu::StringView& value) & {
-    this->entryPoint = value;
-    return *this;
-}
-ComputeState&& ComputeState::setEntryPoint(const wgpu::StringView& value) && {
-    this->entryPoint = value;
-    return std::move(*this);
-}
-ComputeState& ComputeState::setEntryPoint(wgpu::StringView&& value) & {
-    this->entryPoint = std::move(value);
-    return *this;
-}
-ComputeState&& ComputeState::setEntryPoint(wgpu::StringView&& value) && {
-    this->entryPoint = std::move(value);
     return std::move(*this);
 }
 DepthStencilState::DepthStencilState(const WGPUDepthStencilState& native) {
@@ -9663,40 +10096,69 @@ FutureWaitInfo&& FutureWaitInfo::setCompleted(wgpu::Bool value) && {
 }
 InstanceDescriptor::InstanceDescriptor(const WGPUInstanceDescriptor& native) {
     this->nextInChain.setNext(native.nextInChain);
-    this->requiredFeatures = std::span(native.requiredFeatures, native.requiredFeatureCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::InstanceFeatureName>(e); }) | std::ranges::to<std::vector<wgpu::InstanceFeatureName>>();
-    if (native.requiredLimits != nullptr) {
-        this->requiredLimits = static_cast<wgpu::InstanceLimits>(*(native.requiredLimits));
-    } else {
-        this->requiredLimits.reset();
-    }
+    this->features = static_cast<wgpu::InstanceCapabilities>(native.features);
 }
 InstanceDescriptor::CStruct InstanceDescriptor::to_cstruct() const {
     CStruct cstruct;
     cstruct.nextInChain = this->nextInChain.getNext();
-    cstruct.requiredFeatures = reinterpret_cast<const WGPUInstanceFeatureName*>(this->requiredFeatures.data());
-    cstruct.requiredFeatureCount = static_cast<size_t>(this->requiredFeatures.size());
-    if (this->requiredLimits.has_value()) {
-        cstruct.requiredLimits_cstruct = this->requiredLimits->to_cstruct();
-        cstruct.requiredLimits = &(cstruct.requiredLimits_cstruct);
-    } else {
-        cstruct.requiredLimits = nullptr;
-    }
+    cstruct.features = static_cast<WGPUInstanceCapabilities>(this->features.to_cstruct());
     return cstruct;
 }
-InstanceDescriptor& InstanceDescriptor::setRequiredLimits(const wgpu::InstanceLimits& value) & {
-    this->requiredLimits.emplace(value);
+InstanceDescriptor& InstanceDescriptor::setFeatures(const wgpu::InstanceCapabilities& value) & {
+    this->features = value;
     return *this;
 }
-InstanceDescriptor&& InstanceDescriptor::setRequiredLimits(const wgpu::InstanceLimits& value) && {
-    this->requiredLimits.emplace(value);
+InstanceDescriptor&& InstanceDescriptor::setFeatures(const wgpu::InstanceCapabilities& value) && {
+    this->features = value;
     return std::move(*this);
 }
-InstanceDescriptor& InstanceDescriptor::setRequiredLimits(wgpu::InstanceLimits&& value) & {
-    this->requiredLimits.emplace(std::move(value));
+InstanceDescriptor& InstanceDescriptor::setFeatures(wgpu::InstanceCapabilities&& value) & {
+    this->features = std::move(value);
     return *this;
 }
-InstanceDescriptor&& InstanceDescriptor::setRequiredLimits(wgpu::InstanceLimits&& value) && {
-    this->requiredLimits.emplace(std::move(value));
+InstanceDescriptor&& InstanceDescriptor::setFeatures(wgpu::InstanceCapabilities&& value) && {
+    this->features = std::move(value);
+    return std::move(*this);
+}
+ProgrammableStageDescriptor::ProgrammableStageDescriptor(const WGPUProgrammableStageDescriptor& native) {
+    this->nextInChain.setNext(native.nextInChain);
+    this->module = static_cast<wgpu::ShaderModule>(native.module);
+    if (this->module) this->module.addRef();
+    this->entryPoint = static_cast<wgpu::StringView>(native.entryPoint);
+    this->constants = std::span(native.constants, native.constantCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::ConstantEntry>(e); }) | std::ranges::to<std::vector<wgpu::ConstantEntry>>();
+}
+ProgrammableStageDescriptor::CStruct ProgrammableStageDescriptor::to_cstruct() const {
+    CStruct cstruct;
+    cstruct.nextInChain = this->nextInChain.getNext();
+    cstruct.module = static_cast<WGPUShaderModule>(this->module);
+    cstruct.entryPoint = static_cast<WGPUStringView>(this->entryPoint.to_cstruct());
+    cstruct.constants_vec = this->constants | std::views::transform([](auto&& e) { return static_cast<WGPUConstantEntry>(e.to_cstruct()); }) | std::ranges::to<std::vector<WGPUConstantEntry>>();
+    cstruct.constants = cstruct.constants_vec.data();
+    cstruct.constantCount = static_cast<size_t>(cstruct.constants_vec.size());
+    return cstruct;
+}
+ProgrammableStageDescriptor& ProgrammableStageDescriptor::setModule(wgpu::ShaderModule value) & {
+    this->module = std::move(value);
+    return *this;
+}
+ProgrammableStageDescriptor&& ProgrammableStageDescriptor::setModule(wgpu::ShaderModule value) && {
+    this->module = std::move(value);
+    return std::move(*this);
+}
+ProgrammableStageDescriptor& ProgrammableStageDescriptor::setEntryPoint(const wgpu::StringView& value) & {
+    this->entryPoint = value;
+    return *this;
+}
+ProgrammableStageDescriptor&& ProgrammableStageDescriptor::setEntryPoint(const wgpu::StringView& value) && {
+    this->entryPoint = value;
+    return std::move(*this);
+}
+ProgrammableStageDescriptor& ProgrammableStageDescriptor::setEntryPoint(wgpu::StringView&& value) & {
+    this->entryPoint = std::move(value);
+    return *this;
+}
+ProgrammableStageDescriptor&& ProgrammableStageDescriptor::setEntryPoint(wgpu::StringView&& value) && {
+    this->entryPoint = std::move(value);
     return std::move(*this);
 }
 RenderPassColorAttachment::RenderPassColorAttachment(const WGPURenderPassColorAttachment& native) {
@@ -9775,117 +10237,6 @@ RenderPassColorAttachment& RenderPassColorAttachment::setClearValue(wgpu::Color&
 }
 RenderPassColorAttachment&& RenderPassColorAttachment::setClearValue(wgpu::Color&& value) && {
     this->clearValue = std::move(value);
-    return std::move(*this);
-}
-RequestAdapterOptions::RequestAdapterOptions(const WGPURequestAdapterOptions& native) {
-    this->nextInChain.setNext(native.nextInChain);
-    this->featureLevel = static_cast<wgpu::FeatureLevel>(native.featureLevel);
-    this->powerPreference = static_cast<wgpu::PowerPreference>(native.powerPreference);
-    this->forceFallbackAdapter = static_cast<wgpu::Bool>(native.forceFallbackAdapter);
-    this->backendType = static_cast<wgpu::BackendType>(native.backendType);
-    this->compatibleSurface = static_cast<wgpu::Surface>(native.compatibleSurface);
-    if (this->compatibleSurface) this->compatibleSurface.addRef();
-}
-RequestAdapterOptions::CStruct RequestAdapterOptions::to_cstruct() const {
-    CStruct cstruct;
-    cstruct.nextInChain = this->nextInChain.getNext();
-    cstruct.featureLevel = static_cast<WGPUFeatureLevel>(this->featureLevel);
-    cstruct.powerPreference = static_cast<WGPUPowerPreference>(this->powerPreference);
-    cstruct.forceFallbackAdapter = static_cast<WGPUBool>(this->forceFallbackAdapter);
-    cstruct.backendType = static_cast<WGPUBackendType>(this->backendType);
-    cstruct.compatibleSurface = static_cast<WGPUSurface>(this->compatibleSurface);
-    return cstruct;
-}
-RequestAdapterOptions& RequestAdapterOptions::setFeatureLevel(wgpu::FeatureLevel value) & {
-    this->featureLevel = std::move(value);
-    return *this;
-}
-RequestAdapterOptions&& RequestAdapterOptions::setFeatureLevel(wgpu::FeatureLevel value) && {
-    this->featureLevel = std::move(value);
-    return std::move(*this);
-}
-RequestAdapterOptions& RequestAdapterOptions::setPowerPreference(wgpu::PowerPreference value) & {
-    this->powerPreference = std::move(value);
-    return *this;
-}
-RequestAdapterOptions&& RequestAdapterOptions::setPowerPreference(wgpu::PowerPreference value) && {
-    this->powerPreference = std::move(value);
-    return std::move(*this);
-}
-RequestAdapterOptions& RequestAdapterOptions::setForceFallbackAdapter(wgpu::Bool value) & {
-    this->forceFallbackAdapter = std::move(value);
-    return *this;
-}
-RequestAdapterOptions&& RequestAdapterOptions::setForceFallbackAdapter(wgpu::Bool value) && {
-    this->forceFallbackAdapter = std::move(value);
-    return std::move(*this);
-}
-RequestAdapterOptions& RequestAdapterOptions::setBackendType(wgpu::BackendType value) & {
-    this->backendType = std::move(value);
-    return *this;
-}
-RequestAdapterOptions&& RequestAdapterOptions::setBackendType(wgpu::BackendType value) && {
-    this->backendType = std::move(value);
-    return std::move(*this);
-}
-RequestAdapterOptions& RequestAdapterOptions::setCompatibleSurface(wgpu::Surface value) & {
-    this->compatibleSurface = std::move(value);
-    return *this;
-}
-RequestAdapterOptions&& RequestAdapterOptions::setCompatibleSurface(wgpu::Surface value) && {
-    this->compatibleSurface = std::move(value);
-    return std::move(*this);
-}
-ShaderModuleDescriptor::ShaderModuleDescriptor(const WGPUShaderModuleDescriptor& native) {
-    this->nextInChain.setNext(native.nextInChain);
-    this->label = static_cast<wgpu::StringView>(native.label);
-}
-ShaderModuleDescriptor::CStruct ShaderModuleDescriptor::to_cstruct() const {
-    CStruct cstruct;
-    cstruct.nextInChain = this->nextInChain.getNext();
-    cstruct.label = static_cast<WGPUStringView>(this->label.to_cstruct());
-    return cstruct;
-}
-ShaderModuleDescriptor& ShaderModuleDescriptor::setLabel(const wgpu::StringView& value) & {
-    this->label = value;
-    return *this;
-}
-ShaderModuleDescriptor&& ShaderModuleDescriptor::setLabel(const wgpu::StringView& value) && {
-    this->label = value;
-    return std::move(*this);
-}
-ShaderModuleDescriptor& ShaderModuleDescriptor::setLabel(wgpu::StringView&& value) & {
-    this->label = std::move(value);
-    return *this;
-}
-ShaderModuleDescriptor&& ShaderModuleDescriptor::setLabel(wgpu::StringView&& value) && {
-    this->label = std::move(value);
-    return std::move(*this);
-}
-SurfaceDescriptor::SurfaceDescriptor(const WGPUSurfaceDescriptor& native) {
-    this->nextInChain.setNext(native.nextInChain);
-    this->label = static_cast<wgpu::StringView>(native.label);
-}
-SurfaceDescriptor::CStruct SurfaceDescriptor::to_cstruct() const {
-    CStruct cstruct;
-    cstruct.nextInChain = this->nextInChain.getNext();
-    cstruct.label = static_cast<WGPUStringView>(this->label.to_cstruct());
-    return cstruct;
-}
-SurfaceDescriptor& SurfaceDescriptor::setLabel(const wgpu::StringView& value) & {
-    this->label = value;
-    return *this;
-}
-SurfaceDescriptor&& SurfaceDescriptor::setLabel(const wgpu::StringView& value) && {
-    this->label = value;
-    return std::move(*this);
-}
-SurfaceDescriptor& SurfaceDescriptor::setLabel(wgpu::StringView&& value) & {
-    this->label = std::move(value);
-    return *this;
-}
-SurfaceDescriptor&& SurfaceDescriptor::setLabel(wgpu::StringView&& value) && {
-    this->label = std::move(value);
     return std::move(*this);
 }
 TexelCopyBufferInfo::TexelCopyBufferInfo(const WGPUTexelCopyBufferInfo& native) {
@@ -9976,32 +10327,6 @@ TexelCopyTextureInfo& TexelCopyTextureInfo::setAspect(wgpu::TextureAspect value)
 }
 TexelCopyTextureInfo&& TexelCopyTextureInfo::setAspect(wgpu::TextureAspect value) && {
     this->aspect = std::move(value);
-    return std::move(*this);
-}
-TextureComponentSwizzleDescriptor::TextureComponentSwizzleDescriptor(const WGPUTextureComponentSwizzleDescriptor& native) {
-    this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
-    this->swizzle = static_cast<wgpu::TextureComponentSwizzle>(native.swizzle);
-}
-TextureComponentSwizzleDescriptor::CStruct TextureComponentSwizzleDescriptor::to_cstruct() const {
-    CStruct cstruct;
-    cstruct.chain = static_cast<WGPUChainedStruct>(this->chain.to_cstruct());
-    cstruct.swizzle = static_cast<WGPUTextureComponentSwizzle>(this->swizzle.to_cstruct());
-    return cstruct;
-}
-TextureComponentSwizzleDescriptor& TextureComponentSwizzleDescriptor::setSwizzle(const wgpu::TextureComponentSwizzle& value) & {
-    this->swizzle = value;
-    return *this;
-}
-TextureComponentSwizzleDescriptor&& TextureComponentSwizzleDescriptor::setSwizzle(const wgpu::TextureComponentSwizzle& value) && {
-    this->swizzle = value;
-    return std::move(*this);
-}
-TextureComponentSwizzleDescriptor& TextureComponentSwizzleDescriptor::setSwizzle(wgpu::TextureComponentSwizzle&& value) & {
-    this->swizzle = std::move(value);
-    return *this;
-}
-TextureComponentSwizzleDescriptor&& TextureComponentSwizzleDescriptor::setSwizzle(wgpu::TextureComponentSwizzle&& value) && {
-    this->swizzle = std::move(value);
     return std::move(*this);
 }
 TextureDescriptor::TextureDescriptor(const WGPUTextureDescriptor& native) {
@@ -10102,19 +10427,16 @@ TextureDescriptor&& TextureDescriptor::setSampleCount(uint32_t value) && {
     return std::move(*this);
 }
 VertexBufferLayout::VertexBufferLayout(const WGPUVertexBufferLayout& native) {
-    this->nextInChain.setNext(native.nextInChain);
     this->stepMode = static_cast<wgpu::VertexStepMode>(native.stepMode);
     this->arrayStride = static_cast<uint64_t>(native.arrayStride);
     this->attributes = std::span(native.attributes, native.attributeCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::VertexAttribute>(e); }) | std::ranges::to<std::vector<wgpu::VertexAttribute>>();
 }
 VertexBufferLayout::CStruct VertexBufferLayout::to_cstruct() const {
     CStruct cstruct;
-    cstruct.nextInChain = this->nextInChain.getNext();
     cstruct.stepMode = static_cast<WGPUVertexStepMode>(this->stepMode);
     cstruct.arrayStride = static_cast<uint64_t>(this->arrayStride);
-    cstruct.attributes_vec = this->attributes | std::views::transform([](auto&& e) { return static_cast<WGPUVertexAttribute>(e.to_cstruct()); }) | std::ranges::to<std::vector<WGPUVertexAttribute>>();
-    cstruct.attributes = cstruct.attributes_vec.data();
-    cstruct.attributeCount = static_cast<size_t>(cstruct.attributes_vec.size());
+    cstruct.attributes = reinterpret_cast<const WGPUVertexAttribute*>(this->attributes.data());
+    cstruct.attributeCount = static_cast<size_t>(this->attributes.size());
     return cstruct;
 }
 VertexBufferLayout& VertexBufferLayout::setStepMode(wgpu::VertexStepMode value) & {
@@ -10131,47 +10453,6 @@ VertexBufferLayout& VertexBufferLayout::setArrayStride(uint64_t value) & {
 }
 VertexBufferLayout&& VertexBufferLayout::setArrayStride(uint64_t value) && {
     this->arrayStride = std::move(value);
-    return std::move(*this);
-}
-BindGroupDescriptor::BindGroupDescriptor(const WGPUBindGroupDescriptor& native) {
-    this->nextInChain.setNext(native.nextInChain);
-    this->label = static_cast<wgpu::StringView>(native.label);
-    this->layout = static_cast<wgpu::BindGroupLayout>(native.layout);
-    if (this->layout) this->layout.addRef();
-    this->entries = std::span(native.entries, native.entryCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::BindGroupEntry>(e); }) | std::ranges::to<std::vector<wgpu::BindGroupEntry>>();
-}
-BindGroupDescriptor::CStruct BindGroupDescriptor::to_cstruct() const {
-    CStruct cstruct;
-    cstruct.nextInChain = this->nextInChain.getNext();
-    cstruct.label = static_cast<WGPUStringView>(this->label.to_cstruct());
-    cstruct.layout = static_cast<WGPUBindGroupLayout>(this->layout);
-    cstruct.entries_vec = this->entries | std::views::transform([](auto&& e) { return static_cast<WGPUBindGroupEntry>(e.to_cstruct()); }) | std::ranges::to<std::vector<WGPUBindGroupEntry>>();
-    cstruct.entries = cstruct.entries_vec.data();
-    cstruct.entryCount = static_cast<size_t>(cstruct.entries_vec.size());
-    return cstruct;
-}
-BindGroupDescriptor& BindGroupDescriptor::setLabel(const wgpu::StringView& value) & {
-    this->label = value;
-    return *this;
-}
-BindGroupDescriptor&& BindGroupDescriptor::setLabel(const wgpu::StringView& value) && {
-    this->label = value;
-    return std::move(*this);
-}
-BindGroupDescriptor& BindGroupDescriptor::setLabel(wgpu::StringView&& value) & {
-    this->label = std::move(value);
-    return *this;
-}
-BindGroupDescriptor&& BindGroupDescriptor::setLabel(wgpu::StringView&& value) && {
-    this->label = std::move(value);
-    return std::move(*this);
-}
-BindGroupDescriptor& BindGroupDescriptor::setLayout(wgpu::BindGroupLayout value) & {
-    this->layout = std::move(value);
-    return *this;
-}
-BindGroupDescriptor&& BindGroupDescriptor::setLayout(wgpu::BindGroupLayout value) && {
-    this->layout = std::move(value);
     return std::move(*this);
 }
 BindGroupLayoutDescriptor::BindGroupLayoutDescriptor(const WGPUBindGroupLayoutDescriptor& native) {
@@ -10263,7 +10544,7 @@ ComputePipelineDescriptor::ComputePipelineDescriptor(const WGPUComputePipelineDe
     this->label = static_cast<wgpu::StringView>(native.label);
     this->layout = static_cast<wgpu::PipelineLayout>(native.layout);
     if (this->layout) this->layout.addRef();
-    this->compute = static_cast<wgpu::ComputeState>(native.compute);
+    this->compute = static_cast<wgpu::ProgrammableStageDescriptor>(native.compute);
 }
 ComputePipelineDescriptor::CStruct ComputePipelineDescriptor::to_cstruct() const {
     CStruct cstruct;
@@ -10271,7 +10552,7 @@ ComputePipelineDescriptor::CStruct ComputePipelineDescriptor::to_cstruct() const
     cstruct.label = static_cast<WGPUStringView>(this->label.to_cstruct());
     cstruct.layout = static_cast<WGPUPipelineLayout>(this->layout);
     cstruct.compute_cstruct = this->compute.to_cstruct();
-    cstruct.compute = static_cast<WGPUComputeState>(cstruct.compute_cstruct);
+    cstruct.compute = static_cast<WGPUProgrammableStageDescriptor>(cstruct.compute_cstruct);
     return cstruct;
 }
 ComputePipelineDescriptor& ComputePipelineDescriptor::setLabel(const wgpu::StringView& value) & {
@@ -10298,19 +10579,19 @@ ComputePipelineDescriptor&& ComputePipelineDescriptor::setLayout(wgpu::PipelineL
     this->layout = std::move(value);
     return std::move(*this);
 }
-ComputePipelineDescriptor& ComputePipelineDescriptor::setCompute(const wgpu::ComputeState& value) & {
+ComputePipelineDescriptor& ComputePipelineDescriptor::setCompute(const wgpu::ProgrammableStageDescriptor& value) & {
     this->compute = value;
     return *this;
 }
-ComputePipelineDescriptor&& ComputePipelineDescriptor::setCompute(const wgpu::ComputeState& value) && {
+ComputePipelineDescriptor&& ComputePipelineDescriptor::setCompute(const wgpu::ProgrammableStageDescriptor& value) && {
     this->compute = value;
     return std::move(*this);
 }
-ComputePipelineDescriptor& ComputePipelineDescriptor::setCompute(wgpu::ComputeState&& value) & {
+ComputePipelineDescriptor& ComputePipelineDescriptor::setCompute(wgpu::ProgrammableStageDescriptor&& value) & {
     this->compute = std::move(value);
     return *this;
 }
-ComputePipelineDescriptor&& ComputePipelineDescriptor::setCompute(wgpu::ComputeState&& value) && {
+ComputePipelineDescriptor&& ComputePipelineDescriptor::setCompute(wgpu::ProgrammableStageDescriptor&& value) && {
     this->compute = std::move(value);
     return std::move(*this);
 }
@@ -10326,7 +10607,7 @@ RenderPassDescriptor::RenderPassDescriptor(const WGPURenderPassDescriptor& nativ
     this->occlusionQuerySet = static_cast<wgpu::QuerySet>(native.occlusionQuerySet);
     if (this->occlusionQuerySet) this->occlusionQuerySet.addRef();
     if (native.timestampWrites != nullptr) {
-        this->timestampWrites = static_cast<wgpu::PassTimestampWrites>(*(native.timestampWrites));
+        this->timestampWrites = static_cast<wgpu::RenderPassTimestampWrites>(*(native.timestampWrites));
     } else {
         this->timestampWrites.reset();
     }
@@ -10339,15 +10620,13 @@ RenderPassDescriptor::CStruct RenderPassDescriptor::to_cstruct() const {
     cstruct.colorAttachments = cstruct.colorAttachments_vec.data();
     cstruct.colorAttachmentCount = static_cast<size_t>(cstruct.colorAttachments_vec.size());
     if (this->depthStencilAttachment.has_value()) {
-        cstruct.depthStencilAttachment_cstruct = this->depthStencilAttachment->to_cstruct();
-        cstruct.depthStencilAttachment = &(cstruct.depthStencilAttachment_cstruct);
+        cstruct.depthStencilAttachment = reinterpret_cast<const WGPURenderPassDepthStencilAttachment*>(&(*(this->depthStencilAttachment)));
     } else {
         cstruct.depthStencilAttachment = nullptr;
     }
     cstruct.occlusionQuerySet = static_cast<WGPUQuerySet>(this->occlusionQuerySet);
     if (this->timestampWrites.has_value()) {
-        cstruct.timestampWrites_cstruct = this->timestampWrites->to_cstruct();
-        cstruct.timestampWrites = &(cstruct.timestampWrites_cstruct);
+        cstruct.timestampWrites = reinterpret_cast<const WGPURenderPassTimestampWrites*>(&(*(this->timestampWrites)));
     } else {
         cstruct.timestampWrites = nullptr;
     }
@@ -10393,19 +10672,19 @@ RenderPassDescriptor&& RenderPassDescriptor::setOcclusionQuerySet(wgpu::QuerySet
     this->occlusionQuerySet = std::move(value);
     return std::move(*this);
 }
-RenderPassDescriptor& RenderPassDescriptor::setTimestampWrites(const wgpu::PassTimestampWrites& value) & {
+RenderPassDescriptor& RenderPassDescriptor::setTimestampWrites(const wgpu::RenderPassTimestampWrites& value) & {
     this->timestampWrites.emplace(value);
     return *this;
 }
-RenderPassDescriptor&& RenderPassDescriptor::setTimestampWrites(const wgpu::PassTimestampWrites& value) && {
+RenderPassDescriptor&& RenderPassDescriptor::setTimestampWrites(const wgpu::RenderPassTimestampWrites& value) && {
     this->timestampWrites.emplace(value);
     return std::move(*this);
 }
-RenderPassDescriptor& RenderPassDescriptor::setTimestampWrites(wgpu::PassTimestampWrites&& value) & {
+RenderPassDescriptor& RenderPassDescriptor::setTimestampWrites(wgpu::RenderPassTimestampWrites&& value) & {
     this->timestampWrites.emplace(std::move(value));
     return *this;
 }
-RenderPassDescriptor&& RenderPassDescriptor::setTimestampWrites(wgpu::PassTimestampWrites&& value) && {
+RenderPassDescriptor&& RenderPassDescriptor::setTimestampWrites(wgpu::RenderPassTimestampWrites&& value) && {
     this->timestampWrites.emplace(std::move(value));
     return std::move(*this);
 }
@@ -10425,8 +10704,7 @@ VertexState::CStruct VertexState::to_cstruct() const {
     cstruct.constants_vec = this->constants | std::views::transform([](auto&& e) { return static_cast<WGPUConstantEntry>(e.to_cstruct()); }) | std::ranges::to<std::vector<WGPUConstantEntry>>();
     cstruct.constants = cstruct.constants_vec.data();
     cstruct.constantCount = static_cast<size_t>(cstruct.constants_vec.size());
-    cstruct.buffers_cstruct_vec = this->buffers | std::views::transform([](auto&& e) { return e.to_cstruct(); }) | std::ranges::to<std::vector<wgpu::VertexBufferLayout::CStruct>>();
-    cstruct.buffers_vec = cstruct.buffers_cstruct_vec | std::views::transform([](auto&& e) { return static_cast<WGPUVertexBufferLayout>(e); }) | std::ranges::to<std::vector<WGPUVertexBufferLayout>>();
+    cstruct.buffers_vec = this->buffers | std::views::transform([](auto&& e) { return static_cast<WGPUVertexBufferLayout>(e.to_cstruct()); }) | std::ranges::to<std::vector<WGPUVertexBufferLayout>>();
     cstruct.buffers = cstruct.buffers_vec.data();
     cstruct.bufferCount = static_cast<size_t>(cstruct.buffers_vec.size());
     return cstruct;
@@ -10646,6 +10924,814 @@ RenderPipelineDescriptor&& RenderPipelineDescriptor::setFragment(wgpu::FragmentS
     this->fragment.emplace(std::move(value));
     return std::move(*this);
 }
+InstanceExtras::InstanceExtras(const WGPUInstanceExtras& native) {
+    this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
+    this->backends = static_cast<wgpu::InstanceBackend>(native.backends);
+    this->flags = static_cast<wgpu::InstanceFlag>(native.flags);
+    this->dx12ShaderCompiler = static_cast<wgpu::Dx12Compiler>(native.dx12ShaderCompiler);
+    this->gles3MinorVersion = static_cast<wgpu::Gles3MinorVersion>(native.gles3MinorVersion);
+    this->dxilPath = static_cast<wgpu::StringView>(native.dxilPath);
+    this->dxcPath = static_cast<wgpu::StringView>(native.dxcPath);
+}
+InstanceExtras::CStruct InstanceExtras::to_cstruct() const {
+    CStruct cstruct;
+    cstruct.chain = static_cast<WGPUChainedStruct>(this->chain.to_cstruct());
+    cstruct.backends = static_cast<WGPUInstanceBackend>(this->backends);
+    cstruct.flags = static_cast<WGPUInstanceFlag>(this->flags);
+    cstruct.dx12ShaderCompiler = static_cast<WGPUDx12Compiler>(this->dx12ShaderCompiler);
+    cstruct.gles3MinorVersion = static_cast<WGPUGles3MinorVersion>(this->gles3MinorVersion);
+    cstruct.dxilPath = static_cast<WGPUStringView>(this->dxilPath.to_cstruct());
+    cstruct.dxcPath = static_cast<WGPUStringView>(this->dxcPath.to_cstruct());
+    return cstruct;
+}
+InstanceExtras& InstanceExtras::setBackends(wgpu::InstanceBackend value) & {
+    this->backends = std::move(value);
+    return *this;
+}
+InstanceExtras&& InstanceExtras::setBackends(wgpu::InstanceBackend value) && {
+    this->backends = std::move(value);
+    return std::move(*this);
+}
+InstanceExtras& InstanceExtras::setFlags(wgpu::InstanceFlag value) & {
+    this->flags = std::move(value);
+    return *this;
+}
+InstanceExtras&& InstanceExtras::setFlags(wgpu::InstanceFlag value) && {
+    this->flags = std::move(value);
+    return std::move(*this);
+}
+InstanceExtras& InstanceExtras::setDx12ShaderCompiler(wgpu::Dx12Compiler value) & {
+    this->dx12ShaderCompiler = std::move(value);
+    return *this;
+}
+InstanceExtras&& InstanceExtras::setDx12ShaderCompiler(wgpu::Dx12Compiler value) && {
+    this->dx12ShaderCompiler = std::move(value);
+    return std::move(*this);
+}
+InstanceExtras& InstanceExtras::setGles3MinorVersion(wgpu::Gles3MinorVersion value) & {
+    this->gles3MinorVersion = std::move(value);
+    return *this;
+}
+InstanceExtras&& InstanceExtras::setGles3MinorVersion(wgpu::Gles3MinorVersion value) && {
+    this->gles3MinorVersion = std::move(value);
+    return std::move(*this);
+}
+InstanceExtras& InstanceExtras::setDxilPath(const wgpu::StringView& value) & {
+    this->dxilPath = value;
+    return *this;
+}
+InstanceExtras&& InstanceExtras::setDxilPath(const wgpu::StringView& value) && {
+    this->dxilPath = value;
+    return std::move(*this);
+}
+InstanceExtras& InstanceExtras::setDxilPath(wgpu::StringView&& value) & {
+    this->dxilPath = std::move(value);
+    return *this;
+}
+InstanceExtras&& InstanceExtras::setDxilPath(wgpu::StringView&& value) && {
+    this->dxilPath = std::move(value);
+    return std::move(*this);
+}
+InstanceExtras& InstanceExtras::setDxcPath(const wgpu::StringView& value) & {
+    this->dxcPath = value;
+    return *this;
+}
+InstanceExtras&& InstanceExtras::setDxcPath(const wgpu::StringView& value) && {
+    this->dxcPath = value;
+    return std::move(*this);
+}
+InstanceExtras& InstanceExtras::setDxcPath(wgpu::StringView&& value) & {
+    this->dxcPath = std::move(value);
+    return *this;
+}
+InstanceExtras&& InstanceExtras::setDxcPath(wgpu::StringView&& value) && {
+    this->dxcPath = std::move(value);
+    return std::move(*this);
+}
+DeviceExtras::DeviceExtras(const WGPUDeviceExtras& native) {
+    this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
+    this->tracePath = static_cast<wgpu::StringView>(native.tracePath);
+}
+DeviceExtras::CStruct DeviceExtras::to_cstruct() const {
+    CStruct cstruct;
+    cstruct.chain = static_cast<WGPUChainedStruct>(this->chain.to_cstruct());
+    cstruct.tracePath = static_cast<WGPUStringView>(this->tracePath.to_cstruct());
+    return cstruct;
+}
+DeviceExtras& DeviceExtras::setTracePath(const wgpu::StringView& value) & {
+    this->tracePath = value;
+    return *this;
+}
+DeviceExtras&& DeviceExtras::setTracePath(const wgpu::StringView& value) && {
+    this->tracePath = value;
+    return std::move(*this);
+}
+DeviceExtras& DeviceExtras::setTracePath(wgpu::StringView&& value) & {
+    this->tracePath = std::move(value);
+    return *this;
+}
+DeviceExtras&& DeviceExtras::setTracePath(wgpu::StringView&& value) && {
+    this->tracePath = std::move(value);
+    return std::move(*this);
+}
+NativeLimits::NativeLimits(const WGPUNativeLimits& native) {
+    this->chain = static_cast<wgpu::ChainedStructOut>(native.chain);
+    this->maxPushConstantSize = static_cast<uint32_t>(native.maxPushConstantSize);
+    this->maxNonSamplerBindings = static_cast<uint32_t>(native.maxNonSamplerBindings);
+}
+NativeLimits::CStruct NativeLimits::to_cstruct() const {
+    CStruct cstruct;
+    cstruct.chain = static_cast<WGPUChainedStructOut>(this->chain.to_cstruct());
+    cstruct.maxPushConstantSize = static_cast<uint32_t>(this->maxPushConstantSize);
+    cstruct.maxNonSamplerBindings = static_cast<uint32_t>(this->maxNonSamplerBindings);
+    return cstruct;
+}
+NativeLimits& NativeLimits::setChain(const wgpu::ChainedStructOut& value) & {
+    this->chain = value;
+    return *this;
+}
+NativeLimits&& NativeLimits::setChain(const wgpu::ChainedStructOut& value) && {
+    this->chain = value;
+    return std::move(*this);
+}
+NativeLimits& NativeLimits::setChain(wgpu::ChainedStructOut&& value) & {
+    this->chain = std::move(value);
+    return *this;
+}
+NativeLimits&& NativeLimits::setChain(wgpu::ChainedStructOut&& value) && {
+    this->chain = std::move(value);
+    return std::move(*this);
+}
+NativeLimits& NativeLimits::setMaxPushConstantSize(uint32_t value) & {
+    this->maxPushConstantSize = std::move(value);
+    return *this;
+}
+NativeLimits&& NativeLimits::setMaxPushConstantSize(uint32_t value) && {
+    this->maxPushConstantSize = std::move(value);
+    return std::move(*this);
+}
+NativeLimits& NativeLimits::setMaxNonSamplerBindings(uint32_t value) & {
+    this->maxNonSamplerBindings = std::move(value);
+    return *this;
+}
+NativeLimits&& NativeLimits::setMaxNonSamplerBindings(uint32_t value) && {
+    this->maxNonSamplerBindings = std::move(value);
+    return std::move(*this);
+}
+PushConstantRange::PushConstantRange(const WGPUPushConstantRange& native) {
+    this->stages = static_cast<wgpu::ShaderStage>(native.stages);
+    this->start = static_cast<uint32_t>(native.start);
+    this->end = static_cast<uint32_t>(native.end);
+}
+PushConstantRange::CStruct PushConstantRange::to_cstruct() const {
+    CStruct cstruct;
+    cstruct.stages = static_cast<WGPUShaderStage>(this->stages);
+    cstruct.start = static_cast<uint32_t>(this->start);
+    cstruct.end = static_cast<uint32_t>(this->end);
+    return cstruct;
+}
+PushConstantRange& PushConstantRange::setStages(wgpu::ShaderStage value) & {
+    this->stages = std::move(value);
+    return *this;
+}
+PushConstantRange&& PushConstantRange::setStages(wgpu::ShaderStage value) && {
+    this->stages = std::move(value);
+    return std::move(*this);
+}
+PushConstantRange& PushConstantRange::setStart(uint32_t value) & {
+    this->start = std::move(value);
+    return *this;
+}
+PushConstantRange&& PushConstantRange::setStart(uint32_t value) && {
+    this->start = std::move(value);
+    return std::move(*this);
+}
+PushConstantRange& PushConstantRange::setEnd(uint32_t value) & {
+    this->end = std::move(value);
+    return *this;
+}
+PushConstantRange&& PushConstantRange::setEnd(uint32_t value) && {
+    this->end = std::move(value);
+    return std::move(*this);
+}
+PipelineLayoutExtras::PipelineLayoutExtras(const WGPUPipelineLayoutExtras& native) {
+    this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
+    this->pushConstantRanges = std::span(native.pushConstantRanges, native.pushConstantRangeCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::PushConstantRange>(e); }) | std::ranges::to<std::vector<wgpu::PushConstantRange>>();
+}
+PipelineLayoutExtras::CStruct PipelineLayoutExtras::to_cstruct() const {
+    CStruct cstruct;
+    cstruct.chain = static_cast<WGPUChainedStruct>(this->chain.to_cstruct());
+    cstruct.pushConstantRanges = reinterpret_cast<const WGPUPushConstantRange*>(this->pushConstantRanges.data());
+    cstruct.pushConstantRangeCount = static_cast<size_t>(this->pushConstantRanges.size());
+    return cstruct;
+}
+ShaderDefine::ShaderDefine(const WGPUShaderDefine& native) {
+    this->name = static_cast<wgpu::StringView>(native.name);
+    this->value = static_cast<wgpu::StringView>(native.value);
+}
+ShaderDefine::CStruct ShaderDefine::to_cstruct() const {
+    CStruct cstruct;
+    cstruct.name = static_cast<WGPUStringView>(this->name.to_cstruct());
+    cstruct.value = static_cast<WGPUStringView>(this->value.to_cstruct());
+    return cstruct;
+}
+ShaderDefine& ShaderDefine::setName(const wgpu::StringView& value) & {
+    this->name = value;
+    return *this;
+}
+ShaderDefine&& ShaderDefine::setName(const wgpu::StringView& value) && {
+    this->name = value;
+    return std::move(*this);
+}
+ShaderDefine& ShaderDefine::setName(wgpu::StringView&& value) & {
+    this->name = std::move(value);
+    return *this;
+}
+ShaderDefine&& ShaderDefine::setName(wgpu::StringView&& value) && {
+    this->name = std::move(value);
+    return std::move(*this);
+}
+ShaderDefine& ShaderDefine::setValue(const wgpu::StringView& value) & {
+    this->value = value;
+    return *this;
+}
+ShaderDefine&& ShaderDefine::setValue(const wgpu::StringView& value) && {
+    this->value = value;
+    return std::move(*this);
+}
+ShaderDefine& ShaderDefine::setValue(wgpu::StringView&& value) & {
+    this->value = std::move(value);
+    return *this;
+}
+ShaderDefine&& ShaderDefine::setValue(wgpu::StringView&& value) && {
+    this->value = std::move(value);
+    return std::move(*this);
+}
+ShaderModuleGLSLDescriptor::ShaderModuleGLSLDescriptor(const WGPUShaderModuleGLSLDescriptor& native) {
+    this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
+    this->stage = static_cast<wgpu::ShaderStage>(native.stage);
+    this->code = static_cast<wgpu::StringView>(native.code);
+    this->defines = std::span(native.defines, native.defineCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::ShaderDefine>(e); }) | std::ranges::to<std::vector<wgpu::ShaderDefine>>();
+}
+ShaderModuleGLSLDescriptor::CStruct ShaderModuleGLSLDescriptor::to_cstruct() const {
+    CStruct cstruct;
+    cstruct.chain = static_cast<WGPUChainedStruct>(this->chain.to_cstruct());
+    cstruct.stage = static_cast<WGPUShaderStage>(this->stage);
+    cstruct.code = static_cast<WGPUStringView>(this->code.to_cstruct());
+    cstruct.defines = reinterpret_cast<WGPUShaderDefine*>(this->defines.data());
+    cstruct.defineCount = static_cast<uint32_t>(this->defines.size());
+    return cstruct;
+}
+ShaderModuleGLSLDescriptor& ShaderModuleGLSLDescriptor::setStage(wgpu::ShaderStage value) & {
+    this->stage = std::move(value);
+    return *this;
+}
+ShaderModuleGLSLDescriptor&& ShaderModuleGLSLDescriptor::setStage(wgpu::ShaderStage value) && {
+    this->stage = std::move(value);
+    return std::move(*this);
+}
+ShaderModuleGLSLDescriptor& ShaderModuleGLSLDescriptor::setCode(const wgpu::StringView& value) & {
+    this->code = value;
+    return *this;
+}
+ShaderModuleGLSLDescriptor&& ShaderModuleGLSLDescriptor::setCode(const wgpu::StringView& value) && {
+    this->code = value;
+    return std::move(*this);
+}
+ShaderModuleGLSLDescriptor& ShaderModuleGLSLDescriptor::setCode(wgpu::StringView&& value) & {
+    this->code = std::move(value);
+    return *this;
+}
+ShaderModuleGLSLDescriptor&& ShaderModuleGLSLDescriptor::setCode(wgpu::StringView&& value) && {
+    this->code = std::move(value);
+    return std::move(*this);
+}
+ShaderModuleDescriptorSpirV::ShaderModuleDescriptorSpirV(const WGPUShaderModuleDescriptorSpirV& native) {
+    this->label = static_cast<wgpu::StringView>(native.label);
+    this->sourceSize = static_cast<uint32_t>(native.sourceSize);
+    this->source = static_cast<uint32_t const*>(native.source);
+}
+ShaderModuleDescriptorSpirV::CStruct ShaderModuleDescriptorSpirV::to_cstruct() const {
+    CStruct cstruct;
+    cstruct.label = static_cast<WGPUStringView>(this->label.to_cstruct());
+    cstruct.sourceSize = static_cast<uint32_t>(this->sourceSize);
+    cstruct.source = static_cast<const uint32_t*>(this->source);
+    return cstruct;
+}
+ShaderModuleDescriptorSpirV& ShaderModuleDescriptorSpirV::setLabel(const wgpu::StringView& value) & {
+    this->label = value;
+    return *this;
+}
+ShaderModuleDescriptorSpirV&& ShaderModuleDescriptorSpirV::setLabel(const wgpu::StringView& value) && {
+    this->label = value;
+    return std::move(*this);
+}
+ShaderModuleDescriptorSpirV& ShaderModuleDescriptorSpirV::setLabel(wgpu::StringView&& value) & {
+    this->label = std::move(value);
+    return *this;
+}
+ShaderModuleDescriptorSpirV&& ShaderModuleDescriptorSpirV::setLabel(wgpu::StringView&& value) && {
+    this->label = std::move(value);
+    return std::move(*this);
+}
+ShaderModuleDescriptorSpirV& ShaderModuleDescriptorSpirV::setSourceSize(uint32_t value) & {
+    this->sourceSize = std::move(value);
+    return *this;
+}
+ShaderModuleDescriptorSpirV&& ShaderModuleDescriptorSpirV::setSourceSize(uint32_t value) && {
+    this->sourceSize = std::move(value);
+    return std::move(*this);
+}
+ShaderModuleDescriptorSpirV& ShaderModuleDescriptorSpirV::setSource(uint32_t const* value) & {
+    this->source = std::move(value);
+    return *this;
+}
+ShaderModuleDescriptorSpirV&& ShaderModuleDescriptorSpirV::setSource(uint32_t const* value) && {
+    this->source = std::move(value);
+    return std::move(*this);
+}
+RegistryReport::RegistryReport(const WGPURegistryReport& native) {
+    this->numAllocated = static_cast<size_t>(native.numAllocated);
+    this->numKeptFromUser = static_cast<size_t>(native.numKeptFromUser);
+    this->numReleasedFromUser = static_cast<size_t>(native.numReleasedFromUser);
+    this->elementSize = static_cast<size_t>(native.elementSize);
+}
+RegistryReport::CStruct RegistryReport::to_cstruct() const {
+    CStruct cstruct;
+    cstruct.numAllocated = static_cast<size_t>(this->numAllocated);
+    cstruct.numKeptFromUser = static_cast<size_t>(this->numKeptFromUser);
+    cstruct.numReleasedFromUser = static_cast<size_t>(this->numReleasedFromUser);
+    cstruct.elementSize = static_cast<size_t>(this->elementSize);
+    return cstruct;
+}
+RegistryReport& RegistryReport::setNumAllocated(size_t value) & {
+    this->numAllocated = std::move(value);
+    return *this;
+}
+RegistryReport&& RegistryReport::setNumAllocated(size_t value) && {
+    this->numAllocated = std::move(value);
+    return std::move(*this);
+}
+RegistryReport& RegistryReport::setNumKeptFromUser(size_t value) & {
+    this->numKeptFromUser = std::move(value);
+    return *this;
+}
+RegistryReport&& RegistryReport::setNumKeptFromUser(size_t value) && {
+    this->numKeptFromUser = std::move(value);
+    return std::move(*this);
+}
+RegistryReport& RegistryReport::setNumReleasedFromUser(size_t value) & {
+    this->numReleasedFromUser = std::move(value);
+    return *this;
+}
+RegistryReport&& RegistryReport::setNumReleasedFromUser(size_t value) && {
+    this->numReleasedFromUser = std::move(value);
+    return std::move(*this);
+}
+RegistryReport& RegistryReport::setElementSize(size_t value) & {
+    this->elementSize = std::move(value);
+    return *this;
+}
+RegistryReport&& RegistryReport::setElementSize(size_t value) && {
+    this->elementSize = std::move(value);
+    return std::move(*this);
+}
+HubReport::HubReport(const WGPUHubReport& native) {
+    this->adapters = static_cast<wgpu::RegistryReport>(native.adapters);
+    this->devices = static_cast<wgpu::RegistryReport>(native.devices);
+    this->queues = static_cast<wgpu::RegistryReport>(native.queues);
+    this->pipelineLayouts = static_cast<wgpu::RegistryReport>(native.pipelineLayouts);
+    this->shaderModules = static_cast<wgpu::RegistryReport>(native.shaderModules);
+    this->bindGroupLayouts = static_cast<wgpu::RegistryReport>(native.bindGroupLayouts);
+    this->bindGroups = static_cast<wgpu::RegistryReport>(native.bindGroups);
+    this->commandBuffers = static_cast<wgpu::RegistryReport>(native.commandBuffers);
+    this->renderBundles = static_cast<wgpu::RegistryReport>(native.renderBundles);
+    this->renderPipelines = static_cast<wgpu::RegistryReport>(native.renderPipelines);
+    this->computePipelines = static_cast<wgpu::RegistryReport>(native.computePipelines);
+    this->pipelineCaches = static_cast<wgpu::RegistryReport>(native.pipelineCaches);
+    this->querySets = static_cast<wgpu::RegistryReport>(native.querySets);
+    this->buffers = static_cast<wgpu::RegistryReport>(native.buffers);
+    this->textures = static_cast<wgpu::RegistryReport>(native.textures);
+    this->textureViews = static_cast<wgpu::RegistryReport>(native.textureViews);
+    this->samplers = static_cast<wgpu::RegistryReport>(native.samplers);
+}
+HubReport::CStruct HubReport::to_cstruct() const {
+    CStruct cstruct;
+    cstruct.adapters = static_cast<WGPURegistryReport>(this->adapters.to_cstruct());
+    cstruct.devices = static_cast<WGPURegistryReport>(this->devices.to_cstruct());
+    cstruct.queues = static_cast<WGPURegistryReport>(this->queues.to_cstruct());
+    cstruct.pipelineLayouts = static_cast<WGPURegistryReport>(this->pipelineLayouts.to_cstruct());
+    cstruct.shaderModules = static_cast<WGPURegistryReport>(this->shaderModules.to_cstruct());
+    cstruct.bindGroupLayouts = static_cast<WGPURegistryReport>(this->bindGroupLayouts.to_cstruct());
+    cstruct.bindGroups = static_cast<WGPURegistryReport>(this->bindGroups.to_cstruct());
+    cstruct.commandBuffers = static_cast<WGPURegistryReport>(this->commandBuffers.to_cstruct());
+    cstruct.renderBundles = static_cast<WGPURegistryReport>(this->renderBundles.to_cstruct());
+    cstruct.renderPipelines = static_cast<WGPURegistryReport>(this->renderPipelines.to_cstruct());
+    cstruct.computePipelines = static_cast<WGPURegistryReport>(this->computePipelines.to_cstruct());
+    cstruct.pipelineCaches = static_cast<WGPURegistryReport>(this->pipelineCaches.to_cstruct());
+    cstruct.querySets = static_cast<WGPURegistryReport>(this->querySets.to_cstruct());
+    cstruct.buffers = static_cast<WGPURegistryReport>(this->buffers.to_cstruct());
+    cstruct.textures = static_cast<WGPURegistryReport>(this->textures.to_cstruct());
+    cstruct.textureViews = static_cast<WGPURegistryReport>(this->textureViews.to_cstruct());
+    cstruct.samplers = static_cast<WGPURegistryReport>(this->samplers.to_cstruct());
+    return cstruct;
+}
+HubReport& HubReport::setAdapters(const wgpu::RegistryReport& value) & {
+    this->adapters = value;
+    return *this;
+}
+HubReport&& HubReport::setAdapters(const wgpu::RegistryReport& value) && {
+    this->adapters = value;
+    return std::move(*this);
+}
+HubReport& HubReport::setAdapters(wgpu::RegistryReport&& value) & {
+    this->adapters = std::move(value);
+    return *this;
+}
+HubReport&& HubReport::setAdapters(wgpu::RegistryReport&& value) && {
+    this->adapters = std::move(value);
+    return std::move(*this);
+}
+HubReport& HubReport::setDevices(const wgpu::RegistryReport& value) & {
+    this->devices = value;
+    return *this;
+}
+HubReport&& HubReport::setDevices(const wgpu::RegistryReport& value) && {
+    this->devices = value;
+    return std::move(*this);
+}
+HubReport& HubReport::setDevices(wgpu::RegistryReport&& value) & {
+    this->devices = std::move(value);
+    return *this;
+}
+HubReport&& HubReport::setDevices(wgpu::RegistryReport&& value) && {
+    this->devices = std::move(value);
+    return std::move(*this);
+}
+HubReport& HubReport::setQueues(const wgpu::RegistryReport& value) & {
+    this->queues = value;
+    return *this;
+}
+HubReport&& HubReport::setQueues(const wgpu::RegistryReport& value) && {
+    this->queues = value;
+    return std::move(*this);
+}
+HubReport& HubReport::setQueues(wgpu::RegistryReport&& value) & {
+    this->queues = std::move(value);
+    return *this;
+}
+HubReport&& HubReport::setQueues(wgpu::RegistryReport&& value) && {
+    this->queues = std::move(value);
+    return std::move(*this);
+}
+HubReport& HubReport::setPipelineLayouts(const wgpu::RegistryReport& value) & {
+    this->pipelineLayouts = value;
+    return *this;
+}
+HubReport&& HubReport::setPipelineLayouts(const wgpu::RegistryReport& value) && {
+    this->pipelineLayouts = value;
+    return std::move(*this);
+}
+HubReport& HubReport::setPipelineLayouts(wgpu::RegistryReport&& value) & {
+    this->pipelineLayouts = std::move(value);
+    return *this;
+}
+HubReport&& HubReport::setPipelineLayouts(wgpu::RegistryReport&& value) && {
+    this->pipelineLayouts = std::move(value);
+    return std::move(*this);
+}
+HubReport& HubReport::setShaderModules(const wgpu::RegistryReport& value) & {
+    this->shaderModules = value;
+    return *this;
+}
+HubReport&& HubReport::setShaderModules(const wgpu::RegistryReport& value) && {
+    this->shaderModules = value;
+    return std::move(*this);
+}
+HubReport& HubReport::setShaderModules(wgpu::RegistryReport&& value) & {
+    this->shaderModules = std::move(value);
+    return *this;
+}
+HubReport&& HubReport::setShaderModules(wgpu::RegistryReport&& value) && {
+    this->shaderModules = std::move(value);
+    return std::move(*this);
+}
+HubReport& HubReport::setBindGroupLayouts(const wgpu::RegistryReport& value) & {
+    this->bindGroupLayouts = value;
+    return *this;
+}
+HubReport&& HubReport::setBindGroupLayouts(const wgpu::RegistryReport& value) && {
+    this->bindGroupLayouts = value;
+    return std::move(*this);
+}
+HubReport& HubReport::setBindGroupLayouts(wgpu::RegistryReport&& value) & {
+    this->bindGroupLayouts = std::move(value);
+    return *this;
+}
+HubReport&& HubReport::setBindGroupLayouts(wgpu::RegistryReport&& value) && {
+    this->bindGroupLayouts = std::move(value);
+    return std::move(*this);
+}
+HubReport& HubReport::setBindGroups(const wgpu::RegistryReport& value) & {
+    this->bindGroups = value;
+    return *this;
+}
+HubReport&& HubReport::setBindGroups(const wgpu::RegistryReport& value) && {
+    this->bindGroups = value;
+    return std::move(*this);
+}
+HubReport& HubReport::setBindGroups(wgpu::RegistryReport&& value) & {
+    this->bindGroups = std::move(value);
+    return *this;
+}
+HubReport&& HubReport::setBindGroups(wgpu::RegistryReport&& value) && {
+    this->bindGroups = std::move(value);
+    return std::move(*this);
+}
+HubReport& HubReport::setCommandBuffers(const wgpu::RegistryReport& value) & {
+    this->commandBuffers = value;
+    return *this;
+}
+HubReport&& HubReport::setCommandBuffers(const wgpu::RegistryReport& value) && {
+    this->commandBuffers = value;
+    return std::move(*this);
+}
+HubReport& HubReport::setCommandBuffers(wgpu::RegistryReport&& value) & {
+    this->commandBuffers = std::move(value);
+    return *this;
+}
+HubReport&& HubReport::setCommandBuffers(wgpu::RegistryReport&& value) && {
+    this->commandBuffers = std::move(value);
+    return std::move(*this);
+}
+HubReport& HubReport::setRenderBundles(const wgpu::RegistryReport& value) & {
+    this->renderBundles = value;
+    return *this;
+}
+HubReport&& HubReport::setRenderBundles(const wgpu::RegistryReport& value) && {
+    this->renderBundles = value;
+    return std::move(*this);
+}
+HubReport& HubReport::setRenderBundles(wgpu::RegistryReport&& value) & {
+    this->renderBundles = std::move(value);
+    return *this;
+}
+HubReport&& HubReport::setRenderBundles(wgpu::RegistryReport&& value) && {
+    this->renderBundles = std::move(value);
+    return std::move(*this);
+}
+HubReport& HubReport::setRenderPipelines(const wgpu::RegistryReport& value) & {
+    this->renderPipelines = value;
+    return *this;
+}
+HubReport&& HubReport::setRenderPipelines(const wgpu::RegistryReport& value) && {
+    this->renderPipelines = value;
+    return std::move(*this);
+}
+HubReport& HubReport::setRenderPipelines(wgpu::RegistryReport&& value) & {
+    this->renderPipelines = std::move(value);
+    return *this;
+}
+HubReport&& HubReport::setRenderPipelines(wgpu::RegistryReport&& value) && {
+    this->renderPipelines = std::move(value);
+    return std::move(*this);
+}
+HubReport& HubReport::setComputePipelines(const wgpu::RegistryReport& value) & {
+    this->computePipelines = value;
+    return *this;
+}
+HubReport&& HubReport::setComputePipelines(const wgpu::RegistryReport& value) && {
+    this->computePipelines = value;
+    return std::move(*this);
+}
+HubReport& HubReport::setComputePipelines(wgpu::RegistryReport&& value) & {
+    this->computePipelines = std::move(value);
+    return *this;
+}
+HubReport&& HubReport::setComputePipelines(wgpu::RegistryReport&& value) && {
+    this->computePipelines = std::move(value);
+    return std::move(*this);
+}
+HubReport& HubReport::setPipelineCaches(const wgpu::RegistryReport& value) & {
+    this->pipelineCaches = value;
+    return *this;
+}
+HubReport&& HubReport::setPipelineCaches(const wgpu::RegistryReport& value) && {
+    this->pipelineCaches = value;
+    return std::move(*this);
+}
+HubReport& HubReport::setPipelineCaches(wgpu::RegistryReport&& value) & {
+    this->pipelineCaches = std::move(value);
+    return *this;
+}
+HubReport&& HubReport::setPipelineCaches(wgpu::RegistryReport&& value) && {
+    this->pipelineCaches = std::move(value);
+    return std::move(*this);
+}
+HubReport& HubReport::setQuerySets(const wgpu::RegistryReport& value) & {
+    this->querySets = value;
+    return *this;
+}
+HubReport&& HubReport::setQuerySets(const wgpu::RegistryReport& value) && {
+    this->querySets = value;
+    return std::move(*this);
+}
+HubReport& HubReport::setQuerySets(wgpu::RegistryReport&& value) & {
+    this->querySets = std::move(value);
+    return *this;
+}
+HubReport&& HubReport::setQuerySets(wgpu::RegistryReport&& value) && {
+    this->querySets = std::move(value);
+    return std::move(*this);
+}
+HubReport& HubReport::setBuffers(const wgpu::RegistryReport& value) & {
+    this->buffers = value;
+    return *this;
+}
+HubReport&& HubReport::setBuffers(const wgpu::RegistryReport& value) && {
+    this->buffers = value;
+    return std::move(*this);
+}
+HubReport& HubReport::setBuffers(wgpu::RegistryReport&& value) & {
+    this->buffers = std::move(value);
+    return *this;
+}
+HubReport&& HubReport::setBuffers(wgpu::RegistryReport&& value) && {
+    this->buffers = std::move(value);
+    return std::move(*this);
+}
+HubReport& HubReport::setTextures(const wgpu::RegistryReport& value) & {
+    this->textures = value;
+    return *this;
+}
+HubReport&& HubReport::setTextures(const wgpu::RegistryReport& value) && {
+    this->textures = value;
+    return std::move(*this);
+}
+HubReport& HubReport::setTextures(wgpu::RegistryReport&& value) & {
+    this->textures = std::move(value);
+    return *this;
+}
+HubReport&& HubReport::setTextures(wgpu::RegistryReport&& value) && {
+    this->textures = std::move(value);
+    return std::move(*this);
+}
+HubReport& HubReport::setTextureViews(const wgpu::RegistryReport& value) & {
+    this->textureViews = value;
+    return *this;
+}
+HubReport&& HubReport::setTextureViews(const wgpu::RegistryReport& value) && {
+    this->textureViews = value;
+    return std::move(*this);
+}
+HubReport& HubReport::setTextureViews(wgpu::RegistryReport&& value) & {
+    this->textureViews = std::move(value);
+    return *this;
+}
+HubReport&& HubReport::setTextureViews(wgpu::RegistryReport&& value) && {
+    this->textureViews = std::move(value);
+    return std::move(*this);
+}
+HubReport& HubReport::setSamplers(const wgpu::RegistryReport& value) & {
+    this->samplers = value;
+    return *this;
+}
+HubReport&& HubReport::setSamplers(const wgpu::RegistryReport& value) && {
+    this->samplers = value;
+    return std::move(*this);
+}
+HubReport& HubReport::setSamplers(wgpu::RegistryReport&& value) & {
+    this->samplers = std::move(value);
+    return *this;
+}
+HubReport&& HubReport::setSamplers(wgpu::RegistryReport&& value) && {
+    this->samplers = std::move(value);
+    return std::move(*this);
+}
+GlobalReport::GlobalReport(const WGPUGlobalReport& native) {
+    this->surfaces = static_cast<wgpu::RegistryReport>(native.surfaces);
+    this->hub = static_cast<wgpu::HubReport>(native.hub);
+}
+GlobalReport::CStruct GlobalReport::to_cstruct() const {
+    CStruct cstruct;
+    cstruct.surfaces = static_cast<WGPURegistryReport>(this->surfaces.to_cstruct());
+    cstruct.hub = static_cast<WGPUHubReport>(this->hub.to_cstruct());
+    return cstruct;
+}
+GlobalReport& GlobalReport::setSurfaces(const wgpu::RegistryReport& value) & {
+    this->surfaces = value;
+    return *this;
+}
+GlobalReport&& GlobalReport::setSurfaces(const wgpu::RegistryReport& value) && {
+    this->surfaces = value;
+    return std::move(*this);
+}
+GlobalReport& GlobalReport::setSurfaces(wgpu::RegistryReport&& value) & {
+    this->surfaces = std::move(value);
+    return *this;
+}
+GlobalReport&& GlobalReport::setSurfaces(wgpu::RegistryReport&& value) && {
+    this->surfaces = std::move(value);
+    return std::move(*this);
+}
+GlobalReport& GlobalReport::setHub(const wgpu::HubReport& value) & {
+    this->hub = value;
+    return *this;
+}
+GlobalReport&& GlobalReport::setHub(const wgpu::HubReport& value) && {
+    this->hub = value;
+    return std::move(*this);
+}
+GlobalReport& GlobalReport::setHub(wgpu::HubReport&& value) & {
+    this->hub = std::move(value);
+    return *this;
+}
+GlobalReport&& GlobalReport::setHub(wgpu::HubReport&& value) && {
+    this->hub = std::move(value);
+    return std::move(*this);
+}
+InstanceEnumerateAdapterOptions::InstanceEnumerateAdapterOptions(const WGPUInstanceEnumerateAdapterOptions& native) {
+    this->nextInChain.setNext(native.nextInChain);
+    this->backends = static_cast<wgpu::InstanceBackend>(native.backends);
+}
+InstanceEnumerateAdapterOptions::CStruct InstanceEnumerateAdapterOptions::to_cstruct() const {
+    CStruct cstruct;
+    cstruct.nextInChain = this->nextInChain.getNext();
+    cstruct.backends = static_cast<WGPUInstanceBackend>(this->backends);
+    return cstruct;
+}
+InstanceEnumerateAdapterOptions& InstanceEnumerateAdapterOptions::setBackends(wgpu::InstanceBackend value) & {
+    this->backends = std::move(value);
+    return *this;
+}
+InstanceEnumerateAdapterOptions&& InstanceEnumerateAdapterOptions::setBackends(wgpu::InstanceBackend value) && {
+    this->backends = std::move(value);
+    return std::move(*this);
+}
+BindGroupEntryExtras::BindGroupEntryExtras(const WGPUBindGroupEntryExtras& native) {
+    this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
+    this->buffers = std::span(native.buffers, native.bufferCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::Buffer>(e); }) | std::ranges::to<std::vector<wgpu::Buffer>>();
+    this->samplers = std::span(native.samplers, native.samplerCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::Sampler>(e); }) | std::ranges::to<std::vector<wgpu::Sampler>>();
+    this->textureViews = std::span(native.textureViews, native.textureViewCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureView>(e); }) | std::ranges::to<std::vector<wgpu::TextureView>>();
+}
+BindGroupEntryExtras::CStruct BindGroupEntryExtras::to_cstruct() const {
+    CStruct cstruct;
+    cstruct.chain = static_cast<WGPUChainedStruct>(this->chain.to_cstruct());
+    cstruct.buffers = reinterpret_cast<const WGPUBuffer*>(this->buffers.data());
+    cstruct.bufferCount = static_cast<size_t>(this->buffers.size());
+    cstruct.samplers = reinterpret_cast<const WGPUSampler*>(this->samplers.data());
+    cstruct.samplerCount = static_cast<size_t>(this->samplers.size());
+    cstruct.textureViews = reinterpret_cast<const WGPUTextureView*>(this->textureViews.data());
+    cstruct.textureViewCount = static_cast<size_t>(this->textureViews.size());
+    return cstruct;
+}
+BindGroupLayoutEntryExtras::BindGroupLayoutEntryExtras(const WGPUBindGroupLayoutEntryExtras& native) {
+    this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
+    this->count = static_cast<uint32_t>(native.count);
+}
+BindGroupLayoutEntryExtras::CStruct BindGroupLayoutEntryExtras::to_cstruct() const {
+    CStruct cstruct;
+    cstruct.chain = static_cast<WGPUChainedStruct>(this->chain.to_cstruct());
+    cstruct.count = static_cast<uint32_t>(this->count);
+    return cstruct;
+}
+BindGroupLayoutEntryExtras& BindGroupLayoutEntryExtras::setCount(uint32_t value) & {
+    this->count = std::move(value);
+    return *this;
+}
+BindGroupLayoutEntryExtras&& BindGroupLayoutEntryExtras::setCount(uint32_t value) && {
+    this->count = std::move(value);
+    return std::move(*this);
+}
+QuerySetDescriptorExtras::QuerySetDescriptorExtras(const WGPUQuerySetDescriptorExtras& native) {
+    this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
+    this->pipelineStatistics = std::span(native.pipelineStatistics, native.pipelineStatisticCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::PipelineStatisticName>(e); }) | std::ranges::to<std::vector<wgpu::PipelineStatisticName>>();
+}
+QuerySetDescriptorExtras::CStruct QuerySetDescriptorExtras::to_cstruct() const {
+    CStruct cstruct;
+    cstruct.chain = static_cast<WGPUChainedStruct>(this->chain.to_cstruct());
+    cstruct.pipelineStatistics = reinterpret_cast<const WGPUPipelineStatisticName*>(this->pipelineStatistics.data());
+    cstruct.pipelineStatisticCount = static_cast<size_t>(this->pipelineStatistics.size());
+    return cstruct;
+}
+SurfaceConfigurationExtras::SurfaceConfigurationExtras(const WGPUSurfaceConfigurationExtras& native) {
+    this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
+    this->desiredMaximumFrameLatency = static_cast<uint32_t>(native.desiredMaximumFrameLatency);
+}
+SurfaceConfigurationExtras::CStruct SurfaceConfigurationExtras::to_cstruct() const {
+    CStruct cstruct;
+    cstruct.chain = static_cast<WGPUChainedStruct>(this->chain.to_cstruct());
+    cstruct.desiredMaximumFrameLatency = static_cast<uint32_t>(this->desiredMaximumFrameLatency);
+    return cstruct;
+}
+SurfaceConfigurationExtras& SurfaceConfigurationExtras::setDesiredMaximumFrameLatency(uint32_t value) & {
+    this->desiredMaximumFrameLatency = std::move(value);
+    return *this;
+}
+SurfaceConfigurationExtras&& SurfaceConfigurationExtras::setDesiredMaximumFrameLatency(uint32_t value) && {
+    this->desiredMaximumFrameLatency = std::move(value);
+    return std::move(*this);
+}
 }
 namespace wgpu::raw {
 void Adapter::getFeatures(wgpu::SupportedFeatures& features) const {
@@ -10711,12 +11797,12 @@ void const * Buffer::getConstMappedRange(size_t offset, size_t size) const {
     void const * res = static_cast<void const *>(wgpuBufferGetConstMappedRange(m_raw, offset, size));
     return res;
 }
-void * Buffer::getMappedRange(size_t offset, size_t size) const {
-    void * res = static_cast<void *>(wgpuBufferGetMappedRange(m_raw, offset, size));
-    return res;
-}
 wgpu::BufferMapState Buffer::getMapState() const {
     wgpu::BufferMapState res = static_cast<wgpu::BufferMapState>(wgpuBufferGetMapState(m_raw));
+    return res;
+}
+void * Buffer::getMappedRange(size_t offset, size_t size) const {
+    void * res = static_cast<void *>(wgpuBufferGetMappedRange(m_raw, offset, size));
     return res;
 }
 uint64_t Buffer::getSize() const {
@@ -10732,20 +11818,12 @@ wgpu::Future Buffer::mapAsync(wgpu::MapMode mode, size_t offset, size_t size, wg
     wgpu::Future res = static_cast<wgpu::Future>(wgpuBufferMapAsync(m_raw, static_cast<WGPUMapMode>(mode), offset, size, callbackInfo_cstruct));
     return res;
 }
-wgpu::Status Buffer::readMappedRange(size_t offset, void* data, size_t size) const {
-    wgpu::Status res = static_cast<wgpu::Status>(wgpuBufferReadMappedRange(m_raw, offset, data, size));
-    return res;
-}
 void Buffer::setLabel(wgpu::StringView label) const {
     wgpu::StringView::CStruct label_cstruct = label.to_cstruct();
     wgpuBufferSetLabel(m_raw, label_cstruct);
 }
 void Buffer::unmap() const {
     wgpuBufferUnmap(m_raw);
-}
-wgpu::Status Buffer::writeMappedRange(size_t offset, void const* data, size_t size) const {
-    wgpu::Status res = static_cast<wgpu::Status>(wgpuBufferWriteMappedRange(m_raw, offset, data, size));
-    return res;
 }
 void Buffer::addRef() const {
     wgpuBufferAddRef(m_raw);
@@ -10970,11 +12048,8 @@ wgpu::Texture Device::createTexture(wgpu::TextureDescriptor const& descriptor) c
 void Device::destroy() const {
     wgpuDeviceDestroy(m_raw);
 }
-wgpu::Status Device::getAdapterInfo(wgpu::AdapterInfo& adapterInfo) const {
-    WGPUAdapterInfo adapterInfo_native;
-    wgpu::Status res = static_cast<wgpu::Status>(wgpuDeviceGetAdapterInfo(m_raw, &adapterInfo_native));
-    adapterInfo = static_cast<wgpu::AdapterInfo>(adapterInfo_native);
-    wgpuAdapterInfoFreeMembers(adapterInfo_native);
+wgpu::AdapterInfo Device::getAdapterInfo() const {
+    wgpu::AdapterInfo res = static_cast<wgpu::AdapterInfo>(wgpuDeviceGetAdapterInfo(m_raw));
     return res;
 }
 void Device::getFeatures(wgpu::SupportedFeatures& features) const {
@@ -11019,26 +12094,17 @@ void Device::addRef() const {
 void Device::release() const {
     wgpuDeviceRelease(m_raw);
 }
-void ExternalTexture::setLabel(wgpu::StringView label) const {
-    wgpu::StringView::CStruct label_cstruct = label.to_cstruct();
-    wgpuExternalTextureSetLabel(m_raw, label_cstruct);
-}
-void ExternalTexture::addRef() const {
-    wgpuExternalTextureAddRef(m_raw);
-}
-void ExternalTexture::release() const {
-    wgpuExternalTextureRelease(m_raw);
-}
 wgpu::Surface Instance::createSurface(wgpu::SurfaceDescriptor const& descriptor) const {
     wgpu::SurfaceDescriptor::CStruct descriptor_cstruct = descriptor.to_cstruct();
     wgpu::Surface res = static_cast<wgpu::Surface>(wgpuInstanceCreateSurface(m_raw, &descriptor_cstruct));
     return res;
 }
-void Instance::getWGSLLanguageFeatures(wgpu::SupportedWGSLLanguageFeatures& features) const {
+wgpu::Status Instance::getWGSLLanguageFeatures(wgpu::SupportedWGSLLanguageFeatures& features) const {
     WGPUSupportedWGSLLanguageFeatures features_native;
-    wgpuInstanceGetWGSLLanguageFeatures(m_raw, &features_native);
+    wgpu::Status res = static_cast<wgpu::Status>(wgpuInstanceGetWGSLLanguageFeatures(m_raw, &features_native));
     features = static_cast<wgpu::SupportedWGSLLanguageFeatures>(features_native);
     wgpuSupportedWGSLLanguageFeaturesFreeMembers(features_native);
+    return res;
 }
 wgpu::Bool Instance::hasWGSLLanguageFeature(wgpu::WGSLLanguageFeatureName feature) const {
     wgpu::Bool res = static_cast<wgpu::Bool>(wgpuInstanceHasWGSLLanguageFeature(m_raw, static_cast<WGPUWGSLLanguageFeatureName>(feature)));
@@ -11366,10 +12432,6 @@ uint32_t Texture::getSampleCount() const {
     uint32_t res = static_cast<uint32_t>(wgpuTextureGetSampleCount(m_raw));
     return res;
 }
-wgpu::TextureViewDimension Texture::getTextureBindingViewDimension() const {
-    wgpu::TextureViewDimension res = static_cast<wgpu::TextureViewDimension>(wgpuTextureGetTextureBindingViewDimension(m_raw));
-    return res;
-}
 wgpu::TextureUsage Texture::getUsage() const {
     wgpu::TextureUsage res = static_cast<wgpu::TextureUsage>(wgpuTextureGetUsage(m_raw));
     return res;
@@ -11640,11 +12702,11 @@ struct QueueWorkDoneCallbackControlNative : QueueWorkDoneCallback::Control {
     void* userdata1;
     void* userdata2;
     QueueWorkDoneCallbackControlNative(WGPUQueueWorkDoneCallback n, void* userdata1, void* userdata2) : native(n), userdata1(userdata1), userdata2(userdata2) {}
-    void invoke(wgpu::QueueWorkDoneStatus status, wgpu::StringView message) const override {}
-    void invoke_c(WGPUQueueWorkDoneStatus status, WGPUStringView message) const override;
+    void invoke(wgpu::QueueWorkDoneStatus status) const override {}
+    void invoke_c(WGPUQueueWorkDoneStatus status) const override;
 };
-void QueueWorkDoneCallbackControlNative::invoke_c(WGPUQueueWorkDoneStatus status, WGPUStringView message) const {
-    native(status, message, userdata1, userdata2);
+void QueueWorkDoneCallbackControlNative::invoke_c(WGPUQueueWorkDoneStatus status) const {
+    native(status, userdata1, userdata2);
 }
 QueueWorkDoneCallback::QueueWorkDoneCallback(WGPUQueueWorkDoneCallback native, void* userdata1, void* userdata2) {
     if (native) {
@@ -11653,8 +12715,8 @@ QueueWorkDoneCallback::QueueWorkDoneCallback(WGPUQueueWorkDoneCallback native, v
         data = nullptr;
     }
 }
-void QueueWorkDoneCallback::Control::invoke_c(WGPUQueueWorkDoneStatus status, WGPUStringView message) const {
-    invoke(static_cast<wgpu::QueueWorkDoneStatus>(status), static_cast<wgpu::StringView>(message));
+void QueueWorkDoneCallback::Control::invoke_c(WGPUQueueWorkDoneStatus status) const {
+    invoke(static_cast<wgpu::QueueWorkDoneStatus>(status));
 }
 QueueWorkDoneCallback& QueueWorkDoneCallback::operator=(const QueueWorkDoneCallback& other) {
     if (this != &other) {
@@ -11672,8 +12734,8 @@ QueueWorkDoneCallback& QueueWorkDoneCallback::operator=(QueueWorkDoneCallback&& 
     }
     return *this;
 }
-void QueueWorkDoneCallback::operator()(wgpu::QueueWorkDoneStatus status, wgpu::StringView message) const { if (data) data->invoke(status, message); }
-void QueueWorkDoneCallback::operator()(WGPUQueueWorkDoneStatus status, WGPUStringView message) const { if (data) data->invoke_c(status, message); }
+void QueueWorkDoneCallback::operator()(wgpu::QueueWorkDoneStatus status) const { if (data) data->invoke(status); }
+void QueueWorkDoneCallback::operator()(WGPUQueueWorkDoneStatus status) const { if (data) data->invoke_c(status); }
 struct RequestAdapterCallbackControlNative : RequestAdapterCallback::Control {
     WGPURequestAdapterCallback native;
     void* userdata1;
@@ -11802,20 +12864,10 @@ wgpu::Instance createInstance() {
     wgpu::Instance res = static_cast<wgpu::Instance>(wgpuCreateInstance(nullptr));
     return res;
 }
-void getInstanceFeatures(wgpu::SupportedInstanceFeatures& features) {
-    WGPUSupportedInstanceFeatures features_native;
-    wgpuGetInstanceFeatures(&features_native);
-    features = static_cast<wgpu::SupportedInstanceFeatures>(features_native);
-    wgpuSupportedInstanceFeaturesFreeMembers(features_native);
-}
-wgpu::Status getInstanceLimits(wgpu::InstanceLimits& limits) {
-    WGPUInstanceLimits limits_native;
-    wgpu::Status res = static_cast<wgpu::Status>(wgpuGetInstanceLimits(&limits_native));
-    limits = static_cast<wgpu::InstanceLimits>(limits_native);
-    return res;
-}
-wgpu::Bool hasInstanceFeature(wgpu::InstanceFeatureName feature) {
-    wgpu::Bool res = static_cast<wgpu::Bool>(wgpuHasInstanceFeature(static_cast<WGPUInstanceFeatureName>(feature)));
+wgpu::Status getInstanceCapabilities(wgpu::InstanceCapabilities& capabilities) {
+    WGPUInstanceCapabilities capabilities_native;
+    wgpu::Status res = static_cast<wgpu::Status>(wgpuGetInstanceCapabilities(&capabilities_native));
+    capabilities = static_cast<wgpu::InstanceCapabilities>(capabilities_native);
     return res;
 }
 }

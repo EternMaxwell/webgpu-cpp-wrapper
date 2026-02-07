@@ -354,13 +354,15 @@ void {0}::operator()({3}) const {{ if (data) data->invoke_c({1}); }}
 };
 
 constexpr auto nextInChainHelper = R"(
+template <typename Struct>
 struct NextInChainBase {
     std::atomic<std::size_t> ref_count{1};
-    virtual WGPUChainedStruct* getNextInChain() const = 0;
+    virtual Struct* getNextInChain() const = 0;
     virtual ~NextInChainBase() = default;
 };
-template <typename Struct>
-struct NextInChainImpl : Struct, NextInChainBase {
+template <typename Struct, typename ChainT>
+    requires requires(typename Struct::CStruct c) { c.chain; }
+struct NextInChainImpl : Struct, NextInChainBase<ChainT> {
     mutable typename Struct::CStruct cstruct;
     NextInChainImpl(const Struct& s) : Struct(s) {
         cstruct = this->to_cstruct();
@@ -368,19 +370,21 @@ struct NextInChainImpl : Struct, NextInChainBase {
     NextInChainImpl(Struct&& s) : Struct(std::move(s)) {
         cstruct = this->to_cstruct();
     }
-    WGPUChainedStruct* getNextInChain() const override {
+    ChainT* getNextInChain() const override {
         cstruct = this->to_cstruct();
-        return reinterpret_cast<WGPUChainedStruct*>(&cstruct);
+        return reinterpret_cast<ChainT*>(&cstruct);
     }
     void updateFromCStruct() {
         (Struct&)(*this) = static_cast<Struct>(cstruct);
     }
 };
-struct NextInChainNative : NextInChainBase {
-    WGPUChainedStruct* next;
-    NextInChainNative(WGPUChainedStruct* n) : next(n) {}
-    WGPUChainedStruct* getNextInChain() const override { return next; }
+template <typename ChainT>
+struct NextInChainNative : NextInChainBase<ChainT> {
+    ChainT* next;
+    NextInChainNative(ChainT* n) : next(n) {}
+    ChainT* getNextInChain() const override { return next; }
 };
+template <typename ChainT>
 struct NextInChain {
 public:
     NextInChain() : data(nullptr) {}
@@ -408,15 +412,16 @@ public:
     }
     ~NextInChain() { reset(); }
     template <typename Struct>
+        requires requires(typename std::decay_t<Struct>::CStruct c) { c.chain; }
     void setNext(Struct&& s) {
         reset();
-        data = new NextInChainImpl<std::decay_t<Struct>>(std::forward<Struct>(s));
+        data = new NextInChainImpl<std::decay_t<Struct>, ChainT>(std::forward<Struct>(s));
     }
-    void setNext(WGPUChainedStruct* next) {
+    void setNext(ChainT* next) {
         reset();
         data = new NextInChainNative(next);
     }
-    WGPUChainedStruct* getNext() const {
+    ChainT* getNext() const {
         if (data) {
             return data->getNextInChain();
         }
@@ -425,8 +430,8 @@ public:
     template <typename Struct>
     Struct* getAs() const {
         if (data) {
-            if (auto impl = dynamic_cast<NextInChainImpl<Struct>*>(data)) {
-                impl->updateFromCStruct();
+            if (auto impl = dynamic_cast<NextInChainImpl<Struct, ChainT>*>(data)) {
+                if constexpr (!std::is_const_v<ChainT>) impl->updateFromCStruct();
                 return static_cast<Struct*>(impl);
             }
         }
@@ -439,7 +444,7 @@ public:
         data = nullptr;
     }
 private:
-    NextInChainBase* data;
+    NextInChainBase<ChainT>* data;
 };)";
 
 struct StructFieldCpp {
@@ -718,7 +723,7 @@ WebGpuApiCpp produce_webgpu_cpp(const WebGpuApi& api, const TemplateMeta& templa
                 StructFieldCpp field_cpp;
                 field_cpp.name       = field.name;
                 std::string cpp_type = get_cpp_field_type(field.type, struct_api.owning);
-                field_cpp.type       = std::format("std::vector<{}>", cpp_type);
+                field_cpp.type       = std::format("{}std::vector<{}>", field.is_const ? "" : "mutable ", cpp_type);
 
                 // converter
                 field_cpp.assign_from_native =  // we use span | transform | to to convert array
@@ -979,7 +984,7 @@ template <std::ranges::range T> requires std::convertible_to<std::ranges::range_
 
                 StructFieldCpp field_cpp;
                 field_cpp.name = field.name;
-                field_cpp.type = "NextInChain";
+                field_cpp.type = std::format("NextInChain<{}{}>", field.type, field.is_const ? " const" : "");
                 // converter
                 field_cpp.assign_from_native = std::format(R"(
     this->{0}.setNext(native.{0});)",
