@@ -1932,10 +1932,10 @@ std::vector<FuncParamApi> parse_params(const std::string& params_str) {
     std::vector<FuncParamApi> result;
     for (auto& param : params) {
         FuncParamApi func_param;
-        if (param.starts_with("WGPU_NULLABLE")) {
+        if (param.contains("WGPU_NULLABLE")) {
             func_param.nullable = true;
-            param               = param.substr(sizeof("WGPU_NULLABLE"));
-            param               = param.substr(param.find_first_not_of(' '));
+            param.replace(param.find("WGPU_NULLABLE"), sizeof("WGPU_NULLABLE") - 1, "");  // remove WGPU_NULLABLE
+            strip(param);
         }
         std::vector<std::string> tokens =
             param | std::views::split(' ') | std::views::filter([](auto&& rng) { return !rng.empty(); }) |
@@ -1967,8 +1967,8 @@ FuncApi parse_func(const std::string& name, const std::string& return_type, cons
     FuncApi api;
     api.name        = name;
     api.return_type = return_type;
-    if (api.return_type.starts_with("WGPU_NULLABLE")) {
-        api.return_type = api.return_type.substr(sizeof("WGPU_NULLABLE"));
+    if (api.return_type.contains("WGPU_NULLABLE")) {
+        api.return_type.replace(api.return_type.find("WGPU_NULLABLE"), sizeof("WGPU_NULLABLE") - 1, "");  // remove WGPU_NULLABLE
         api.return_type = strip(api.return_type);
         api.nullable    = true;
     }
@@ -2012,9 +2012,9 @@ StructApi parse_struct(const std::string& name, std::span<std::string>& lines) {
         if (std::regex_search(lines[0], match, field_re)) {
             FieldApi field;
             field.type = match[1];
-            if (field.type.starts_with("WGPU_NULLABLE")) {
+            if (field.type.contains("WGPU_NULLABLE")) {
                 field.nullable = true;
-                field.type     = field.type.substr(sizeof("WGPU_NULLABLE"));
+                field.type.replace(field.type.find("WGPU_NULLABLE"), sizeof("WGPU_NULLABLE") - 1, "");  // remove WGPU_NULLABLE
             }
             if (field.type.contains('*')) {
                 field.is_pointer = true;

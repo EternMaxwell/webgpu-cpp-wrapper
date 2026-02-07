@@ -568,9 +568,9 @@ def parse_params(params_str: str) -> List[FuncParamApi]:
 		if not param:
 			continue
 		nullable = False
-		if param.startswith("WGPU_NULLABLE"):
+		if "WGPU_NULLABLE" in param:
 			nullable = True
-			param = param[len("WGPU_NULLABLE"):].lstrip(" ")
+			param = param.replace("WGPU_NULLABLE", "").strip()
 		tokens = [t for t in param.split(" ") if t]
 		name = tokens[-1]
 		type_tokens = tokens[:-1]
@@ -600,8 +600,8 @@ def parse_params(params_str: str) -> List[FuncParamApi]:
 
 def parse_func(name: str, return_type: str, params_str: str) -> FuncApi:
 	nullable = False
-	if return_type.startswith("WGPU_NULLABLE"):
-		return_type = return_type[len("WGPU_NULLABLE"):].strip()
+	if "WGPU_NULLABLE" in return_type:
+		return_type = return_type.replace("WGPU_NULLABLE", "").strip()
 		nullable = True
 	log.println("  Return type: {}, nullable: {}", return_type, nullable)
 	params = parse_params(params_str)
@@ -640,9 +640,9 @@ def parse_struct(name: str, lines: List[str], start_index: int) -> Tuple[StructA
 			nullable = False
 			is_pointer = False
 			is_const = False
-			if field_type.startswith("WGPU_NULLABLE"):
+			if "WGPU_NULLABLE" in field_type:
 				nullable = True
-				field_type = field_type[len("WGPU_NULLABLE"):]
+				field_type = field_type.replace("WGPU_NULLABLE", "")
 			if "*" in field_type:
 				is_pointer = True
 				field_type = field_type.replace("*", "", 1)

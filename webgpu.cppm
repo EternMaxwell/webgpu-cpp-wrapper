@@ -2426,8 +2426,8 @@ struct StringView {
     StringView(const WGPUStringView& native);
     StringView() : StringView(WGPU_STRING_VIEW_INIT) {};
     CStruct to_cstruct() const;
-    StringView& setData(char   WGPU_NULLABLE const* value) &;
-    StringView&& setData(char   WGPU_NULLABLE const* value) &&;
+    StringView& setData(char const* value) &;
+    StringView&& setData(char const* value) &&;
     StringView& setLength(size_t value) &;
     StringView&& setLength(size_t value) &&;
     StringView(const std::string_view& sv) : data(sv.data()), length(sv.size()) {}
@@ -2435,7 +2435,7 @@ struct StringView {
     operator std::string_view() const {
         return length == WGPU_STRLEN ? std::string_view(data) : std::string_view(data, length);
     }
-    char   WGPU_NULLABLE const* data{};
+    char const* data{};
     size_t length{};
 };
 struct ChainedStruct {
@@ -6790,20 +6790,20 @@ InstanceFlag operator|(InstanceFlag lhs, InstanceFlag rhs) {
 }
 namespace wgpu {
 StringView::StringView(const WGPUStringView& native) {
-    this->data = static_cast<char   WGPU_NULLABLE const*>(native.data);
+    this->data = static_cast<char const*>(native.data);
     this->length = static_cast<size_t>(native.length);
 }
 StringView::CStruct StringView::to_cstruct() const {
     CStruct cstruct;
-    cstruct.data = static_cast<const char   WGPU_NULLABLE*>(this->data);
+    cstruct.data = static_cast<const char*>(this->data);
     cstruct.length = static_cast<size_t>(this->length);
     return cstruct;
 }
-StringView& StringView::setData(char   WGPU_NULLABLE const* value) & {
+StringView& StringView::setData(char const* value) & {
     this->data = std::move(value);
     return *this;
 }
-StringView&& StringView::setData(char   WGPU_NULLABLE const* value) && {
+StringView&& StringView::setData(char const* value) && {
     this->data = std::move(value);
     return std::move(*this);
 }
