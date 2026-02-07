@@ -2427,7 +2427,10 @@ struct StringView {
     struct CStruct : public WGPUStringView {
     };
     StringView(const WGPUStringView& native);
-    StringView() : StringView(WGPU_STRING_VIEW_INIT) {};
+    StringView() {
+        WGPUStringView native = WGPU_STRING_VIEW_INIT;
+        *this = static_cast<StringView>(native);
+    };
     CStruct to_cstruct() const;
     StringView& setData(char const* value) &;
     StringView&& setData(char const* value) &&;

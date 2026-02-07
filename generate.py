@@ -447,14 +447,17 @@ class StructApiCpp:
 		extra_members = "\n        ".join(self.extra_cstruct_members)
 		methods_decl = "\n    ".join(self.methods_decl)
 		fields_decl = "\n    ".join(f"{f.type} {f.name}{{}};" for f in self.fields)
-		init = "" if not self.init_macro else f" : {self.name}({self.init_macro})"
+		init = "" if not self.init_macro else f"""
+        WGPU{self.name} native = {self.init_macro};
+        *this = static_cast<{self.name}>(native);
+    """
 		return (
 			f"\nstruct {self.name} {{\n"
 			f"    struct CStruct : public WGPU{self.name} {{\n"
 			f"        {extra_members}\n"
 			f"    }};\n"
 			f"    {self.name}(const WGPU{self.name}& native);\n"
-			f"    {self.name}(){init} {{}};\n"
+			f"    {self.name}() {{{init}}};\n"
 			f"    CStruct to_cstruct() const;\n"
 			f"    {methods_decl}\n"
 			f"    {fields_decl}\n"

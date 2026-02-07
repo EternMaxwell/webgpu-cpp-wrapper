@@ -472,17 +472,24 @@ struct {0} {{
         {2}
     }};
     {0}(const WGPU{0}& native);
-    {0}(){1} {{}};
+    {0}() {{{1}}};
     CStruct to_cstruct() const;
     {3}
     {4}
 }};)",
-            name, init_macro.empty() ? "" : std::format(" : {}({})", name, init_macro),
+            name,
+            init_macro.empty() ? ""
+                               : std::format(R"(
+        WGPU{0} native = {1};
+        *this = static_cast<{0}>(native);
+    )",
+                                             name, init_macro),
             extra_cstruct_members | std::views::join_with(std::string("\n        ")) | std::ranges::to<std::string>(),
             methods_decl | std::views::join_with(std::string("\n    ")) | std::ranges::to<std::string>(),
-            fields |
-                std::views::transform([](const StructFieldCpp& f) { return std::format("{} {}{{}};", f.type, f.name); }) |
-                std::views::join_with(std::string("\n    ")) | std::ranges::to<std::string>(),
+            fields | std::views::transform([](const StructFieldCpp& f) {
+                return std::format("{} {}{{}};", f.type, f.name);
+            }) | std::views::join_with(std::string("\n    ")) |
+                std::ranges::to<std::string>(),
             binary_compatible ? "true" : "false");
     }
     std::string gen_template_impl() const {
@@ -1972,7 +1979,8 @@ FuncApi parse_func(const std::string& name, const std::string& return_type, cons
     api.name        = name;
     api.return_type = return_type;
     if (api.return_type.contains("WGPU_NULLABLE")) {
-        api.return_type.replace(api.return_type.find("WGPU_NULLABLE"), sizeof("WGPU_NULLABLE") - 1, "");  // remove WGPU_NULLABLE
+        api.return_type.replace(api.return_type.find("WGPU_NULLABLE"), sizeof("WGPU_NULLABLE") - 1,
+                                "");  // remove WGPU_NULLABLE
         api.return_type = strip(api.return_type);
         api.nullable    = true;
     }
@@ -2018,7 +2026,8 @@ StructApi parse_struct(const std::string& name, std::span<std::string>& lines) {
             field.type = match[1];
             if (field.type.contains("WGPU_NULLABLE")) {
                 field.nullable = true;
-                field.type.replace(field.type.find("WGPU_NULLABLE"), sizeof("WGPU_NULLABLE") - 1, "");  // remove WGPU_NULLABLE
+                field.type.replace(field.type.find("WGPU_NULLABLE"), sizeof("WGPU_NULLABLE") - 1,
+                                   "");  // remove WGPU_NULLABLE
             }
             if (field.type.contains('*')) {
                 field.is_pointer = true;
