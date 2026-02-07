@@ -446,7 +446,7 @@ class StructApiCpp:
 	def gen_definition(self) -> str:
 		extra_members = "\n        ".join(self.extra_cstruct_members)
 		methods_decl = "\n    ".join(self.methods_decl)
-		fields_decl = "\n    ".join(f"{f.type} {f.name};" for f in self.fields)
+		fields_decl = "\n    ".join(f"{f.type} {f.name}{{}};" for f in self.fields)
 		init = "" if not self.init_macro else f" : {self.name}({self.init_macro})"
 		return (
 			f"\nstruct {self.name} {{\n"

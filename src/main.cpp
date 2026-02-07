@@ -481,7 +481,7 @@ struct {0} {{
             extra_cstruct_members | std::views::join_with(std::string("\n        ")) | std::ranges::to<std::string>(),
             methods_decl | std::views::join_with(std::string("\n    ")) | std::ranges::to<std::string>(),
             fields |
-                std::views::transform([](const StructFieldCpp& f) { return std::format("{} {};", f.type, f.name); }) |
+                std::views::transform([](const StructFieldCpp& f) { return std::format("{} {}{{}};", f.type, f.name); }) |
                 std::views::join_with(std::string("\n    ")) | std::ranges::to<std::string>(),
             binary_compatible ? "true" : "false");
     }

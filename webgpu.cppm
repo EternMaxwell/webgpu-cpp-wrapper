@@ -2435,8 +2435,8 @@ struct StringView {
     operator std::string_view() const {
         return length == WGPU_STRLEN ? std::string_view(data) : std::string_view(data, length);
     }
-    char   WGPU_NULLABLE const* data;
-    size_t length;
+    char   WGPU_NULLABLE const* data{};
+    size_t length{};
 };
 struct ChainedStruct {
     struct CStruct : public WGPUChainedStruct {
@@ -2450,8 +2450,8 @@ struct ChainedStruct {
     ChainedStruct&& setNext(T&& value) &&;
     ChainedStruct& setSType(wgpu::SType value) &;
     ChainedStruct&& setSType(wgpu::SType value) &&;
-    NextInChain<struct WGPUChainedStruct const> next;
-    wgpu::SType sType;
+    NextInChain<struct WGPUChainedStruct const> next{};
+    wgpu::SType sType{};
 };
 struct ChainedStructOut {
     struct CStruct : public WGPUChainedStructOut {
@@ -2465,8 +2465,8 @@ struct ChainedStructOut {
     ChainedStructOut&& setNext(T&& value) &&;
     ChainedStructOut& setSType(wgpu::SType value) &;
     ChainedStructOut&& setSType(wgpu::SType value) &&;
-    NextInChain<struct WGPUChainedStructOut> next;
-    wgpu::SType sType;
+    NextInChain<struct WGPUChainedStructOut> next{};
+    wgpu::SType sType{};
 };
 struct BufferMapCallbackInfo {
     struct CStruct : public WGPUBufferMapCallbackInfo {
@@ -2482,9 +2482,9 @@ struct BufferMapCallbackInfo {
     BufferMapCallbackInfo&& setMode(wgpu::CallbackMode value) &&;
     BufferMapCallbackInfo& setCallback(wgpu::BufferMapCallback value) &;
     BufferMapCallbackInfo&& setCallback(wgpu::BufferMapCallback value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::CallbackMode mode;
-    wgpu::BufferMapCallback callback;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::CallbackMode mode{};
+    wgpu::BufferMapCallback callback{};
 };
 struct CompilationInfoCallbackInfo {
     struct CStruct : public WGPUCompilationInfoCallbackInfo {
@@ -2500,9 +2500,9 @@ struct CompilationInfoCallbackInfo {
     CompilationInfoCallbackInfo&& setMode(wgpu::CallbackMode value) &&;
     CompilationInfoCallbackInfo& setCallback(wgpu::CompilationInfoCallback value) &;
     CompilationInfoCallbackInfo&& setCallback(wgpu::CompilationInfoCallback value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::CallbackMode mode;
-    wgpu::CompilationInfoCallback callback;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::CallbackMode mode{};
+    wgpu::CompilationInfoCallback callback{};
 };
 struct CreateComputePipelineAsyncCallbackInfo {
     struct CStruct : public WGPUCreateComputePipelineAsyncCallbackInfo {
@@ -2518,9 +2518,9 @@ struct CreateComputePipelineAsyncCallbackInfo {
     CreateComputePipelineAsyncCallbackInfo&& setMode(wgpu::CallbackMode value) &&;
     CreateComputePipelineAsyncCallbackInfo& setCallback(wgpu::CreateComputePipelineAsyncCallback value) &;
     CreateComputePipelineAsyncCallbackInfo&& setCallback(wgpu::CreateComputePipelineAsyncCallback value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::CallbackMode mode;
-    wgpu::CreateComputePipelineAsyncCallback callback;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::CallbackMode mode{};
+    wgpu::CreateComputePipelineAsyncCallback callback{};
 };
 struct CreateRenderPipelineAsyncCallbackInfo {
     struct CStruct : public WGPUCreateRenderPipelineAsyncCallbackInfo {
@@ -2536,9 +2536,9 @@ struct CreateRenderPipelineAsyncCallbackInfo {
     CreateRenderPipelineAsyncCallbackInfo&& setMode(wgpu::CallbackMode value) &&;
     CreateRenderPipelineAsyncCallbackInfo& setCallback(wgpu::CreateRenderPipelineAsyncCallback value) &;
     CreateRenderPipelineAsyncCallbackInfo&& setCallback(wgpu::CreateRenderPipelineAsyncCallback value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::CallbackMode mode;
-    wgpu::CreateRenderPipelineAsyncCallback callback;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::CallbackMode mode{};
+    wgpu::CreateRenderPipelineAsyncCallback callback{};
 };
 struct DeviceLostCallbackInfo {
     struct CStruct : public WGPUDeviceLostCallbackInfo {
@@ -2554,9 +2554,9 @@ struct DeviceLostCallbackInfo {
     DeviceLostCallbackInfo&& setMode(wgpu::CallbackMode value) &&;
     DeviceLostCallbackInfo& setCallback(wgpu::DeviceLostCallback value) &;
     DeviceLostCallbackInfo&& setCallback(wgpu::DeviceLostCallback value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::CallbackMode mode;
-    wgpu::DeviceLostCallback callback;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::CallbackMode mode{};
+    wgpu::DeviceLostCallback callback{};
 };
 struct PopErrorScopeCallbackInfo {
     struct CStruct : public WGPUPopErrorScopeCallbackInfo {
@@ -2572,9 +2572,9 @@ struct PopErrorScopeCallbackInfo {
     PopErrorScopeCallbackInfo&& setMode(wgpu::CallbackMode value) &&;
     PopErrorScopeCallbackInfo& setCallback(wgpu::PopErrorScopeCallback value) &;
     PopErrorScopeCallbackInfo&& setCallback(wgpu::PopErrorScopeCallback value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::CallbackMode mode;
-    wgpu::PopErrorScopeCallback callback;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::CallbackMode mode{};
+    wgpu::PopErrorScopeCallback callback{};
 };
 struct QueueWorkDoneCallbackInfo {
     struct CStruct : public WGPUQueueWorkDoneCallbackInfo {
@@ -2590,9 +2590,9 @@ struct QueueWorkDoneCallbackInfo {
     QueueWorkDoneCallbackInfo&& setMode(wgpu::CallbackMode value) &&;
     QueueWorkDoneCallbackInfo& setCallback(wgpu::QueueWorkDoneCallback value) &;
     QueueWorkDoneCallbackInfo&& setCallback(wgpu::QueueWorkDoneCallback value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::CallbackMode mode;
-    wgpu::QueueWorkDoneCallback callback;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::CallbackMode mode{};
+    wgpu::QueueWorkDoneCallback callback{};
 };
 struct RequestAdapterCallbackInfo {
     struct CStruct : public WGPURequestAdapterCallbackInfo {
@@ -2608,9 +2608,9 @@ struct RequestAdapterCallbackInfo {
     RequestAdapterCallbackInfo&& setMode(wgpu::CallbackMode value) &&;
     RequestAdapterCallbackInfo& setCallback(wgpu::RequestAdapterCallback value) &;
     RequestAdapterCallbackInfo&& setCallback(wgpu::RequestAdapterCallback value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::CallbackMode mode;
-    wgpu::RequestAdapterCallback callback;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::CallbackMode mode{};
+    wgpu::RequestAdapterCallback callback{};
 };
 struct RequestDeviceCallbackInfo {
     struct CStruct : public WGPURequestDeviceCallbackInfo {
@@ -2626,9 +2626,9 @@ struct RequestDeviceCallbackInfo {
     RequestDeviceCallbackInfo&& setMode(wgpu::CallbackMode value) &&;
     RequestDeviceCallbackInfo& setCallback(wgpu::RequestDeviceCallback value) &;
     RequestDeviceCallbackInfo&& setCallback(wgpu::RequestDeviceCallback value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::CallbackMode mode;
-    wgpu::RequestDeviceCallback callback;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::CallbackMode mode{};
+    wgpu::RequestDeviceCallback callback{};
 };
 struct UncapturedErrorCallbackInfo {
     struct CStruct : public WGPUUncapturedErrorCallbackInfo {
@@ -2642,8 +2642,8 @@ struct UncapturedErrorCallbackInfo {
     UncapturedErrorCallbackInfo&& setNextInChain(T&& value) &&;
     UncapturedErrorCallbackInfo& setCallback(wgpu::UncapturedErrorCallback value) &;
     UncapturedErrorCallbackInfo&& setCallback(wgpu::UncapturedErrorCallback value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::UncapturedErrorCallback callback;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::UncapturedErrorCallback callback{};
 };
 struct AdapterInfo {
     struct CStruct : public WGPUAdapterInfo {
@@ -2679,15 +2679,15 @@ struct AdapterInfo {
     AdapterInfo&& setVendorID(uint32_t value) &&;
     AdapterInfo& setDeviceID(uint32_t value) &;
     AdapterInfo&& setDeviceID(uint32_t value) &&;
-    NextInChain<WGPUChainedStructOut> nextInChain;
-    wgpu::StringView vendor;
-    wgpu::StringView architecture;
-    wgpu::StringView device;
-    wgpu::StringView description;
-    wgpu::BackendType backendType;
-    wgpu::AdapterType adapterType;
-    uint32_t vendorID;
-    uint32_t deviceID;
+    NextInChain<WGPUChainedStructOut> nextInChain{};
+    wgpu::StringView vendor{};
+    wgpu::StringView architecture{};
+    wgpu::StringView device{};
+    wgpu::StringView description{};
+    wgpu::BackendType backendType{};
+    wgpu::AdapterType adapterType{};
+    uint32_t vendorID{};
+    uint32_t deviceID{};
 };
 struct BindGroupEntry {
     struct CStruct : public WGPUBindGroupEntry {
@@ -2711,13 +2711,13 @@ struct BindGroupEntry {
     BindGroupEntry&& setSampler(wgpu::Sampler value) &&;
     BindGroupEntry& setTextureView(wgpu::TextureView value) &;
     BindGroupEntry&& setTextureView(wgpu::TextureView value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    uint32_t binding;
-    wgpu::Buffer buffer;
-    uint64_t offset;
-    uint64_t size;
-    wgpu::Sampler sampler;
-    wgpu::TextureView textureView;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    uint32_t binding{};
+    wgpu::Buffer buffer{};
+    uint64_t offset{};
+    uint64_t size{};
+    wgpu::Sampler sampler{};
+    wgpu::TextureView textureView{};
 };
 struct BlendComponent {
     struct CStruct : public WGPUBlendComponent {
@@ -2731,9 +2731,9 @@ struct BlendComponent {
     BlendComponent&& setSrcFactor(wgpu::BlendFactor value) &&;
     BlendComponent& setDstFactor(wgpu::BlendFactor value) &;
     BlendComponent&& setDstFactor(wgpu::BlendFactor value) &&;
-    wgpu::BlendOperation operation;
-    wgpu::BlendFactor srcFactor;
-    wgpu::BlendFactor dstFactor;
+    wgpu::BlendOperation operation{};
+    wgpu::BlendFactor srcFactor{};
+    wgpu::BlendFactor dstFactor{};
 };
 struct BufferBindingLayout {
     struct CStruct : public WGPUBufferBindingLayout {
@@ -2751,10 +2751,10 @@ struct BufferBindingLayout {
     BufferBindingLayout&& setHasDynamicOffset(wgpu::Bool value) &&;
     BufferBindingLayout& setMinBindingSize(uint64_t value) &;
     BufferBindingLayout&& setMinBindingSize(uint64_t value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::BufferBindingType type;
-    wgpu::Bool hasDynamicOffset;
-    uint64_t minBindingSize;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::BufferBindingType type{};
+    wgpu::Bool hasDynamicOffset{};
+    uint64_t minBindingSize{};
 };
 struct BufferDescriptor {
     struct CStruct : public WGPUBufferDescriptor {
@@ -2776,11 +2776,11 @@ struct BufferDescriptor {
     BufferDescriptor&& setSize(uint64_t value) &&;
     BufferDescriptor& setMappedAtCreation(wgpu::Bool value) &;
     BufferDescriptor&& setMappedAtCreation(wgpu::Bool value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::StringView label;
-    wgpu::BufferUsage usage;
-    uint64_t size;
-    wgpu::Bool mappedAtCreation;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::StringView label{};
+    wgpu::BufferUsage usage{};
+    uint64_t size{};
+    wgpu::Bool mappedAtCreation{};
 };
 struct Color {
     struct CStruct : public WGPUColor {
@@ -2796,10 +2796,10 @@ struct Color {
     Color&& setB(double value) &&;
     Color& setA(double value) &;
     Color&& setA(double value) &&;
-    double r;
-    double g;
-    double b;
-    double a;
+    double r{};
+    double g{};
+    double b{};
+    double a{};
 };
 struct CommandBufferDescriptor {
     struct CStruct : public WGPUCommandBufferDescriptor {
@@ -2815,8 +2815,8 @@ struct CommandBufferDescriptor {
     CommandBufferDescriptor&& setLabel(const wgpu::StringView& value) &&;
     CommandBufferDescriptor& setLabel(wgpu::StringView&& value) &;
     CommandBufferDescriptor&& setLabel(wgpu::StringView&& value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::StringView label;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::StringView label{};
 };
 struct CommandEncoderDescriptor {
     struct CStruct : public WGPUCommandEncoderDescriptor {
@@ -2832,8 +2832,8 @@ struct CommandEncoderDescriptor {
     CommandEncoderDescriptor&& setLabel(const wgpu::StringView& value) &&;
     CommandEncoderDescriptor& setLabel(wgpu::StringView&& value) &;
     CommandEncoderDescriptor&& setLabel(wgpu::StringView&& value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::StringView label;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::StringView label{};
 };
 struct CompilationMessage {
     struct CStruct : public WGPUCompilationMessage {
@@ -2859,13 +2859,13 @@ struct CompilationMessage {
     CompilationMessage&& setOffset(uint64_t value) &&;
     CompilationMessage& setLength(uint64_t value) &;
     CompilationMessage&& setLength(uint64_t value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::StringView message;
-    wgpu::CompilationMessageType type;
-    uint64_t lineNum;
-    uint64_t linePos;
-    uint64_t offset;
-    uint64_t length;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::StringView message{};
+    wgpu::CompilationMessageType type{};
+    uint64_t lineNum{};
+    uint64_t linePos{};
+    uint64_t offset{};
+    uint64_t length{};
 };
 struct ComputePassTimestampWrites {
     struct CStruct : public WGPUComputePassTimestampWrites {
@@ -2879,9 +2879,9 @@ struct ComputePassTimestampWrites {
     ComputePassTimestampWrites&& setBeginningOfPassWriteIndex(uint32_t value) &&;
     ComputePassTimestampWrites& setEndOfPassWriteIndex(uint32_t value) &;
     ComputePassTimestampWrites&& setEndOfPassWriteIndex(uint32_t value) &&;
-    wgpu::QuerySet querySet;
-    uint32_t beginningOfPassWriteIndex;
-    uint32_t endOfPassWriteIndex;
+    wgpu::QuerySet querySet{};
+    uint32_t beginningOfPassWriteIndex{};
+    uint32_t endOfPassWriteIndex{};
 };
 struct ConstantEntry {
     struct CStruct : public WGPUConstantEntry {
@@ -2899,9 +2899,9 @@ struct ConstantEntry {
     ConstantEntry&& setKey(wgpu::StringView&& value) &&;
     ConstantEntry& setValue(double value) &;
     ConstantEntry&& setValue(double value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::StringView key;
-    double value;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::StringView key{};
+    double value{};
 };
 struct Extent3D {
     struct CStruct : public WGPUExtent3D {
@@ -2915,9 +2915,9 @@ struct Extent3D {
     Extent3D&& setHeight(uint32_t value) &&;
     Extent3D& setDepthOrArrayLayers(uint32_t value) &;
     Extent3D&& setDepthOrArrayLayers(uint32_t value) &&;
-    uint32_t width;
-    uint32_t height;
-    uint32_t depthOrArrayLayers;
+    uint32_t width{};
+    uint32_t height{};
+    uint32_t depthOrArrayLayers{};
 };
 struct Future {
     struct CStruct : public WGPUFuture {
@@ -2927,7 +2927,7 @@ struct Future {
     CStruct to_cstruct() const;
     Future& setId(uint64_t value) &;
     Future&& setId(uint64_t value) &&;
-    uint64_t id;
+    uint64_t id{};
 };
 struct InstanceCapabilities {
     struct CStruct : public WGPUInstanceCapabilities {
@@ -2943,9 +2943,9 @@ struct InstanceCapabilities {
     InstanceCapabilities&& setTimedWaitAnyEnable(wgpu::Bool value) &&;
     InstanceCapabilities& setTimedWaitAnyMaxCount(size_t value) &;
     InstanceCapabilities&& setTimedWaitAnyMaxCount(size_t value) &&;
-    NextInChain<WGPUChainedStructOut> nextInChain;
-    wgpu::Bool timedWaitAnyEnable;
-    size_t timedWaitAnyMaxCount;
+    NextInChain<WGPUChainedStructOut> nextInChain{};
+    wgpu::Bool timedWaitAnyEnable{};
+    size_t timedWaitAnyMaxCount{};
 };
 struct Limits {
     struct CStruct : public WGPULimits {
@@ -3019,38 +3019,38 @@ struct Limits {
     Limits&& setMaxComputeWorkgroupSizeZ(uint32_t value) &&;
     Limits& setMaxComputeWorkgroupsPerDimension(uint32_t value) &;
     Limits&& setMaxComputeWorkgroupsPerDimension(uint32_t value) &&;
-    NextInChain<WGPUChainedStructOut> nextInChain;
-    uint32_t maxTextureDimension1D;
-    uint32_t maxTextureDimension2D;
-    uint32_t maxTextureDimension3D;
-    uint32_t maxTextureArrayLayers;
-    uint32_t maxBindGroups;
-    uint32_t maxBindGroupsPlusVertexBuffers;
-    uint32_t maxBindingsPerBindGroup;
-    uint32_t maxDynamicUniformBuffersPerPipelineLayout;
-    uint32_t maxDynamicStorageBuffersPerPipelineLayout;
-    uint32_t maxSampledTexturesPerShaderStage;
-    uint32_t maxSamplersPerShaderStage;
-    uint32_t maxStorageBuffersPerShaderStage;
-    uint32_t maxStorageTexturesPerShaderStage;
-    uint32_t maxUniformBuffersPerShaderStage;
-    uint64_t maxUniformBufferBindingSize;
-    uint64_t maxStorageBufferBindingSize;
-    uint32_t minUniformBufferOffsetAlignment;
-    uint32_t minStorageBufferOffsetAlignment;
-    uint32_t maxVertexBuffers;
-    uint64_t maxBufferSize;
-    uint32_t maxVertexAttributes;
-    uint32_t maxVertexBufferArrayStride;
-    uint32_t maxInterStageShaderVariables;
-    uint32_t maxColorAttachments;
-    uint32_t maxColorAttachmentBytesPerSample;
-    uint32_t maxComputeWorkgroupStorageSize;
-    uint32_t maxComputeInvocationsPerWorkgroup;
-    uint32_t maxComputeWorkgroupSizeX;
-    uint32_t maxComputeWorkgroupSizeY;
-    uint32_t maxComputeWorkgroupSizeZ;
-    uint32_t maxComputeWorkgroupsPerDimension;
+    NextInChain<WGPUChainedStructOut> nextInChain{};
+    uint32_t maxTextureDimension1D{};
+    uint32_t maxTextureDimension2D{};
+    uint32_t maxTextureDimension3D{};
+    uint32_t maxTextureArrayLayers{};
+    uint32_t maxBindGroups{};
+    uint32_t maxBindGroupsPlusVertexBuffers{};
+    uint32_t maxBindingsPerBindGroup{};
+    uint32_t maxDynamicUniformBuffersPerPipelineLayout{};
+    uint32_t maxDynamicStorageBuffersPerPipelineLayout{};
+    uint32_t maxSampledTexturesPerShaderStage{};
+    uint32_t maxSamplersPerShaderStage{};
+    uint32_t maxStorageBuffersPerShaderStage{};
+    uint32_t maxStorageTexturesPerShaderStage{};
+    uint32_t maxUniformBuffersPerShaderStage{};
+    uint64_t maxUniformBufferBindingSize{};
+    uint64_t maxStorageBufferBindingSize{};
+    uint32_t minUniformBufferOffsetAlignment{};
+    uint32_t minStorageBufferOffsetAlignment{};
+    uint32_t maxVertexBuffers{};
+    uint64_t maxBufferSize{};
+    uint32_t maxVertexAttributes{};
+    uint32_t maxVertexBufferArrayStride{};
+    uint32_t maxInterStageShaderVariables{};
+    uint32_t maxColorAttachments{};
+    uint32_t maxColorAttachmentBytesPerSample{};
+    uint32_t maxComputeWorkgroupStorageSize{};
+    uint32_t maxComputeInvocationsPerWorkgroup{};
+    uint32_t maxComputeWorkgroupSizeX{};
+    uint32_t maxComputeWorkgroupSizeY{};
+    uint32_t maxComputeWorkgroupSizeZ{};
+    uint32_t maxComputeWorkgroupsPerDimension{};
 };
 struct MultisampleState {
     struct CStruct : public WGPUMultisampleState {
@@ -3068,10 +3068,10 @@ struct MultisampleState {
     MultisampleState&& setMask(uint32_t value) &&;
     MultisampleState& setAlphaToCoverageEnabled(wgpu::Bool value) &;
     MultisampleState&& setAlphaToCoverageEnabled(wgpu::Bool value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    uint32_t count;
-    uint32_t mask;
-    wgpu::Bool alphaToCoverageEnabled;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    uint32_t count{};
+    uint32_t mask{};
+    wgpu::Bool alphaToCoverageEnabled{};
 };
 struct Origin3D {
     struct CStruct : public WGPUOrigin3D {
@@ -3085,9 +3085,9 @@ struct Origin3D {
     Origin3D&& setY(uint32_t value) &&;
     Origin3D& setZ(uint32_t value) &;
     Origin3D&& setZ(uint32_t value) &&;
-    uint32_t x;
-    uint32_t y;
-    uint32_t z;
+    uint32_t x{};
+    uint32_t y{};
+    uint32_t z{};
 };
 struct PipelineLayoutDescriptor {
     struct CStruct : public WGPUPipelineLayoutDescriptor {
@@ -3107,9 +3107,9 @@ struct PipelineLayoutDescriptor {
     PipelineLayoutDescriptor& setBindGroupLayouts(T&& values) &;
     template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::BindGroupLayout>
     PipelineLayoutDescriptor&& setBindGroupLayouts(T&& values) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::StringView label;
-    std::vector<wgpu::BindGroupLayout> bindGroupLayouts;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::StringView label{};
+    std::vector<wgpu::BindGroupLayout> bindGroupLayouts{};
 };
 struct PrimitiveState {
     struct CStruct : public WGPUPrimitiveState {
@@ -3131,12 +3131,12 @@ struct PrimitiveState {
     PrimitiveState&& setCullMode(wgpu::CullMode value) &&;
     PrimitiveState& setUnclippedDepth(wgpu::Bool value) &;
     PrimitiveState&& setUnclippedDepth(wgpu::Bool value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::PrimitiveTopology topology;
-    wgpu::IndexFormat stripIndexFormat;
-    wgpu::FrontFace frontFace;
-    wgpu::CullMode cullMode;
-    wgpu::Bool unclippedDepth;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::PrimitiveTopology topology{};
+    wgpu::IndexFormat stripIndexFormat{};
+    wgpu::FrontFace frontFace{};
+    wgpu::CullMode cullMode{};
+    wgpu::Bool unclippedDepth{};
 };
 struct QuerySetDescriptor {
     struct CStruct : public WGPUQuerySetDescriptor {
@@ -3156,10 +3156,10 @@ struct QuerySetDescriptor {
     QuerySetDescriptor&& setType(wgpu::QueryType value) &&;
     QuerySetDescriptor& setCount(uint32_t value) &;
     QuerySetDescriptor&& setCount(uint32_t value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::StringView label;
-    wgpu::QueryType type;
-    uint32_t count;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::StringView label{};
+    wgpu::QueryType type{};
+    uint32_t count{};
 };
 struct QueueDescriptor {
     struct CStruct : public WGPUQueueDescriptor {
@@ -3175,8 +3175,8 @@ struct QueueDescriptor {
     QueueDescriptor&& setLabel(const wgpu::StringView& value) &&;
     QueueDescriptor& setLabel(wgpu::StringView&& value) &;
     QueueDescriptor&& setLabel(wgpu::StringView&& value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::StringView label;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::StringView label{};
 };
 struct RenderBundleDescriptor {
     struct CStruct : public WGPURenderBundleDescriptor {
@@ -3192,8 +3192,8 @@ struct RenderBundleDescriptor {
     RenderBundleDescriptor&& setLabel(const wgpu::StringView& value) &&;
     RenderBundleDescriptor& setLabel(wgpu::StringView&& value) &;
     RenderBundleDescriptor&& setLabel(wgpu::StringView&& value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::StringView label;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::StringView label{};
 };
 struct RenderBundleEncoderDescriptor {
     struct CStruct : public WGPURenderBundleEncoderDescriptor {
@@ -3221,13 +3221,13 @@ struct RenderBundleEncoderDescriptor {
     RenderBundleEncoderDescriptor&& setDepthReadOnly(wgpu::Bool value) &&;
     RenderBundleEncoderDescriptor& setStencilReadOnly(wgpu::Bool value) &;
     RenderBundleEncoderDescriptor&& setStencilReadOnly(wgpu::Bool value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::StringView label;
-    std::vector<wgpu::TextureFormat> colorFormats;
-    wgpu::TextureFormat depthStencilFormat;
-    uint32_t sampleCount;
-    wgpu::Bool depthReadOnly;
-    wgpu::Bool stencilReadOnly;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::StringView label{};
+    std::vector<wgpu::TextureFormat> colorFormats{};
+    wgpu::TextureFormat depthStencilFormat{};
+    uint32_t sampleCount{};
+    wgpu::Bool depthReadOnly{};
+    wgpu::Bool stencilReadOnly{};
 };
 struct RenderPassDepthStencilAttachment {
     struct CStruct : public WGPURenderPassDepthStencilAttachment {
@@ -3253,15 +3253,15 @@ struct RenderPassDepthStencilAttachment {
     RenderPassDepthStencilAttachment&& setStencilClearValue(uint32_t value) &&;
     RenderPassDepthStencilAttachment& setStencilReadOnly(wgpu::Bool value) &;
     RenderPassDepthStencilAttachment&& setStencilReadOnly(wgpu::Bool value) &&;
-    wgpu::TextureView view;
-    wgpu::LoadOp depthLoadOp;
-    wgpu::StoreOp depthStoreOp;
-    float depthClearValue;
-    wgpu::Bool depthReadOnly;
-    wgpu::LoadOp stencilLoadOp;
-    wgpu::StoreOp stencilStoreOp;
-    uint32_t stencilClearValue;
-    wgpu::Bool stencilReadOnly;
+    wgpu::TextureView view{};
+    wgpu::LoadOp depthLoadOp{};
+    wgpu::StoreOp depthStoreOp{};
+    float depthClearValue{};
+    wgpu::Bool depthReadOnly{};
+    wgpu::LoadOp stencilLoadOp{};
+    wgpu::StoreOp stencilStoreOp{};
+    uint32_t stencilClearValue{};
+    wgpu::Bool stencilReadOnly{};
 };
 struct RenderPassMaxDrawCount {
     struct CStruct : public WGPURenderPassMaxDrawCount {
@@ -3275,8 +3275,8 @@ struct RenderPassMaxDrawCount {
     RenderPassMaxDrawCount&& setNext(T&& value) &&;
     RenderPassMaxDrawCount& setMaxDrawCount(uint64_t value) &;
     RenderPassMaxDrawCount&& setMaxDrawCount(uint64_t value) &&;
-    wgpu::ChainedStruct chain;
-    uint64_t maxDrawCount;
+    wgpu::ChainedStruct chain{};
+    uint64_t maxDrawCount{};
 };
 struct RenderPassTimestampWrites {
     struct CStruct : public WGPURenderPassTimestampWrites {
@@ -3290,9 +3290,9 @@ struct RenderPassTimestampWrites {
     RenderPassTimestampWrites&& setBeginningOfPassWriteIndex(uint32_t value) &&;
     RenderPassTimestampWrites& setEndOfPassWriteIndex(uint32_t value) &;
     RenderPassTimestampWrites&& setEndOfPassWriteIndex(uint32_t value) &&;
-    wgpu::QuerySet querySet;
-    uint32_t beginningOfPassWriteIndex;
-    uint32_t endOfPassWriteIndex;
+    wgpu::QuerySet querySet{};
+    uint32_t beginningOfPassWriteIndex{};
+    uint32_t endOfPassWriteIndex{};
 };
 struct RequestAdapterOptions {
     struct CStruct : public WGPURequestAdapterOptions {
@@ -3314,12 +3314,12 @@ struct RequestAdapterOptions {
     RequestAdapterOptions&& setBackendType(wgpu::BackendType value) &&;
     RequestAdapterOptions& setCompatibleSurface(wgpu::Surface value) &;
     RequestAdapterOptions&& setCompatibleSurface(wgpu::Surface value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::FeatureLevel featureLevel;
-    wgpu::PowerPreference powerPreference;
-    wgpu::Bool forceFallbackAdapter;
-    wgpu::BackendType backendType;
-    wgpu::Surface compatibleSurface;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::FeatureLevel featureLevel{};
+    wgpu::PowerPreference powerPreference{};
+    wgpu::Bool forceFallbackAdapter{};
+    wgpu::BackendType backendType{};
+    wgpu::Surface compatibleSurface{};
 };
 struct SamplerBindingLayout {
     struct CStruct : public WGPUSamplerBindingLayout {
@@ -3333,8 +3333,8 @@ struct SamplerBindingLayout {
     SamplerBindingLayout&& setNextInChain(T&& value) &&;
     SamplerBindingLayout& setType(wgpu::SamplerBindingType value) &;
     SamplerBindingLayout&& setType(wgpu::SamplerBindingType value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::SamplerBindingType type;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::SamplerBindingType type{};
 };
 struct SamplerDescriptor {
     struct CStruct : public WGPUSamplerDescriptor {
@@ -3370,18 +3370,18 @@ struct SamplerDescriptor {
     SamplerDescriptor&& setCompare(wgpu::CompareFunction value) &&;
     SamplerDescriptor& setMaxAnisotropy(uint16_t value) &;
     SamplerDescriptor&& setMaxAnisotropy(uint16_t value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::StringView label;
-    wgpu::AddressMode addressModeU;
-    wgpu::AddressMode addressModeV;
-    wgpu::AddressMode addressModeW;
-    wgpu::FilterMode magFilter;
-    wgpu::FilterMode minFilter;
-    wgpu::MipmapFilterMode mipmapFilter;
-    float lodMinClamp;
-    float lodMaxClamp;
-    wgpu::CompareFunction compare;
-    uint16_t maxAnisotropy;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::StringView label{};
+    wgpu::AddressMode addressModeU{};
+    wgpu::AddressMode addressModeV{};
+    wgpu::AddressMode addressModeW{};
+    wgpu::FilterMode magFilter{};
+    wgpu::FilterMode minFilter{};
+    wgpu::MipmapFilterMode mipmapFilter{};
+    float lodMinClamp{};
+    float lodMaxClamp{};
+    wgpu::CompareFunction compare{};
+    uint16_t maxAnisotropy{};
 };
 struct ShaderModuleDescriptor {
     struct CStruct : public WGPUShaderModuleDescriptor {
@@ -3397,8 +3397,8 @@ struct ShaderModuleDescriptor {
     ShaderModuleDescriptor&& setLabel(const wgpu::StringView& value) &&;
     ShaderModuleDescriptor& setLabel(wgpu::StringView&& value) &;
     ShaderModuleDescriptor&& setLabel(wgpu::StringView&& value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::StringView label;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::StringView label{};
 };
 struct ShaderSourceSPIRV {
     struct CStruct : public WGPUShaderSourceSPIRV {
@@ -3414,9 +3414,9 @@ struct ShaderSourceSPIRV {
     ShaderSourceSPIRV&& setCodeSize(uint32_t value) &&;
     ShaderSourceSPIRV& setCode(uint32_t const* value) &;
     ShaderSourceSPIRV&& setCode(uint32_t const* value) &&;
-    wgpu::ChainedStruct chain;
-    uint32_t codeSize;
-    uint32_t const* code;
+    wgpu::ChainedStruct chain{};
+    uint32_t codeSize{};
+    uint32_t const* code{};
 };
 struct ShaderSourceWGSL {
     struct CStruct : public WGPUShaderSourceWGSL {
@@ -3432,8 +3432,8 @@ struct ShaderSourceWGSL {
     ShaderSourceWGSL&& setCode(const wgpu::StringView& value) &&;
     ShaderSourceWGSL& setCode(wgpu::StringView&& value) &;
     ShaderSourceWGSL&& setCode(wgpu::StringView&& value) &&;
-    wgpu::ChainedStruct chain;
-    wgpu::StringView code;
+    wgpu::ChainedStruct chain{};
+    wgpu::StringView code{};
 };
 struct StencilFaceState {
     struct CStruct : public WGPUStencilFaceState {
@@ -3449,10 +3449,10 @@ struct StencilFaceState {
     StencilFaceState&& setDepthFailOp(wgpu::StencilOperation value) &&;
     StencilFaceState& setPassOp(wgpu::StencilOperation value) &;
     StencilFaceState&& setPassOp(wgpu::StencilOperation value) &&;
-    wgpu::CompareFunction compare;
-    wgpu::StencilOperation failOp;
-    wgpu::StencilOperation depthFailOp;
-    wgpu::StencilOperation passOp;
+    wgpu::CompareFunction compare{};
+    wgpu::StencilOperation failOp{};
+    wgpu::StencilOperation depthFailOp{};
+    wgpu::StencilOperation passOp{};
 };
 struct StorageTextureBindingLayout {
     struct CStruct : public WGPUStorageTextureBindingLayout {
@@ -3470,10 +3470,10 @@ struct StorageTextureBindingLayout {
     StorageTextureBindingLayout&& setFormat(wgpu::TextureFormat value) &&;
     StorageTextureBindingLayout& setViewDimension(wgpu::TextureViewDimension value) &;
     StorageTextureBindingLayout&& setViewDimension(wgpu::TextureViewDimension value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::StorageTextureAccess access;
-    wgpu::TextureFormat format;
-    wgpu::TextureViewDimension viewDimension;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::StorageTextureAccess access{};
+    wgpu::TextureFormat format{};
+    wgpu::TextureViewDimension viewDimension{};
 };
 struct SupportedFeatures {
     struct CStruct : public WGPUSupportedFeatures {
@@ -3485,7 +3485,7 @@ struct SupportedFeatures {
     SupportedFeatures& setFeatures(T&& values) &;
     template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::FeatureName>
     SupportedFeatures&& setFeatures(T&& values) &&;
-    std::vector<wgpu::FeatureName> features;
+    std::vector<wgpu::FeatureName> features{};
 };
 struct SupportedWGSLLanguageFeatures {
     struct CStruct : public WGPUSupportedWGSLLanguageFeatures {
@@ -3497,7 +3497,7 @@ struct SupportedWGSLLanguageFeatures {
     SupportedWGSLLanguageFeatures& setFeatures(T&& values) &;
     template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::WGSLLanguageFeatureName>
     SupportedWGSLLanguageFeatures&& setFeatures(T&& values) &&;
-    std::vector<wgpu::WGSLLanguageFeatureName> features;
+    std::vector<wgpu::WGSLLanguageFeatureName> features{};
 };
 struct SurfaceCapabilities {
     struct CStruct : public WGPUSurfaceCapabilities {
@@ -3523,11 +3523,11 @@ struct SurfaceCapabilities {
     SurfaceCapabilities& setAlphaModes(T&& values) &;
     template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::CompositeAlphaMode>
     SurfaceCapabilities&& setAlphaModes(T&& values) &&;
-    NextInChain<WGPUChainedStructOut> nextInChain;
-    wgpu::TextureUsage usages;
-    std::vector<wgpu::TextureFormat> formats;
-    std::vector<wgpu::PresentMode> presentModes;
-    std::vector<wgpu::CompositeAlphaMode> alphaModes;
+    NextInChain<WGPUChainedStructOut> nextInChain{};
+    wgpu::TextureUsage usages{};
+    std::vector<wgpu::TextureFormat> formats{};
+    std::vector<wgpu::PresentMode> presentModes{};
+    std::vector<wgpu::CompositeAlphaMode> alphaModes{};
 };
 struct SurfaceConfiguration {
     struct CStruct : public WGPUSurfaceConfiguration {
@@ -3557,15 +3557,15 @@ struct SurfaceConfiguration {
     SurfaceConfiguration&& setAlphaMode(wgpu::CompositeAlphaMode value) &&;
     SurfaceConfiguration& setPresentMode(wgpu::PresentMode value) &;
     SurfaceConfiguration&& setPresentMode(wgpu::PresentMode value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::Device device;
-    wgpu::TextureFormat format;
-    wgpu::TextureUsage usage;
-    uint32_t width;
-    uint32_t height;
-    std::vector<wgpu::TextureFormat> viewFormats;
-    wgpu::CompositeAlphaMode alphaMode;
-    wgpu::PresentMode presentMode;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::Device device{};
+    wgpu::TextureFormat format{};
+    wgpu::TextureUsage usage{};
+    uint32_t width{};
+    uint32_t height{};
+    std::vector<wgpu::TextureFormat> viewFormats{};
+    wgpu::CompositeAlphaMode alphaMode{};
+    wgpu::PresentMode presentMode{};
 };
 struct SurfaceDescriptor {
     struct CStruct : public WGPUSurfaceDescriptor {
@@ -3581,8 +3581,8 @@ struct SurfaceDescriptor {
     SurfaceDescriptor&& setLabel(const wgpu::StringView& value) &&;
     SurfaceDescriptor& setLabel(wgpu::StringView&& value) &;
     SurfaceDescriptor&& setLabel(wgpu::StringView&& value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::StringView label;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::StringView label{};
 };
 struct SurfaceSourceAndroidNativeWindow {
     struct CStruct : public WGPUSurfaceSourceAndroidNativeWindow {
@@ -3596,8 +3596,8 @@ struct SurfaceSourceAndroidNativeWindow {
     SurfaceSourceAndroidNativeWindow&& setNext(T&& value) &&;
     SurfaceSourceAndroidNativeWindow& setWindow(void* value) &;
     SurfaceSourceAndroidNativeWindow&& setWindow(void* value) &&;
-    wgpu::ChainedStruct chain;
-    void* window;
+    wgpu::ChainedStruct chain{};
+    void* window{};
 };
 struct SurfaceSourceMetalLayer {
     struct CStruct : public WGPUSurfaceSourceMetalLayer {
@@ -3611,8 +3611,8 @@ struct SurfaceSourceMetalLayer {
     SurfaceSourceMetalLayer&& setNext(T&& value) &&;
     SurfaceSourceMetalLayer& setLayer(void* value) &;
     SurfaceSourceMetalLayer&& setLayer(void* value) &&;
-    wgpu::ChainedStruct chain;
-    void* layer;
+    wgpu::ChainedStruct chain{};
+    void* layer{};
 };
 struct SurfaceSourceWaylandSurface {
     struct CStruct : public WGPUSurfaceSourceWaylandSurface {
@@ -3628,9 +3628,9 @@ struct SurfaceSourceWaylandSurface {
     SurfaceSourceWaylandSurface&& setDisplay(void* value) &&;
     SurfaceSourceWaylandSurface& setSurface(void* value) &;
     SurfaceSourceWaylandSurface&& setSurface(void* value) &&;
-    wgpu::ChainedStruct chain;
-    void* display;
-    void* surface;
+    wgpu::ChainedStruct chain{};
+    void* display{};
+    void* surface{};
 };
 struct SurfaceSourceWindowsHWND {
     struct CStruct : public WGPUSurfaceSourceWindowsHWND {
@@ -3646,9 +3646,9 @@ struct SurfaceSourceWindowsHWND {
     SurfaceSourceWindowsHWND&& setHinstance(void* value) &&;
     SurfaceSourceWindowsHWND& setHwnd(void* value) &;
     SurfaceSourceWindowsHWND&& setHwnd(void* value) &&;
-    wgpu::ChainedStruct chain;
-    void* hinstance;
-    void* hwnd;
+    wgpu::ChainedStruct chain{};
+    void* hinstance{};
+    void* hwnd{};
 };
 struct SurfaceSourceXCBWindow {
     struct CStruct : public WGPUSurfaceSourceXCBWindow {
@@ -3664,9 +3664,9 @@ struct SurfaceSourceXCBWindow {
     SurfaceSourceXCBWindow&& setConnection(void* value) &&;
     SurfaceSourceXCBWindow& setWindow(uint32_t value) &;
     SurfaceSourceXCBWindow&& setWindow(uint32_t value) &&;
-    wgpu::ChainedStruct chain;
-    void* connection;
-    uint32_t window;
+    wgpu::ChainedStruct chain{};
+    void* connection{};
+    uint32_t window{};
 };
 struct SurfaceSourceXlibWindow {
     struct CStruct : public WGPUSurfaceSourceXlibWindow {
@@ -3682,9 +3682,9 @@ struct SurfaceSourceXlibWindow {
     SurfaceSourceXlibWindow&& setDisplay(void* value) &&;
     SurfaceSourceXlibWindow& setWindow(uint64_t value) &;
     SurfaceSourceXlibWindow&& setWindow(uint64_t value) &&;
-    wgpu::ChainedStruct chain;
-    void* display;
-    uint64_t window;
+    wgpu::ChainedStruct chain{};
+    void* display{};
+    uint64_t window{};
 };
 struct SurfaceTexture {
     struct CStruct : public WGPUSurfaceTexture {
@@ -3700,9 +3700,9 @@ struct SurfaceTexture {
     SurfaceTexture&& setTexture(wgpu::Texture value) &&;
     SurfaceTexture& setStatus(wgpu::SurfaceGetCurrentTextureStatus value) &;
     SurfaceTexture&& setStatus(wgpu::SurfaceGetCurrentTextureStatus value) &&;
-    NextInChain<WGPUChainedStructOut> nextInChain;
-    wgpu::Texture texture;
-    wgpu::SurfaceGetCurrentTextureStatus status;
+    NextInChain<WGPUChainedStructOut> nextInChain{};
+    wgpu::Texture texture{};
+    wgpu::SurfaceGetCurrentTextureStatus status{};
 };
 struct TexelCopyBufferLayout {
     struct CStruct : public WGPUTexelCopyBufferLayout {
@@ -3716,9 +3716,9 @@ struct TexelCopyBufferLayout {
     TexelCopyBufferLayout&& setBytesPerRow(uint32_t value) &&;
     TexelCopyBufferLayout& setRowsPerImage(uint32_t value) &;
     TexelCopyBufferLayout&& setRowsPerImage(uint32_t value) &&;
-    uint64_t offset;
-    uint32_t bytesPerRow;
-    uint32_t rowsPerImage;
+    uint64_t offset{};
+    uint32_t bytesPerRow{};
+    uint32_t rowsPerImage{};
 };
 struct TextureBindingLayout {
     struct CStruct : public WGPUTextureBindingLayout {
@@ -3736,10 +3736,10 @@ struct TextureBindingLayout {
     TextureBindingLayout&& setViewDimension(wgpu::TextureViewDimension value) &&;
     TextureBindingLayout& setMultisampled(wgpu::Bool value) &;
     TextureBindingLayout&& setMultisampled(wgpu::Bool value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::TextureSampleType sampleType;
-    wgpu::TextureViewDimension viewDimension;
-    wgpu::Bool multisampled;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::TextureSampleType sampleType{};
+    wgpu::TextureViewDimension viewDimension{};
+    wgpu::Bool multisampled{};
 };
 struct TextureViewDescriptor {
     struct CStruct : public WGPUTextureViewDescriptor {
@@ -3771,16 +3771,16 @@ struct TextureViewDescriptor {
     TextureViewDescriptor&& setAspect(wgpu::TextureAspect value) &&;
     TextureViewDescriptor& setUsage(wgpu::TextureUsage value) &;
     TextureViewDescriptor&& setUsage(wgpu::TextureUsage value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::StringView label;
-    wgpu::TextureFormat format;
-    wgpu::TextureViewDimension dimension;
-    uint32_t baseMipLevel;
-    uint32_t mipLevelCount;
-    uint32_t baseArrayLayer;
-    uint32_t arrayLayerCount;
-    wgpu::TextureAspect aspect;
-    wgpu::TextureUsage usage;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::StringView label{};
+    wgpu::TextureFormat format{};
+    wgpu::TextureViewDimension dimension{};
+    uint32_t baseMipLevel{};
+    uint32_t mipLevelCount{};
+    uint32_t baseArrayLayer{};
+    uint32_t arrayLayerCount{};
+    wgpu::TextureAspect aspect{};
+    wgpu::TextureUsage usage{};
 };
 struct VertexAttribute {
     struct CStruct : public WGPUVertexAttribute {
@@ -3794,9 +3794,9 @@ struct VertexAttribute {
     VertexAttribute&& setOffset(uint64_t value) &&;
     VertexAttribute& setShaderLocation(uint32_t value) &;
     VertexAttribute&& setShaderLocation(uint32_t value) &&;
-    wgpu::VertexFormat format;
-    uint64_t offset;
-    uint32_t shaderLocation;
+    wgpu::VertexFormat format{};
+    uint64_t offset{};
+    uint32_t shaderLocation{};
 };
 struct BindGroupDescriptor {
     struct CStruct : public WGPUBindGroupDescriptor {
@@ -3819,10 +3819,10 @@ struct BindGroupDescriptor {
     BindGroupDescriptor& setEntries(T&& values) &;
     template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::BindGroupEntry>
     BindGroupDescriptor&& setEntries(T&& values) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::StringView label;
-    wgpu::BindGroupLayout layout;
-    std::vector<wgpu::BindGroupEntry> entries;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::StringView label{};
+    wgpu::BindGroupLayout layout{};
+    std::vector<wgpu::BindGroupEntry> entries{};
 };
 struct BindGroupLayoutEntry {
     struct CStruct : public WGPUBindGroupLayoutEntry {
@@ -3854,13 +3854,13 @@ struct BindGroupLayoutEntry {
     BindGroupLayoutEntry&& setStorageTexture(const wgpu::StorageTextureBindingLayout& value) &&;
     BindGroupLayoutEntry& setStorageTexture(wgpu::StorageTextureBindingLayout&& value) &;
     BindGroupLayoutEntry&& setStorageTexture(wgpu::StorageTextureBindingLayout&& value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    uint32_t binding;
-    wgpu::ShaderStage visibility;
-    wgpu::BufferBindingLayout buffer;
-    wgpu::SamplerBindingLayout sampler;
-    wgpu::TextureBindingLayout texture;
-    wgpu::StorageTextureBindingLayout storageTexture;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    uint32_t binding{};
+    wgpu::ShaderStage visibility{};
+    wgpu::BufferBindingLayout buffer{};
+    wgpu::SamplerBindingLayout sampler{};
+    wgpu::TextureBindingLayout texture{};
+    wgpu::StorageTextureBindingLayout storageTexture{};
 };
 struct BlendState {
     struct CStruct : public WGPUBlendState {
@@ -3876,8 +3876,8 @@ struct BlendState {
     BlendState&& setAlpha(const wgpu::BlendComponent& value) &&;
     BlendState& setAlpha(wgpu::BlendComponent&& value) &;
     BlendState&& setAlpha(wgpu::BlendComponent&& value) &&;
-    wgpu::BlendComponent color;
-    wgpu::BlendComponent alpha;
+    wgpu::BlendComponent color{};
+    wgpu::BlendComponent alpha{};
 };
 struct CompilationInfo {
     struct CStruct : public WGPUCompilationInfo {
@@ -3894,8 +3894,8 @@ struct CompilationInfo {
     CompilationInfo& setMessages(T&& values) &;
     template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::CompilationMessage>
     CompilationInfo&& setMessages(T&& values) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    std::vector<wgpu::CompilationMessage> messages;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    std::vector<wgpu::CompilationMessage> messages{};
 };
 struct ComputePassDescriptor {
     struct CStruct : public WGPUComputePassDescriptor {
@@ -3915,9 +3915,9 @@ struct ComputePassDescriptor {
     ComputePassDescriptor&& setTimestampWrites(const wgpu::ComputePassTimestampWrites& value) &&;
     ComputePassDescriptor& setTimestampWrites(wgpu::ComputePassTimestampWrites&& value) &;
     ComputePassDescriptor&& setTimestampWrites(wgpu::ComputePassTimestampWrites&& value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::StringView label;
-    std::optional<wgpu::ComputePassTimestampWrites> timestampWrites;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::StringView label{};
+    std::optional<wgpu::ComputePassTimestampWrites> timestampWrites{};
 };
 struct DepthStencilState {
     struct CStruct : public WGPUDepthStencilState {
@@ -3953,17 +3953,17 @@ struct DepthStencilState {
     DepthStencilState&& setDepthBiasSlopeScale(float value) &&;
     DepthStencilState& setDepthBiasClamp(float value) &;
     DepthStencilState&& setDepthBiasClamp(float value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::TextureFormat format;
-    wgpu::OptionalBool depthWriteEnabled;
-    wgpu::CompareFunction depthCompare;
-    wgpu::StencilFaceState stencilFront;
-    wgpu::StencilFaceState stencilBack;
-    uint32_t stencilReadMask;
-    uint32_t stencilWriteMask;
-    int32_t depthBias;
-    float depthBiasSlopeScale;
-    float depthBiasClamp;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::TextureFormat format{};
+    wgpu::OptionalBool depthWriteEnabled{};
+    wgpu::CompareFunction depthCompare{};
+    wgpu::StencilFaceState stencilFront{};
+    wgpu::StencilFaceState stencilBack{};
+    uint32_t stencilReadMask{};
+    uint32_t stencilWriteMask{};
+    int32_t depthBias{};
+    float depthBiasSlopeScale{};
+    float depthBiasClamp{};
 };
 struct DeviceDescriptor {
     struct CStruct : public WGPUDeviceDescriptor {
@@ -4000,13 +4000,13 @@ struct DeviceDescriptor {
     DeviceDescriptor&& setUncapturedErrorCallbackInfo(const wgpu::UncapturedErrorCallbackInfo& value) &&;
     DeviceDescriptor& setUncapturedErrorCallbackInfo(wgpu::UncapturedErrorCallbackInfo&& value) &;
     DeviceDescriptor&& setUncapturedErrorCallbackInfo(wgpu::UncapturedErrorCallbackInfo&& value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::StringView label;
-    std::vector<wgpu::FeatureName> requiredFeatures;
-    std::optional<wgpu::Limits> requiredLimits;
-    wgpu::QueueDescriptor defaultQueue;
-    wgpu::DeviceLostCallbackInfo deviceLostCallbackInfo;
-    wgpu::UncapturedErrorCallbackInfo uncapturedErrorCallbackInfo;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::StringView label{};
+    std::vector<wgpu::FeatureName> requiredFeatures{};
+    std::optional<wgpu::Limits> requiredLimits{};
+    wgpu::QueueDescriptor defaultQueue{};
+    wgpu::DeviceLostCallbackInfo deviceLostCallbackInfo{};
+    wgpu::UncapturedErrorCallbackInfo uncapturedErrorCallbackInfo{};
 };
 struct FutureWaitInfo {
     struct CStruct : public WGPUFutureWaitInfo {
@@ -4020,8 +4020,8 @@ struct FutureWaitInfo {
     FutureWaitInfo&& setFuture(wgpu::Future&& value) &&;
     FutureWaitInfo& setCompleted(wgpu::Bool value) &;
     FutureWaitInfo&& setCompleted(wgpu::Bool value) &&;
-    wgpu::Future future;
-    wgpu::Bool completed;
+    wgpu::Future future{};
+    wgpu::Bool completed{};
 };
 struct InstanceDescriptor {
     struct CStruct : public WGPUInstanceDescriptor {
@@ -4037,8 +4037,8 @@ struct InstanceDescriptor {
     InstanceDescriptor&& setFeatures(const wgpu::InstanceCapabilities& value) &&;
     InstanceDescriptor& setFeatures(wgpu::InstanceCapabilities&& value) &;
     InstanceDescriptor&& setFeatures(wgpu::InstanceCapabilities&& value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::InstanceCapabilities features;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::InstanceCapabilities features{};
 };
 struct ProgrammableStageDescriptor {
     struct CStruct : public WGPUProgrammableStageDescriptor {
@@ -4061,10 +4061,10 @@ struct ProgrammableStageDescriptor {
     ProgrammableStageDescriptor& setConstants(T&& values) &;
     template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::ConstantEntry>
     ProgrammableStageDescriptor&& setConstants(T&& values) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::ShaderModule module;
-    wgpu::StringView entryPoint;
-    std::vector<wgpu::ConstantEntry> constants;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::ShaderModule module{};
+    wgpu::StringView entryPoint{};
+    std::vector<wgpu::ConstantEntry> constants{};
 };
 struct RenderPassColorAttachment {
     struct CStruct : public WGPURenderPassColorAttachment {
@@ -4090,13 +4090,13 @@ struct RenderPassColorAttachment {
     RenderPassColorAttachment&& setClearValue(const wgpu::Color& value) &&;
     RenderPassColorAttachment& setClearValue(wgpu::Color&& value) &;
     RenderPassColorAttachment&& setClearValue(wgpu::Color&& value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::TextureView view;
-    uint32_t depthSlice;
-    wgpu::TextureView resolveTarget;
-    wgpu::LoadOp loadOp;
-    wgpu::StoreOp storeOp;
-    wgpu::Color clearValue;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::TextureView view{};
+    uint32_t depthSlice{};
+    wgpu::TextureView resolveTarget{};
+    wgpu::LoadOp loadOp{};
+    wgpu::StoreOp storeOp{};
+    wgpu::Color clearValue{};
 };
 struct TexelCopyBufferInfo {
     struct CStruct : public WGPUTexelCopyBufferInfo {
@@ -4110,8 +4110,8 @@ struct TexelCopyBufferInfo {
     TexelCopyBufferInfo&& setLayout(wgpu::TexelCopyBufferLayout&& value) &&;
     TexelCopyBufferInfo& setBuffer(wgpu::Buffer value) &;
     TexelCopyBufferInfo&& setBuffer(wgpu::Buffer value) &&;
-    wgpu::TexelCopyBufferLayout layout;
-    wgpu::Buffer buffer;
+    wgpu::TexelCopyBufferLayout layout{};
+    wgpu::Buffer buffer{};
 };
 struct TexelCopyTextureInfo {
     struct CStruct : public WGPUTexelCopyTextureInfo {
@@ -4129,10 +4129,10 @@ struct TexelCopyTextureInfo {
     TexelCopyTextureInfo&& setOrigin(wgpu::Origin3D&& value) &&;
     TexelCopyTextureInfo& setAspect(wgpu::TextureAspect value) &;
     TexelCopyTextureInfo&& setAspect(wgpu::TextureAspect value) &&;
-    wgpu::Texture texture;
-    uint32_t mipLevel;
-    wgpu::Origin3D origin;
-    wgpu::TextureAspect aspect;
+    wgpu::Texture texture{};
+    uint32_t mipLevel{};
+    wgpu::Origin3D origin{};
+    wgpu::TextureAspect aspect{};
 };
 struct TextureDescriptor {
     struct CStruct : public WGPUTextureDescriptor {
@@ -4166,15 +4166,15 @@ struct TextureDescriptor {
     TextureDescriptor& setViewFormats(T&& values) &;
     template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::TextureFormat>
     TextureDescriptor&& setViewFormats(T&& values) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::StringView label;
-    wgpu::TextureUsage usage;
-    wgpu::TextureDimension dimension;
-    wgpu::Extent3D size;
-    wgpu::TextureFormat format;
-    uint32_t mipLevelCount;
-    uint32_t sampleCount;
-    std::vector<wgpu::TextureFormat> viewFormats;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::StringView label{};
+    wgpu::TextureUsage usage{};
+    wgpu::TextureDimension dimension{};
+    wgpu::Extent3D size{};
+    wgpu::TextureFormat format{};
+    uint32_t mipLevelCount{};
+    uint32_t sampleCount{};
+    std::vector<wgpu::TextureFormat> viewFormats{};
 };
 struct VertexBufferLayout {
     struct CStruct : public WGPUVertexBufferLayout {
@@ -4190,9 +4190,9 @@ struct VertexBufferLayout {
     VertexBufferLayout& setAttributes(T&& values) &;
     template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::VertexAttribute>
     VertexBufferLayout&& setAttributes(T&& values) &&;
-    wgpu::VertexStepMode stepMode;
-    uint64_t arrayStride;
-    std::vector<wgpu::VertexAttribute> attributes;
+    wgpu::VertexStepMode stepMode{};
+    uint64_t arrayStride{};
+    std::vector<wgpu::VertexAttribute> attributes{};
 };
 struct BindGroupLayoutDescriptor {
     struct CStruct : public WGPUBindGroupLayoutDescriptor {
@@ -4213,9 +4213,9 @@ struct BindGroupLayoutDescriptor {
     BindGroupLayoutDescriptor& setEntries(T&& values) &;
     template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::BindGroupLayoutEntry>
     BindGroupLayoutDescriptor&& setEntries(T&& values) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::StringView label;
-    std::vector<wgpu::BindGroupLayoutEntry> entries;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::StringView label{};
+    std::vector<wgpu::BindGroupLayoutEntry> entries{};
 };
 struct ColorTargetState {
     struct CStruct : public WGPUColorTargetState {
@@ -4235,10 +4235,10 @@ struct ColorTargetState {
     ColorTargetState&& setBlend(wgpu::BlendState&& value) &&;
     ColorTargetState& setWriteMask(wgpu::ColorWriteMask value) &;
     ColorTargetState&& setWriteMask(wgpu::ColorWriteMask value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::TextureFormat format;
-    std::optional<wgpu::BlendState> blend;
-    wgpu::ColorWriteMask writeMask;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::TextureFormat format{};
+    std::optional<wgpu::BlendState> blend{};
+    wgpu::ColorWriteMask writeMask{};
 };
 struct ComputePipelineDescriptor {
     struct CStruct : public WGPUComputePipelineDescriptor {
@@ -4261,10 +4261,10 @@ struct ComputePipelineDescriptor {
     ComputePipelineDescriptor&& setCompute(const wgpu::ProgrammableStageDescriptor& value) &&;
     ComputePipelineDescriptor& setCompute(wgpu::ProgrammableStageDescriptor&& value) &;
     ComputePipelineDescriptor&& setCompute(wgpu::ProgrammableStageDescriptor&& value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::StringView label;
-    wgpu::PipelineLayout layout;
-    wgpu::ProgrammableStageDescriptor compute;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::StringView label{};
+    wgpu::PipelineLayout layout{};
+    wgpu::ProgrammableStageDescriptor compute{};
 };
 struct RenderPassDescriptor {
     struct CStruct : public WGPURenderPassDescriptor {
@@ -4295,12 +4295,12 @@ struct RenderPassDescriptor {
     RenderPassDescriptor&& setTimestampWrites(const wgpu::RenderPassTimestampWrites& value) &&;
     RenderPassDescriptor& setTimestampWrites(wgpu::RenderPassTimestampWrites&& value) &;
     RenderPassDescriptor&& setTimestampWrites(wgpu::RenderPassTimestampWrites&& value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::StringView label;
-    std::vector<wgpu::RenderPassColorAttachment> colorAttachments;
-    std::optional<wgpu::RenderPassDepthStencilAttachment> depthStencilAttachment;
-    wgpu::QuerySet occlusionQuerySet;
-    std::optional<wgpu::RenderPassTimestampWrites> timestampWrites;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::StringView label{};
+    std::vector<wgpu::RenderPassColorAttachment> colorAttachments{};
+    std::optional<wgpu::RenderPassDepthStencilAttachment> depthStencilAttachment{};
+    wgpu::QuerySet occlusionQuerySet{};
+    std::optional<wgpu::RenderPassTimestampWrites> timestampWrites{};
 };
 struct VertexState {
     struct CStruct : public WGPUVertexState {
@@ -4328,11 +4328,11 @@ struct VertexState {
     VertexState& setBuffers(T&& values) &;
     template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::VertexBufferLayout>
     VertexState&& setBuffers(T&& values) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::ShaderModule module;
-    wgpu::StringView entryPoint;
-    std::vector<wgpu::ConstantEntry> constants;
-    std::vector<wgpu::VertexBufferLayout> buffers;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::ShaderModule module{};
+    wgpu::StringView entryPoint{};
+    std::vector<wgpu::ConstantEntry> constants{};
+    std::vector<wgpu::VertexBufferLayout> buffers{};
 };
 struct FragmentState {
     struct CStruct : public WGPUFragmentState {
@@ -4360,11 +4360,11 @@ struct FragmentState {
     FragmentState& setTargets(T&& values) &;
     template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::ColorTargetState>
     FragmentState&& setTargets(T&& values) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::ShaderModule module;
-    wgpu::StringView entryPoint;
-    std::vector<wgpu::ConstantEntry> constants;
-    std::vector<wgpu::ColorTargetState> targets;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::ShaderModule module{};
+    wgpu::StringView entryPoint{};
+    std::vector<wgpu::ConstantEntry> constants{};
+    std::vector<wgpu::ColorTargetState> targets{};
 };
 struct RenderPipelineDescriptor {
     struct CStruct : public WGPURenderPipelineDescriptor {
@@ -4405,14 +4405,14 @@ struct RenderPipelineDescriptor {
     RenderPipelineDescriptor&& setFragment(const wgpu::FragmentState& value) &&;
     RenderPipelineDescriptor& setFragment(wgpu::FragmentState&& value) &;
     RenderPipelineDescriptor&& setFragment(wgpu::FragmentState&& value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::StringView label;
-    wgpu::PipelineLayout layout;
-    wgpu::VertexState vertex;
-    wgpu::PrimitiveState primitive;
-    std::optional<wgpu::DepthStencilState> depthStencil;
-    wgpu::MultisampleState multisample;
-    std::optional<wgpu::FragmentState> fragment;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::StringView label{};
+    wgpu::PipelineLayout layout{};
+    wgpu::VertexState vertex{};
+    wgpu::PrimitiveState primitive{};
+    std::optional<wgpu::DepthStencilState> depthStencil{};
+    wgpu::MultisampleState multisample{};
+    std::optional<wgpu::FragmentState> fragment{};
 };
 struct InstanceExtras {
     struct CStruct : public WGPUInstanceExtras {
@@ -4440,13 +4440,13 @@ struct InstanceExtras {
     InstanceExtras&& setDxcPath(const wgpu::StringView& value) &&;
     InstanceExtras& setDxcPath(wgpu::StringView&& value) &;
     InstanceExtras&& setDxcPath(wgpu::StringView&& value) &&;
-    wgpu::ChainedStruct chain;
-    wgpu::InstanceBackend backends;
-    wgpu::InstanceFlag flags;
-    wgpu::Dx12Compiler dx12ShaderCompiler;
-    wgpu::Gles3MinorVersion gles3MinorVersion;
-    wgpu::StringView dxilPath;
-    wgpu::StringView dxcPath;
+    wgpu::ChainedStruct chain{};
+    wgpu::InstanceBackend backends{};
+    wgpu::InstanceFlag flags{};
+    wgpu::Dx12Compiler dx12ShaderCompiler{};
+    wgpu::Gles3MinorVersion gles3MinorVersion{};
+    wgpu::StringView dxilPath{};
+    wgpu::StringView dxcPath{};
 };
 struct DeviceExtras {
     struct CStruct : public WGPUDeviceExtras {
@@ -4462,8 +4462,8 @@ struct DeviceExtras {
     DeviceExtras&& setTracePath(const wgpu::StringView& value) &&;
     DeviceExtras& setTracePath(wgpu::StringView&& value) &;
     DeviceExtras&& setTracePath(wgpu::StringView&& value) &&;
-    wgpu::ChainedStruct chain;
-    wgpu::StringView tracePath;
+    wgpu::ChainedStruct chain{};
+    wgpu::StringView tracePath{};
 };
 struct NativeLimits {
     struct CStruct : public WGPUNativeLimits {
@@ -4479,9 +4479,9 @@ struct NativeLimits {
     NativeLimits&& setMaxPushConstantSize(uint32_t value) &&;
     NativeLimits& setMaxNonSamplerBindings(uint32_t value) &;
     NativeLimits&& setMaxNonSamplerBindings(uint32_t value) &&;
-    wgpu::ChainedStructOut chain;
-    uint32_t maxPushConstantSize;
-    uint32_t maxNonSamplerBindings;
+    wgpu::ChainedStructOut chain{};
+    uint32_t maxPushConstantSize{};
+    uint32_t maxNonSamplerBindings{};
 };
 struct PushConstantRange {
     struct CStruct : public WGPUPushConstantRange {
@@ -4495,9 +4495,9 @@ struct PushConstantRange {
     PushConstantRange&& setStart(uint32_t value) &&;
     PushConstantRange& setEnd(uint32_t value) &;
     PushConstantRange&& setEnd(uint32_t value) &&;
-    wgpu::ShaderStage stages;
-    uint32_t start;
-    uint32_t end;
+    wgpu::ShaderStage stages{};
+    uint32_t start{};
+    uint32_t end{};
 };
 struct PipelineLayoutExtras {
     struct CStruct : public WGPUPipelineLayoutExtras {
@@ -4513,8 +4513,8 @@ struct PipelineLayoutExtras {
     PipelineLayoutExtras& setPushConstantRanges(T&& values) &;
     template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::PushConstantRange>
     PipelineLayoutExtras&& setPushConstantRanges(T&& values) &&;
-    wgpu::ChainedStruct chain;
-    std::vector<wgpu::PushConstantRange> pushConstantRanges;
+    wgpu::ChainedStruct chain{};
+    std::vector<wgpu::PushConstantRange> pushConstantRanges{};
 };
 struct ShaderDefine {
     struct CStruct : public WGPUShaderDefine {
@@ -4530,8 +4530,8 @@ struct ShaderDefine {
     ShaderDefine&& setValue(const wgpu::StringView& value) &&;
     ShaderDefine& setValue(wgpu::StringView&& value) &;
     ShaderDefine&& setValue(wgpu::StringView&& value) &&;
-    wgpu::StringView name;
-    wgpu::StringView value;
+    wgpu::StringView name{};
+    wgpu::StringView value{};
 };
 struct ShaderModuleGLSLDescriptor {
     struct CStruct : public WGPUShaderModuleGLSLDescriptor {
@@ -4553,10 +4553,10 @@ struct ShaderModuleGLSLDescriptor {
     ShaderModuleGLSLDescriptor& setDefines(T&& values) &;
     template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::ShaderDefine>
     ShaderModuleGLSLDescriptor&& setDefines(T&& values) &&;
-    wgpu::ChainedStruct chain;
-    wgpu::ShaderStage stage;
-    wgpu::StringView code;
-    mutable std::vector<wgpu::ShaderDefine> defines;
+    wgpu::ChainedStruct chain{};
+    wgpu::ShaderStage stage{};
+    wgpu::StringView code{};
+    mutable std::vector<wgpu::ShaderDefine> defines{};
 };
 struct ShaderModuleDescriptorSpirV {
     struct CStruct : public WGPUShaderModuleDescriptorSpirV {
@@ -4572,9 +4572,9 @@ struct ShaderModuleDescriptorSpirV {
     ShaderModuleDescriptorSpirV&& setSourceSize(uint32_t value) &&;
     ShaderModuleDescriptorSpirV& setSource(uint32_t const* value) &;
     ShaderModuleDescriptorSpirV&& setSource(uint32_t const* value) &&;
-    wgpu::StringView label;
-    uint32_t sourceSize;
-    uint32_t const* source;
+    wgpu::StringView label{};
+    uint32_t sourceSize{};
+    uint32_t const* source{};
 };
 struct RegistryReport {
     struct CStruct : public WGPURegistryReport {
@@ -4590,10 +4590,10 @@ struct RegistryReport {
     RegistryReport&& setNumReleasedFromUser(size_t value) &&;
     RegistryReport& setElementSize(size_t value) &;
     RegistryReport&& setElementSize(size_t value) &&;
-    size_t numAllocated;
-    size_t numKeptFromUser;
-    size_t numReleasedFromUser;
-    size_t elementSize;
+    size_t numAllocated{};
+    size_t numKeptFromUser{};
+    size_t numReleasedFromUser{};
+    size_t elementSize{};
 };
 struct HubReport {
     struct CStruct : public WGPUHubReport {
@@ -4669,23 +4669,23 @@ struct HubReport {
     HubReport&& setSamplers(const wgpu::RegistryReport& value) &&;
     HubReport& setSamplers(wgpu::RegistryReport&& value) &;
     HubReport&& setSamplers(wgpu::RegistryReport&& value) &&;
-    wgpu::RegistryReport adapters;
-    wgpu::RegistryReport devices;
-    wgpu::RegistryReport queues;
-    wgpu::RegistryReport pipelineLayouts;
-    wgpu::RegistryReport shaderModules;
-    wgpu::RegistryReport bindGroupLayouts;
-    wgpu::RegistryReport bindGroups;
-    wgpu::RegistryReport commandBuffers;
-    wgpu::RegistryReport renderBundles;
-    wgpu::RegistryReport renderPipelines;
-    wgpu::RegistryReport computePipelines;
-    wgpu::RegistryReport pipelineCaches;
-    wgpu::RegistryReport querySets;
-    wgpu::RegistryReport buffers;
-    wgpu::RegistryReport textures;
-    wgpu::RegistryReport textureViews;
-    wgpu::RegistryReport samplers;
+    wgpu::RegistryReport adapters{};
+    wgpu::RegistryReport devices{};
+    wgpu::RegistryReport queues{};
+    wgpu::RegistryReport pipelineLayouts{};
+    wgpu::RegistryReport shaderModules{};
+    wgpu::RegistryReport bindGroupLayouts{};
+    wgpu::RegistryReport bindGroups{};
+    wgpu::RegistryReport commandBuffers{};
+    wgpu::RegistryReport renderBundles{};
+    wgpu::RegistryReport renderPipelines{};
+    wgpu::RegistryReport computePipelines{};
+    wgpu::RegistryReport pipelineCaches{};
+    wgpu::RegistryReport querySets{};
+    wgpu::RegistryReport buffers{};
+    wgpu::RegistryReport textures{};
+    wgpu::RegistryReport textureViews{};
+    wgpu::RegistryReport samplers{};
 };
 struct GlobalReport {
     struct CStruct : public WGPUGlobalReport {
@@ -4701,8 +4701,8 @@ struct GlobalReport {
     GlobalReport&& setHub(const wgpu::HubReport& value) &&;
     GlobalReport& setHub(wgpu::HubReport&& value) &;
     GlobalReport&& setHub(wgpu::HubReport&& value) &&;
-    wgpu::RegistryReport surfaces;
-    wgpu::HubReport hub;
+    wgpu::RegistryReport surfaces{};
+    wgpu::HubReport hub{};
 };
 struct InstanceEnumerateAdapterOptions {
     struct CStruct : public WGPUInstanceEnumerateAdapterOptions {
@@ -4716,8 +4716,8 @@ struct InstanceEnumerateAdapterOptions {
     InstanceEnumerateAdapterOptions&& setNextInChain(T&& value) &&;
     InstanceEnumerateAdapterOptions& setBackends(wgpu::InstanceBackend value) &;
     InstanceEnumerateAdapterOptions&& setBackends(wgpu::InstanceBackend value) &&;
-    NextInChain<WGPUChainedStruct const> nextInChain;
-    wgpu::InstanceBackend backends;
+    NextInChain<WGPUChainedStruct const> nextInChain{};
+    wgpu::InstanceBackend backends{};
 };
 struct BindGroupEntryExtras {
     struct CStruct : public WGPUBindGroupEntryExtras {
@@ -4741,10 +4741,10 @@ struct BindGroupEntryExtras {
     BindGroupEntryExtras& setTextureViews(T&& values) &;
     template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::TextureView>
     BindGroupEntryExtras&& setTextureViews(T&& values) &&;
-    wgpu::ChainedStruct chain;
-    std::vector<wgpu::Buffer> buffers;
-    std::vector<wgpu::Sampler> samplers;
-    std::vector<wgpu::TextureView> textureViews;
+    wgpu::ChainedStruct chain{};
+    std::vector<wgpu::Buffer> buffers{};
+    std::vector<wgpu::Sampler> samplers{};
+    std::vector<wgpu::TextureView> textureViews{};
 };
 struct BindGroupLayoutEntryExtras {
     struct CStruct : public WGPUBindGroupLayoutEntryExtras {
@@ -4758,8 +4758,8 @@ struct BindGroupLayoutEntryExtras {
     BindGroupLayoutEntryExtras&& setNext(T&& value) &&;
     BindGroupLayoutEntryExtras& setCount(uint32_t value) &;
     BindGroupLayoutEntryExtras&& setCount(uint32_t value) &&;
-    wgpu::ChainedStruct chain;
-    uint32_t count;
+    wgpu::ChainedStruct chain{};
+    uint32_t count{};
 };
 struct QuerySetDescriptorExtras {
     struct CStruct : public WGPUQuerySetDescriptorExtras {
@@ -4775,8 +4775,8 @@ struct QuerySetDescriptorExtras {
     QuerySetDescriptorExtras& setPipelineStatistics(T&& values) &;
     template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::PipelineStatisticName>
     QuerySetDescriptorExtras&& setPipelineStatistics(T&& values) &&;
-    wgpu::ChainedStruct chain;
-    std::vector<wgpu::PipelineStatisticName> pipelineStatistics;
+    wgpu::ChainedStruct chain{};
+    std::vector<wgpu::PipelineStatisticName> pipelineStatistics{};
 };
 struct SurfaceConfigurationExtras {
     struct CStruct : public WGPUSurfaceConfigurationExtras {
@@ -4790,8 +4790,8 @@ struct SurfaceConfigurationExtras {
     SurfaceConfigurationExtras&& setNext(T&& value) &&;
     SurfaceConfigurationExtras& setDesiredMaximumFrameLatency(uint32_t value) &;
     SurfaceConfigurationExtras&& setDesiredMaximumFrameLatency(uint32_t value) &&;
-    wgpu::ChainedStruct chain;
-    uint32_t desiredMaximumFrameLatency;
+    wgpu::ChainedStruct chain{};
+    uint32_t desiredMaximumFrameLatency{};
 };
 }
 // Non member functions
