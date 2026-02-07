@@ -9,6 +9,7 @@
 #include <sstream>
 #include <stacktrace>
 #include <string>
+#include <unordered_set>
 
 #include "wcpp/args_parser.hpp"
 
@@ -1295,6 +1296,200 @@ template <typename T>
         }
         return {assign, temp_data, write_back};
     };
+    auto find_array_pairs = [&](const std::vector<FuncParamApi>& params_api) {
+        std::unordered_map<std::size_t, std::size_t> pairs;
+        for (std::size_t i = 0; i < params_api.size(); ++i) {
+            const auto& param = params_api[i];
+            if (!param.name.ends_with("Count")) continue;
+            auto prefix = param.name.substr(0, param.name.size() - 5);
+            for (std::size_t j = 0; j < params_api.size(); ++j) {
+                if (i == j) continue;
+                const auto& other = params_api[j];
+                if (other.is_pointer && other.is_const && other.name.starts_with(prefix)) {
+                    pairs[i] = j;
+                    break;
+                }
+            }
+        }
+        return pairs;
+    };
+    auto get_span_pointer_expr = [&](const FuncParamApiCpp& param, const std::string& span_name) {
+        std::string temp_data;
+        std::string type_without_wgpu = param.type;
+        bool is_wgpu_type             = type_without_wgpu.starts_with(ns + "::");
+        if (!is_wgpu_type) {
+            return std::pair<std::string, std::string>{span_name + ".data()", ""};
+        }
+        type_without_wgpu = type_without_wgpu.substr(ns.size() + 2);
+        if (type_without_wgpu.starts_with("raw::")) {
+            type_without_wgpu = type_without_wgpu.substr(5);
+        }
+        std::string const_suffix = param.is_const ? " const" : "";
+        if (param.is_handle) {
+            return std::pair<std::string, std::string>{
+                std::format("reinterpret_cast<WGPU{}{}*>({}.data())", type_without_wgpu, const_suffix, span_name), ""};
+        }
+        if (param.is_struct) {
+            auto& struct_cpp = get_struct_api_cpp(type_without_wgpu, nullptr);
+            if (struct_cpp.binary_compatible) {
+                return std::pair<std::string, std::string>{
+                    std::format("reinterpret_cast<WGPU{}{}*>({}.data())", type_without_wgpu, const_suffix, span_name),
+                    ""};
+            }
+            if (struct_cpp.extra_cstruct_members.empty()) {
+                temp_data = std::format(
+                    R"(
+    std::vector<WGPU{0}> {1}_native = {1} | std::views::transform([](auto&& e) {{ return static_cast<WGPU{0}>(e.to_cstruct()); }}) | std::ranges::to<std::vector<WGPU{0}>>();)",
+                    type_without_wgpu, span_name);
+                return std::pair<std::string, std::string>{span_name + "_native.data()", temp_data};
+            }
+            temp_data = std::format(
+                R"(
+    std::vector<{0}::CStruct> {1}_cstruct_vec = {1} | std::views::transform([](auto&& e) {{ return e.to_cstruct(); }}) | std::ranges::to<std::vector<{0}::CStruct>>();
+    std::vector<WGPU{2}> {1}_native = {1}_cstruct_vec | std::views::transform([](auto&& e) {{ return static_cast<WGPU{2}>(e); }}) | std::ranges::to<std::vector<WGPU{2}>>();)",
+                param.type, span_name, type_without_wgpu);
+            return std::pair<std::string, std::string>{span_name + "_native.data()", temp_data};
+        }
+        return std::pair<std::string, std::string>{span_name + ".data()", ""};
+    };
+    auto build_span_overload =
+        [&](const std::string& func_name, const std::vector<FuncParamApi>& params_api,
+            const std::vector<FuncParamApiCpp>& params_cpp, const std::string& return_type,
+            const std::string& wgpu_name,
+            const std::optional<std::string>& member_class) -> std::optional<std::pair<std::string, std::string>> {
+        auto pairs = find_array_pairs(params_api);
+        if (pairs.empty()) return std::nullopt;
+
+        std::unordered_set<std::size_t> count_indices;
+        std::unordered_set<std::size_t> data_indices;
+        for (const auto& [count_i, data_i] : pairs) {
+            count_indices.insert(count_i);
+            data_indices.insert(data_i);
+        }
+
+        std::vector<std::string> sig_parts;
+        for (std::size_t i = 0; i < params_cpp.size(); ++i) {
+            const auto& param = params_cpp[i];
+            if (count_indices.contains(i)) continue;
+            if (data_indices.contains(i)) {
+                std::string elem_type = param.type + (param.is_const ? " const" : "");
+                sig_parts.push_back(std::format("std::span<{}> {}", elem_type, param.name));
+                continue;
+            }
+            sig_parts.push_back(param.full_type() + " " + param.name);
+        }
+        auto sig = sig_parts | std::views::join_with(std::string(", ")) | std::ranges::to<std::string>();
+
+        std::vector<std::string> temp_data_parts;
+        std::vector<std::string> write_back_parts;
+        std::vector<std::string> arg_exprs;
+        for (std::size_t i = 0; i < params_api.size(); ++i) {
+            if (count_indices.contains(i)) {
+                auto span_name = params_cpp.at(pairs.at(i)).name;
+                arg_exprs.push_back(std::format("static_cast<{}>({}.size())", params_api[i].type, span_name));
+                continue;
+            }
+            if (data_indices.contains(i)) {
+                auto span_name        = params_cpp[i].name;
+                auto [ptr_expr, temp] = get_span_pointer_expr(params_cpp[i], span_name);
+                if (!temp.empty()) temp_data_parts.push_back(temp);
+                arg_exprs.push_back(ptr_expr);
+                continue;
+            }
+            auto [assign, temp, write_back] = get_assign_to_native(params_cpp[i]);
+            if (!temp.empty()) temp_data_parts.push_back(temp);
+            if (!write_back.empty()) write_back_parts.push_back(write_back);
+            arg_exprs.push_back(assign);
+        }
+        auto temp_data  = temp_data_parts | std::views::join_with(std::string("\n")) | std::ranges::to<std::string>();
+        auto write_back = write_back_parts | std::views::join_with(std::string("\n")) | std::ranges::to<std::string>();
+
+        std::string call_args;
+        if (member_class.has_value()) {
+            auto args = arg_exprs | std::views::join_with(std::string(", ")) | std::ranges::to<std::string>();
+            call_args = args.empty() ? "m_raw" : "m_raw, " + args;
+        } else {
+            call_args = arg_exprs | std::views::join_with(std::string(", ")) | std::ranges::to<std::string>();
+        }
+
+        std::string qualifier    = member_class.has_value() ? member_class.value() + "::" : "";
+        std::string const_suffix = member_class.has_value() ? " const" : "";
+        std::string impl;
+        if (return_type == "void") {
+            impl = std::format(
+                R"(
+{8} {2}{0}({1}){5} {{
+{3}
+    wgpu{4}({6});
+{7}
+}})",
+                func_name, sig, qualifier, temp_data, wgpu_name, const_suffix, call_args, write_back, return_type);
+        } else {
+            impl = std::format(
+                R"(
+{8} {2}{0}({1}){5} {{
+{3}
+    {8} res = static_cast<{8}>(wgpu{4}({6}));
+{7}
+    return res;
+}})",
+                func_name, sig, qualifier, temp_data, wgpu_name, const_suffix, call_args, write_back, return_type);
+        }
+        auto decl = std::format("{} {}({}){};", return_type, func_name, sig, member_class.has_value() ? " const" : "");
+        return std::pair<std::string, std::string>{decl, impl};
+    };
+    auto build_single_overload =
+        [&](const std::string& func_name, const std::vector<FuncParamApi>& params_api,
+            const std::vector<FuncParamApiCpp>& params_cpp, const std::string& return_type,
+            const std::optional<std::string>& member_class) -> std::optional<std::pair<std::string, std::string>> {
+        auto pairs = find_array_pairs(params_api);
+        if (pairs.empty()) return std::nullopt;
+
+        std::unordered_set<std::size_t> count_indices;
+        std::unordered_set<std::size_t> data_indices;
+        for (const auto& [count_i, data_i] : pairs) {
+            count_indices.insert(count_i);
+            data_indices.insert(data_i);
+        }
+
+        std::vector<std::string> sig_parts;
+        std::vector<std::string> call_args;
+        for (std::size_t i = 0; i < params_cpp.size(); ++i) {
+            const auto& param = params_cpp[i];
+            if (count_indices.contains(i)) continue;
+            if (data_indices.contains(i)) {
+                std::string elem_type = param.type;
+                sig_parts.push_back(std::format("const {}& {}", elem_type, param.name));
+                call_args.push_back(std::format("std::span<const {}>(&{}, 1)", elem_type, param.name));
+                continue;
+            }
+            sig_parts.push_back(param.full_type() + " " + param.name);
+            call_args.push_back(param.name);
+        }
+        auto sig  = sig_parts | std::views::join_with(std::string(", ")) | std::ranges::to<std::string>();
+        auto args = call_args | std::views::join_with(std::string(", ")) | std::ranges::to<std::string>();
+
+        std::string qualifier    = member_class.has_value() ? member_class.value() + "::" : "";
+        std::string const_suffix = member_class.has_value() ? " const" : "";
+        std::string impl;
+        if (return_type == "void") {
+            impl = std::format(
+                R"(
+{5} {2}{0}({1}){4} {{
+    {0}({3});
+}})",
+                func_name, sig, qualifier, args, const_suffix, return_type);
+        } else {
+            impl = std::format(
+                R"(
+{5} {2}{0}({1}){4} {{
+    return {0}({3});
+}})",
+                func_name, sig, qualifier, args, const_suffix, return_type);
+        }
+        auto decl = std::format("{} {}({}){};", return_type, func_name, sig, member_class.has_value() ? " const" : "");
+        return std::pair<std::string, std::string>{decl, impl};
+    };
     for (const auto& func_api : api.functions) {
         if (func_api.name.ends_with("FreeMembers") || func_api.name.ends_with("ProcAddress")) {
             continue;  // skip internal functions for free members and get proc address
@@ -1305,9 +1500,26 @@ template <typename T>
             func_cpp.name[0]                        = std::tolower(func_cpp.name[0]);  // make first letter lower case
             std::vector<FuncParamApiCpp> params_cpp = func_api.params | std::views::transform(get_func_param_cpp_type) |
                                                       std::ranges::to<std::vector<FuncParamApiCpp>>();
+            auto params_cpp_base    = params_cpp;
             std::string return_type = func_api.return_type;
             if (return_type.starts_with("WGPU")) {
                 return_type = ns + "::" + return_type.substr(4);
+            }
+
+            if (auto span_overload = build_span_overload(func_cpp.name, func_api.params, params_cpp_base, return_type,
+                                                         func_api.name, std::nullopt)) {
+                result.functions.push_back(FuncApiCpp{.name               = func_cpp.name,
+                                                      .func_decl          = span_overload->first,
+                                                      .func_template_impl = "",
+                                                      .func_impl          = span_overload->second});
+                if (auto single_overload = build_single_overload(func_cpp.name, func_api.params, params_cpp_base,
+                                                                 return_type, std::nullopt)) {
+                    result.functions.push_back(FuncApiCpp{.name               = func_cpp.name,
+                                                          .func_decl          = single_overload->first,
+                                                          .func_template_impl = "",
+                                                          .func_impl          = single_overload->second});
+                }
+                continue;
             }
             bool nullable_overload = false;
             if (!params_cpp.empty() && params_cpp.back().nullable && params_cpp.back().is_pointer) {
@@ -1398,9 +1610,23 @@ template <typename T>
             std::vector<FuncParamApiCpp> params_cpp = func_api.params | std::views::drop(1) |
                                                       std::views::transform(get_func_param_cpp_type) |
                                                       std::ranges::to<std::vector<FuncParamApiCpp>>();
+            auto params_cpp_base    = params_cpp;
             std::string return_type = func_api.return_type;
             if (return_type.starts_with("WGPU")) {
                 return_type = ns + "::" + return_type.substr(4);
+            }
+
+            auto params_api = func_api.params | std::views::drop(1) | std::ranges::to<std::vector<FuncParamApi>>();
+            if (auto span_overload = build_span_overload(func_name, params_api, params_cpp_base, return_type,
+                                                         func_api.name, handle_cpp.name)) {
+                handle_cpp.methods_decl.push_back("\n    " + span_overload->first);
+                handle_cpp.methods_impl.push_back(span_overload->second);
+                if (auto single_overload =
+                        build_single_overload(func_name, params_api, params_cpp_base, return_type, handle_cpp.name)) {
+                    handle_cpp.methods_decl.push_back("\n    " + single_overload->first);
+                    handle_cpp.methods_impl.push_back(single_overload->second);
+                }
+                continue;
             }
             bool nullable_overload = false;
             if (!params_cpp.empty() && params_cpp.back().nullable && params_cpp.back().is_pointer) {

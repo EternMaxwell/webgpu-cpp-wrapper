@@ -1236,6 +1236,171 @@ def produce_webgpu_cpp(api: WebGpuApi, template_meta: TemplateMeta, args: argpar
 			assign = f"static_cast<WGPU{type_without_wgpu}>({param.name})"
 		return assign, temp_data, write_back
 
+	def clone_param_cpp(param: FuncParamApiCpp) -> FuncParamApiCpp:
+		return FuncParamApiCpp(
+			type=param.type,
+			name=param.name,
+			is_pointer=param.is_pointer,
+			is_const=param.is_const,
+			is_struct=param.is_struct,
+			is_handle=param.is_handle,
+			binary_compatible=param.binary_compatible,
+			nullable=param.nullable,
+		)
+
+	def find_array_pairs(params_api: List[FuncParamApi]) -> Dict[int, int]:
+		pairs: Dict[int, int] = {}
+		for i, param in enumerate(params_api):
+			if param.name.endswith("Count"):
+				prefix = param.name[:-5]
+				for j, other in enumerate(params_api):
+					if i != j and other.is_pointer and other.is_const and other.name.startswith(prefix):
+						pairs[i] = j
+						break
+		return pairs
+
+	def get_span_pointer_expr(param: FuncParamApiCpp, span_name: str) -> Tuple[str, str]:
+		type_without_wgpu = param.type
+		is_wgpu_type = type_without_wgpu.startswith(namespace + "::")
+		if not is_wgpu_type:
+			return f"{span_name}.data()", ""
+		type_without_wgpu = type_without_wgpu[len(namespace) + 2:]
+		if type_without_wgpu.startswith("raw::"):
+			type_without_wgpu = type_without_wgpu[5:]
+		const_suffix = " const" if param.is_const else ""
+		if param.is_handle:
+			return f"reinterpret_cast<WGPU{type_without_wgpu}{const_suffix}*>({span_name}.data())", ""
+		if param.is_struct:
+			struct_cpp = get_struct_api_cpp(type_without_wgpu)
+			if struct_cpp.binary_compatible:
+				return f"reinterpret_cast<WGPU{type_without_wgpu}{const_suffix}*>({span_name}.data())", ""
+			if not struct_cpp.extra_cstruct_members:
+				temp = (
+					f"\n    std::vector<WGPU{type_without_wgpu}> {span_name}_native = {span_name} | "
+					f"std::views::transform([](auto&& e) {{ return static_cast<WGPU{type_without_wgpu}>(e.to_cstruct()); }}) | "
+					f"std::ranges::to<std::vector<WGPU{type_without_wgpu}>>();"
+				)
+				return f"{span_name}_native.data()", temp
+			temp = (
+				f"\n    std::vector<{param.type}::CStruct> {span_name}_cstruct_vec = {span_name} | "
+				f"std::views::transform([](auto&& e) {{ return e.to_cstruct(); }}) | "
+				f"std::ranges::to<std::vector<{param.type}::CStruct>>();\n"
+				f"    std::vector<WGPU{type_without_wgpu}> {span_name}_native = {span_name}_cstruct_vec | "
+				f"std::views::transform([](auto&& e) {{ return static_cast<WGPU{type_without_wgpu}>(e); }}) | "
+				f"std::ranges::to<std::vector<WGPU{type_without_wgpu}>>();"
+			)
+			return f"{span_name}_native.data()", temp
+		return f"{span_name}.data()", ""
+
+	def build_span_overload(
+		func_name: str,
+		params_api: List[FuncParamApi],
+		params_cpp: List[FuncParamApiCpp],
+		return_type: str,
+		wgpu_name: str,
+		is_member: bool,
+		member_class: Optional[str],
+	) -> Optional[Tuple[str, str]]:
+		pairs = find_array_pairs(params_api)
+		if not pairs:
+			return None
+		span_param_parts: List[str] = []
+		count_indices = set(pairs.keys())
+		data_indices = set(pairs.values())
+		for i, param in enumerate(params_cpp):
+			if i in count_indices:
+				continue
+			if i in data_indices:
+				elem_type = param.type + (" const" if param.is_const else "")
+				span_param_parts.append(f"std::span<{elem_type}> {param.name}")
+				continue
+			span_param_parts.append(f"{param.full_type(namespace)} {param.name}")
+		sig = ", ".join(span_param_parts)
+		temp_data_parts: List[str] = []
+		write_back_parts: List[str] = []
+		arg_exprs: List[str] = []
+		for idx, param_api in enumerate(params_api):
+			if idx in count_indices:
+				span_name = params_cpp[pairs[idx]].name
+				arg_exprs.append(f"static_cast<{param_api.type}>({span_name}.size())")
+				continue
+			if idx in data_indices:
+				span_name = params_cpp[idx].name
+				ptr_expr, temp = get_span_pointer_expr(params_cpp[idx], span_name)
+				if temp:
+					temp_data_parts.append(temp)
+				arg_exprs.append(ptr_expr)
+				continue
+			assign, temp, write = get_assign_to_native(params_cpp[idx])
+			if temp:
+				temp_data_parts.append(temp)
+			if write:
+				write_back_parts.append(write)
+			arg_exprs.append(assign)
+		temp_data = "\n".join(temp_data_parts)
+		write_back = "\n".join(write_back_parts)
+		if is_member:
+			call_args = "m_raw" if not arg_exprs else f"m_raw, {', '.join(arg_exprs)}"
+		else:
+			call_args = ", ".join(arg_exprs)
+		qualifier = f"{member_class}::" if member_class else ""
+		const_suffix = " const" if member_class else ""
+		if return_type == "void":
+			impl = (
+				f"\n{return_type} {qualifier}{func_name}({sig}){const_suffix} {{\n{temp_data}\n"
+				f"    wgpu{wgpu_name}({call_args});\n{write_back}\n}}"
+			)
+		else:
+			impl = (
+				f"\n{return_type} {qualifier}{func_name}({sig}){const_suffix} {{\n{temp_data}\n"
+				f"    {return_type} res = static_cast<{return_type}>(wgpu{wgpu_name}({call_args}));\n"
+				f"{write_back}\n    return res;\n}}"
+			)
+		decl = f"{return_type} {func_name}({sig}){const_suffix};"
+		return decl, impl
+
+	def build_single_overload(
+		func_name: str,
+		params_api: List[FuncParamApi],
+		params_cpp: List[FuncParamApiCpp],
+		return_type: str,
+		is_member: bool,
+		member_class: Optional[str],
+	) -> Optional[Tuple[str, str]]:
+		pairs = find_array_pairs(params_api)
+		if not pairs:
+			return None
+		span_param_parts: List[str] = []
+		count_indices = set(pairs.keys())
+		data_indices = set(pairs.values())
+		call_args: List[str] = []
+		for i, param in enumerate(params_cpp):
+			if i in count_indices:
+				continue
+			if i in data_indices:
+				elem_type = param.type
+				span_param_parts.append(f"const {elem_type}& {param.name}")
+				call_args.append(f"std::span<const {elem_type}>(&{param.name}, 1)")
+				continue
+			span_param_parts.append(f"{param.full_type(namespace)} {param.name}")
+			call_args.append(param.name)
+		sig = ", ".join(span_param_parts)
+		qualifier = f"{member_class}::" if member_class else ""
+		const_suffix = " const" if member_class else ""
+		call_expr = f"{func_name}({', '.join(call_args)})"
+		if return_type == "void":
+			impl = (
+				f"\n{return_type} {qualifier}{func_name}({sig}){const_suffix} {{\n"
+				f"    {call_expr};\n}}"
+			)
+		else:
+			impl = (
+				f"\n{return_type} {qualifier}{func_name}({sig}){const_suffix} {{\n"
+				f"    return {call_expr};\n}}"
+			)
+		decl = f"{return_type} {func_name}({sig}){const_suffix};"
+		return decl, impl
+
 	for func_api in api.functions:
 		if func_api.name.endswith("FreeMembers") or func_api.name.endswith("ProcAddress"):
 			continue
@@ -1243,9 +1408,39 @@ def produce_webgpu_cpp(api: WebGpuApi, template_meta: TemplateMeta, args: argpar
 			func_name = func_api.name
 			func_name = func_name[:1].lower() + func_name[1:]
 			params_cpp = [get_func_param_cpp_type(p) for p in func_api.params]
+			params_cpp_base = [clone_param_cpp(p) for p in params_cpp]
 			return_type = func_api.return_type
 			if return_type.startswith("WGPU"):
 				return_type = namespace + "::" + return_type[4:]
+
+			span_overload = build_span_overload(
+				func_name,
+				func_api.params,
+				params_cpp_base,
+				return_type,
+				func_api.name,
+				False,
+				None,
+			)
+			if span_overload:
+				span_decl, span_impl = span_overload
+				result.functions.append(
+					FuncApiCpp(name=func_name, func_decl=span_decl, func_template_impl="", func_impl=span_impl)
+				)
+				single_overload = build_single_overload(
+					func_name,
+					func_api.params,
+					params_cpp_base,
+					return_type,
+					False,
+					None,
+				)
+				if single_overload:
+					single_decl, single_impl = single_overload
+					result.functions.append(
+						FuncApiCpp(name=func_name, func_decl=single_decl, func_template_impl="", func_impl=single_impl)
+					)
+				continue
 			nullable_overload = False
 			if params_cpp and params_cpp[-1].nullable and params_cpp[-1].is_pointer:
 				params_cpp[-1].nullable = False
@@ -1287,9 +1482,37 @@ def produce_webgpu_cpp(api: WebGpuApi, template_meta: TemplateMeta, args: argpar
 			func_name = func_api.name[len(handle_cpp.name):]
 			func_name = func_name[:1].lower() + func_name[1:]
 			params_cpp = [get_func_param_cpp_type(p) for p in func_api.params[1:]]
+			params_cpp_base = [clone_param_cpp(p) for p in params_cpp]
 			return_type = func_api.return_type
 			if return_type.startswith("WGPU"):
 				return_type = namespace + "::" + return_type[4:]
+
+			span_overload = build_span_overload(
+				func_name,
+				func_api.params[1:],
+				params_cpp_base,
+				return_type,
+				func_api.name,
+				True,
+				handle_cpp.name,
+			)
+			if span_overload:
+				span_decl, span_impl = span_overload
+				handle_cpp.methods_decl.append(f"\n    {span_decl}")
+				handle_cpp.methods_impl.append(span_impl)
+				single_overload = build_single_overload(
+					func_name,
+					func_api.params[1:],
+					params_cpp_base,
+					return_type,
+					True,
+					handle_cpp.name,
+				)
+				if single_overload:
+					single_decl, single_impl = single_overload
+					handle_cpp.methods_decl.append(f"\n    {single_decl}")
+					handle_cpp.methods_impl.append(single_impl)
+				continue
 			nullable_overload = False
 			if params_cpp and params_cpp[-1].nullable and params_cpp[-1].is_pointer:
 				params_cpp[-1].nullable = False
@@ -1329,6 +1552,7 @@ def produce_webgpu_cpp(api: WebGpuApi, template_meta: TemplateMeta, args: argpar
 					handle_cpp.methods_impl.append(
 						f"\n{return_type} {handle_cpp.name}::{func_name}({arg3}) const {{\n{arg4}\n    {return_type} res = static_cast<{return_type}>(wgpu{arg5}({arg6}{arg7}, nullptr));\n{arg8}\n    return res;\n}}"
 					)
+
 
 	return result
 
