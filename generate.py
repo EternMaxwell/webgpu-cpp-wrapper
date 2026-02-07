@@ -844,8 +844,11 @@ def load_template(template_path: Path) -> TemplateMeta:
 	return meta
 
 
-def produce_webgpu_cpp(api: WebGpuApi, template_meta: TemplateMeta, namespace: str, use_raii: bool) -> WebGpuApiCpp:
+def produce_webgpu_cpp(api: WebGpuApi, template_meta: TemplateMeta, args: argparse.Namespace) -> WebGpuApiCpp:
 	result = WebGpuApiCpp()
+	namespace = args.namespace
+	use_raii = args.use_raii
+	force_raii = args.force_raii
 
 	for type_alias in api.type_aliases:
 		result.type_aliases.append(type_alias)
@@ -898,7 +901,7 @@ def produce_webgpu_cpp(api: WebGpuApi, template_meta: TemplateMeta, namespace: s
 	def get_cpp_field_type(typ: str, owning: bool) -> str:
 		if typ.startswith("WGPU"):
 			typ = typ[4:]
-			if use_raii and not owning and any(h.name == typ for h in api.handles):
+			if use_raii and not force_raii and not owning and any(h.name == typ for h in api.handles):
 				return namespace + "::raw::" + typ
 			return namespace + "::" + typ
 		return typ
@@ -1085,6 +1088,8 @@ def produce_webgpu_cpp(api: WebGpuApi, template_meta: TemplateMeta, namespace: s
 				assign_from_native=f"\n    this->{field.name} = static_cast<{cpp_type}>(native.{field.name});",
 				assign_to_cstruct="",
 			)
+			if field.type.startswith("WGPU") and any(h.name == field.type[4:] for h in api.handles) and args.force_raii and not struct_api.owning:
+				field_cpp.assign_from_native += f"\n    if (this->{field.name}) this->{field.name}.addRef();"
 
 			if field.type.startswith("WGPU") and any(s.name == field.type[4:] for s in api.structs):
 				if field.is_pointer:
@@ -1320,7 +1325,11 @@ def produce_webgpu_cpp(api: WebGpuApi, template_meta: TemplateMeta, namespace: s
 	return result
 
 
-def generate_webgpu_cpp(api: WebGpuApi, api_cpp: WebGpuApiCpp, template_meta: TemplateMeta, namespace: str, headers: List[str], use_raii: bool, output_path: Path) -> None:
+def generate_webgpu_cpp(api: WebGpuApi, api_cpp: WebGpuApiCpp, template_meta: TemplateMeta, args: argparse.Namespace) -> None:
+	namespace = args.namespace
+	use_raii = args.use_raii
+	headers = args.headers
+	output_path = Path(args.output)
 	output = template_meta.text
 
 	type_aliases_text = ""
@@ -1416,7 +1425,7 @@ def generate_webgpu_cpp(api: WebGpuApi, api_cpp: WebGpuApiCpp, template_meta: Te
 		for handle_cpp in api_cpp.handles:
 			raii_friends_text += f" \\\n    friend class raw::{handle_cpp.name};"
 		for struct_cpp in api.structs:
-			if struct_cpp.owning:
+			if struct_cpp.owning or args.force_raii:
 				raii_friends_text += f" \\\n    friend struct {struct_cpp.name};"
 		for func_cpp in api_cpp.functions:
 			decl = re.sub(r"\n", " ", func_cpp.func_decl)
@@ -1468,19 +1477,19 @@ def main() -> None:
 	parser.add_argument("-n", "--namespace", dest="namespace", default="wgpu", help="The namespace to use in the generated file")
 	parser.add_argument("-t", "--template", dest="template", default="webgpu.template.cppm", help="The template file to use for generation")
 	parser.add_argument("--use-raii", action="store_true", help="Generate RAII wrappers for handles, and make non raii handles use raw namespace")
+	parser.add_argument("--force-raii", action="store_true", help="while using RAII, also force structs to store raii handles")
 	args = parser.parse_args()
 
-	headers = args.headers if args.headers else ["webgpu/webgpu.h"]
 	template_meta = load_template(Path(args.template))
 	api = WebGpuApi()
-	for header in headers:
+	for header in args.headers:
 		header_path = Path(header)
 		if not header_path.exists():
 			print(f"Failed to open header file: {header}")
 			continue
 		parse_header(api, header_path.read_text(encoding="utf-8"))
-	api_cpp = produce_webgpu_cpp(api, template_meta, args.namespace, args.use_raii)
-	generate_webgpu_cpp(api, api_cpp, template_meta, args.namespace, headers, args.use_raii, Path(args.output))
+	api_cpp = produce_webgpu_cpp(api, template_meta, args)
+	generate_webgpu_cpp(api, api_cpp, template_meta, args)
 
 
 if __name__ == "__main__":

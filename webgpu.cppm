@@ -1366,16 +1366,96 @@ private:
     friend class raw::Surface; \
     friend class raw::Texture; \
     friend class raw::TextureView; \
+    friend struct StringView; \
+    friend struct ChainedStruct; \
+    friend struct BufferMapCallbackInfo; \
+    friend struct CompilationInfoCallbackInfo; \
+    friend struct CreateComputePipelineAsyncCallbackInfo; \
+    friend struct CreateRenderPipelineAsyncCallbackInfo; \
+    friend struct DeviceLostCallbackInfo; \
+    friend struct PopErrorScopeCallbackInfo; \
+    friend struct QueueWorkDoneCallbackInfo; \
+    friend struct RequestAdapterCallbackInfo; \
+    friend struct RequestDeviceCallbackInfo; \
+    friend struct UncapturedErrorCallbackInfo; \
     friend struct AdapterInfo; \
+    friend struct BlendComponent; \
+    friend struct BufferBindingLayout; \
+    friend struct BufferDescriptor; \
+    friend struct Color; \
+    friend struct CommandBufferDescriptor; \
+    friend struct CommandEncoderDescriptor; \
+    friend struct CompilationMessage; \
+    friend struct ConstantEntry; \
+    friend struct Extent3D; \
+    friend struct ExternalTextureBindingEntry; \
+    friend struct ExternalTextureBindingLayout; \
     friend struct Future; \
     friend struct InstanceLimits; \
     friend struct Limits; \
+    friend struct MultisampleState; \
+    friend struct Origin3D; \
+    friend struct PassTimestampWrites; \
+    friend struct PipelineLayoutDescriptor; \
+    friend struct PrimitiveState; \
+    friend struct QuerySetDescriptor; \
+    friend struct QueueDescriptor; \
+    friend struct RenderBundleDescriptor; \
+    friend struct RenderBundleEncoderDescriptor; \
+    friend struct RenderPassDepthStencilAttachment; \
+    friend struct RenderPassMaxDrawCount; \
+    friend struct RequestAdapterWebXROptions; \
+    friend struct SamplerBindingLayout; \
+    friend struct SamplerDescriptor; \
+    friend struct ShaderSourceSPIRV; \
+    friend struct ShaderSourceWGSL; \
+    friend struct StencilFaceState; \
+    friend struct StorageTextureBindingLayout; \
     friend struct SupportedFeatures; \
     friend struct SupportedInstanceFeatures; \
     friend struct SupportedWGSLLanguageFeatures; \
     friend struct SurfaceCapabilities; \
+    friend struct SurfaceColorManagement; \
+    friend struct SurfaceConfiguration; \
+    friend struct SurfaceSourceAndroidNativeWindow; \
+    friend struct SurfaceSourceMetalLayer; \
+    friend struct SurfaceSourceWaylandSurface; \
+    friend struct SurfaceSourceWindowsHWND; \
+    friend struct SurfaceSourceXCBWindow; \
+    friend struct SurfaceSourceXlibWindow; \
     friend struct SurfaceTexture; \
+    friend struct TexelCopyBufferLayout; \
+    friend struct TextureBindingLayout; \
+    friend struct TextureComponentSwizzle; \
+    friend struct TextureViewDescriptor; \
+    friend struct VertexAttribute; \
+    friend struct BindGroupEntry; \
+    friend struct BindGroupLayoutEntry; \
+    friend struct BlendState; \
+    friend struct CompilationInfo; \
+    friend struct ComputePassDescriptor; \
+    friend struct ComputeState; \
+    friend struct DepthStencilState; \
+    friend struct DeviceDescriptor; \
     friend struct FutureWaitInfo; \
+    friend struct InstanceDescriptor; \
+    friend struct RenderPassColorAttachment; \
+    friend struct RequestAdapterOptions; \
+    friend struct ShaderModuleDescriptor; \
+    friend struct SurfaceDescriptor; \
+    friend struct TexelCopyBufferInfo; \
+    friend struct TexelCopyTextureInfo; \
+    friend struct TextureComponentSwizzleDescriptor; \
+    friend struct TextureDescriptor; \
+    friend struct VertexBufferLayout; \
+    friend struct BindGroupDescriptor; \
+    friend struct BindGroupLayoutDescriptor; \
+    friend struct ColorTargetState; \
+    friend struct ComputePipelineDescriptor; \
+    friend struct RenderPassDescriptor; \
+    friend struct VertexState; \
+    friend struct FragmentState; \
+    friend struct RenderPipelineDescriptor; \
     friend wgpu::Instance createInstance(wgpu::InstanceDescriptor const& descriptor); \
     friend wgpu::Instance createInstance(); \
     friend void getInstanceFeatures(wgpu::SupportedInstanceFeatures& features); \
@@ -2744,10 +2824,10 @@ struct ExternalTextureBindingEntry {
     ExternalTextureBindingEntry& setNext(T&& value) &;
     template <typename T>
     ExternalTextureBindingEntry&& setNext(T&& value) &&;
-    ExternalTextureBindingEntry& setExternalTexture(wgpu::raw::ExternalTexture value) &;
-    ExternalTextureBindingEntry&& setExternalTexture(wgpu::raw::ExternalTexture value) &&;
+    ExternalTextureBindingEntry& setExternalTexture(wgpu::ExternalTexture value) &;
+    ExternalTextureBindingEntry&& setExternalTexture(wgpu::ExternalTexture value) &&;
     wgpu::ChainedStruct chain;
-    wgpu::raw::ExternalTexture externalTexture;
+    wgpu::ExternalTexture externalTexture;
 };
 struct ExternalTextureBindingLayout {
     struct CStruct : public WGPUExternalTextureBindingLayout {
@@ -2941,14 +3021,14 @@ struct PassTimestampWrites {
     PassTimestampWrites& setNextInChain(T&& value) &;
     template <typename T>
     PassTimestampWrites&& setNextInChain(T&& value) &&;
-    PassTimestampWrites& setQuerySet(wgpu::raw::QuerySet value) &;
-    PassTimestampWrites&& setQuerySet(wgpu::raw::QuerySet value) &&;
+    PassTimestampWrites& setQuerySet(wgpu::QuerySet value) &;
+    PassTimestampWrites&& setQuerySet(wgpu::QuerySet value) &&;
     PassTimestampWrites& setBeginningOfPassWriteIndex(uint32_t value) &;
     PassTimestampWrites&& setBeginningOfPassWriteIndex(uint32_t value) &&;
     PassTimestampWrites& setEndOfPassWriteIndex(uint32_t value) &;
     PassTimestampWrites&& setEndOfPassWriteIndex(uint32_t value) &&;
     NextInChain nextInChain;
-    wgpu::raw::QuerySet querySet;
+    wgpu::QuerySet querySet;
     uint32_t beginningOfPassWriteIndex;
     uint32_t endOfPassWriteIndex;
 };
@@ -2966,15 +3046,15 @@ struct PipelineLayoutDescriptor {
     PipelineLayoutDescriptor&& setLabel(const wgpu::StringView& value) &&;
     PipelineLayoutDescriptor& setLabel(wgpu::StringView&& value) &;
     PipelineLayoutDescriptor&& setLabel(wgpu::StringView&& value) &&;
-    template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::raw::BindGroupLayout>
+    template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::BindGroupLayout>
     PipelineLayoutDescriptor& setBindGroupLayouts(T&& values) &;
-    template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::raw::BindGroupLayout>
+    template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::BindGroupLayout>
     PipelineLayoutDescriptor&& setBindGroupLayouts(T&& values) &&;
     PipelineLayoutDescriptor& setImmediateSize(uint32_t value) &;
     PipelineLayoutDescriptor&& setImmediateSize(uint32_t value) &&;
     NextInChain nextInChain;
     wgpu::StringView label;
-    std::vector<wgpu::raw::BindGroupLayout> bindGroupLayouts;
+    std::vector<wgpu::BindGroupLayout> bindGroupLayouts;
     uint32_t immediateSize;
 };
 struct PrimitiveState {
@@ -3105,8 +3185,8 @@ struct RenderPassDepthStencilAttachment {
     RenderPassDepthStencilAttachment& setNextInChain(T&& value) &;
     template <typename T>
     RenderPassDepthStencilAttachment&& setNextInChain(T&& value) &&;
-    RenderPassDepthStencilAttachment& setView(wgpu::raw::TextureView value) &;
-    RenderPassDepthStencilAttachment&& setView(wgpu::raw::TextureView value) &&;
+    RenderPassDepthStencilAttachment& setView(wgpu::TextureView value) &;
+    RenderPassDepthStencilAttachment&& setView(wgpu::TextureView value) &&;
     RenderPassDepthStencilAttachment& setDepthLoadOp(wgpu::LoadOp value) &;
     RenderPassDepthStencilAttachment&& setDepthLoadOp(wgpu::LoadOp value) &&;
     RenderPassDepthStencilAttachment& setDepthStoreOp(wgpu::StoreOp value) &;
@@ -3124,7 +3204,7 @@ struct RenderPassDepthStencilAttachment {
     RenderPassDepthStencilAttachment& setStencilReadOnly(wgpu::Bool value) &;
     RenderPassDepthStencilAttachment&& setStencilReadOnly(wgpu::Bool value) &&;
     NextInChain nextInChain;
-    wgpu::raw::TextureView view;
+    wgpu::TextureView view;
     wgpu::LoadOp depthLoadOp;
     wgpu::StoreOp depthStoreOp;
     float depthClearValue;
@@ -3395,8 +3475,8 @@ struct SurfaceConfiguration {
     SurfaceConfiguration& setNextInChain(T&& value) &;
     template <typename T>
     SurfaceConfiguration&& setNextInChain(T&& value) &&;
-    SurfaceConfiguration& setDevice(wgpu::raw::Device value) &;
-    SurfaceConfiguration&& setDevice(wgpu::raw::Device value) &&;
+    SurfaceConfiguration& setDevice(wgpu::Device value) &;
+    SurfaceConfiguration&& setDevice(wgpu::Device value) &&;
     SurfaceConfiguration& setFormat(wgpu::TextureFormat value) &;
     SurfaceConfiguration&& setFormat(wgpu::TextureFormat value) &&;
     SurfaceConfiguration& setUsage(wgpu::TextureUsage value) &;
@@ -3414,7 +3494,7 @@ struct SurfaceConfiguration {
     SurfaceConfiguration& setPresentMode(wgpu::PresentMode value) &;
     SurfaceConfiguration&& setPresentMode(wgpu::PresentMode value) &&;
     NextInChain nextInChain;
-    wgpu::raw::Device device;
+    wgpu::Device device;
     wgpu::TextureFormat format;
     wgpu::TextureUsage usage;
     uint32_t width;
@@ -3673,23 +3753,23 @@ struct BindGroupEntry {
     BindGroupEntry&& setNextInChain(T&& value) &&;
     BindGroupEntry& setBinding(uint32_t value) &;
     BindGroupEntry&& setBinding(uint32_t value) &&;
-    BindGroupEntry& setBuffer(wgpu::raw::Buffer value) &;
-    BindGroupEntry&& setBuffer(wgpu::raw::Buffer value) &&;
+    BindGroupEntry& setBuffer(wgpu::Buffer value) &;
+    BindGroupEntry&& setBuffer(wgpu::Buffer value) &&;
     BindGroupEntry& setOffset(uint64_t value) &;
     BindGroupEntry&& setOffset(uint64_t value) &&;
     BindGroupEntry& setSize(uint64_t value) &;
     BindGroupEntry&& setSize(uint64_t value) &&;
-    BindGroupEntry& setSampler(wgpu::raw::Sampler value) &;
-    BindGroupEntry&& setSampler(wgpu::raw::Sampler value) &&;
-    BindGroupEntry& setTextureView(wgpu::raw::TextureView value) &;
-    BindGroupEntry&& setTextureView(wgpu::raw::TextureView value) &&;
+    BindGroupEntry& setSampler(wgpu::Sampler value) &;
+    BindGroupEntry&& setSampler(wgpu::Sampler value) &&;
+    BindGroupEntry& setTextureView(wgpu::TextureView value) &;
+    BindGroupEntry&& setTextureView(wgpu::TextureView value) &&;
     NextInChain nextInChain;
     uint32_t binding;
-    wgpu::raw::Buffer buffer;
+    wgpu::Buffer buffer;
     uint64_t offset;
     uint64_t size;
-    wgpu::raw::Sampler sampler;
-    wgpu::raw::TextureView textureView;
+    wgpu::Sampler sampler;
+    wgpu::TextureView textureView;
 };
 struct BindGroupLayoutEntry {
     struct CStruct : public WGPUBindGroupLayoutEntry {
@@ -3801,8 +3881,8 @@ struct ComputeState {
     ComputeState& setNextInChain(T&& value) &;
     template <typename T>
     ComputeState&& setNextInChain(T&& value) &&;
-    ComputeState& setModule(wgpu::raw::ShaderModule value) &;
-    ComputeState&& setModule(wgpu::raw::ShaderModule value) &&;
+    ComputeState& setModule(wgpu::ShaderModule value) &;
+    ComputeState&& setModule(wgpu::ShaderModule value) &&;
     ComputeState& setEntryPoint(const wgpu::StringView& value) &;
     ComputeState&& setEntryPoint(const wgpu::StringView& value) &&;
     ComputeState& setEntryPoint(wgpu::StringView&& value) &;
@@ -3812,7 +3892,7 @@ struct ComputeState {
     template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::ConstantEntry>
     ComputeState&& setConstants(T&& values) &&;
     NextInChain nextInChain;
-    wgpu::raw::ShaderModule module;
+    wgpu::ShaderModule module;
     wgpu::StringView entryPoint;
     std::vector<wgpu::ConstantEntry> constants;
 };
@@ -3953,12 +4033,12 @@ struct RenderPassColorAttachment {
     RenderPassColorAttachment& setNextInChain(T&& value) &;
     template <typename T>
     RenderPassColorAttachment&& setNextInChain(T&& value) &&;
-    RenderPassColorAttachment& setView(wgpu::raw::TextureView value) &;
-    RenderPassColorAttachment&& setView(wgpu::raw::TextureView value) &&;
+    RenderPassColorAttachment& setView(wgpu::TextureView value) &;
+    RenderPassColorAttachment&& setView(wgpu::TextureView value) &&;
     RenderPassColorAttachment& setDepthSlice(uint32_t value) &;
     RenderPassColorAttachment&& setDepthSlice(uint32_t value) &&;
-    RenderPassColorAttachment& setResolveTarget(wgpu::raw::TextureView value) &;
-    RenderPassColorAttachment&& setResolveTarget(wgpu::raw::TextureView value) &&;
+    RenderPassColorAttachment& setResolveTarget(wgpu::TextureView value) &;
+    RenderPassColorAttachment&& setResolveTarget(wgpu::TextureView value) &&;
     RenderPassColorAttachment& setLoadOp(wgpu::LoadOp value) &;
     RenderPassColorAttachment&& setLoadOp(wgpu::LoadOp value) &&;
     RenderPassColorAttachment& setStoreOp(wgpu::StoreOp value) &;
@@ -3968,9 +4048,9 @@ struct RenderPassColorAttachment {
     RenderPassColorAttachment& setClearValue(wgpu::Color&& value) &;
     RenderPassColorAttachment&& setClearValue(wgpu::Color&& value) &&;
     NextInChain nextInChain;
-    wgpu::raw::TextureView view;
+    wgpu::TextureView view;
     uint32_t depthSlice;
-    wgpu::raw::TextureView resolveTarget;
+    wgpu::TextureView resolveTarget;
     wgpu::LoadOp loadOp;
     wgpu::StoreOp storeOp;
     wgpu::Color clearValue;
@@ -3993,14 +4073,14 @@ struct RequestAdapterOptions {
     RequestAdapterOptions&& setForceFallbackAdapter(wgpu::Bool value) &&;
     RequestAdapterOptions& setBackendType(wgpu::BackendType value) &;
     RequestAdapterOptions&& setBackendType(wgpu::BackendType value) &&;
-    RequestAdapterOptions& setCompatibleSurface(wgpu::raw::Surface value) &;
-    RequestAdapterOptions&& setCompatibleSurface(wgpu::raw::Surface value) &&;
+    RequestAdapterOptions& setCompatibleSurface(wgpu::Surface value) &;
+    RequestAdapterOptions&& setCompatibleSurface(wgpu::Surface value) &&;
     NextInChain nextInChain;
     wgpu::FeatureLevel featureLevel;
     wgpu::PowerPreference powerPreference;
     wgpu::Bool forceFallbackAdapter;
     wgpu::BackendType backendType;
-    wgpu::raw::Surface compatibleSurface;
+    wgpu::Surface compatibleSurface;
 };
 struct ShaderModuleDescriptor {
     struct CStruct : public WGPUShaderModuleDescriptor {
@@ -4046,10 +4126,10 @@ struct TexelCopyBufferInfo {
     TexelCopyBufferInfo&& setLayout(const wgpu::TexelCopyBufferLayout& value) &&;
     TexelCopyBufferInfo& setLayout(wgpu::TexelCopyBufferLayout&& value) &;
     TexelCopyBufferInfo&& setLayout(wgpu::TexelCopyBufferLayout&& value) &&;
-    TexelCopyBufferInfo& setBuffer(wgpu::raw::Buffer value) &;
-    TexelCopyBufferInfo&& setBuffer(wgpu::raw::Buffer value) &&;
+    TexelCopyBufferInfo& setBuffer(wgpu::Buffer value) &;
+    TexelCopyBufferInfo&& setBuffer(wgpu::Buffer value) &&;
     wgpu::TexelCopyBufferLayout layout;
-    wgpu::raw::Buffer buffer;
+    wgpu::Buffer buffer;
 };
 struct TexelCopyTextureInfo {
     struct CStruct : public WGPUTexelCopyTextureInfo {
@@ -4057,8 +4137,8 @@ struct TexelCopyTextureInfo {
     TexelCopyTextureInfo(const WGPUTexelCopyTextureInfo& native);
     TexelCopyTextureInfo() : TexelCopyTextureInfo(WGPU_TEXEL_COPY_TEXTURE_INFO_INIT) {};
     CStruct to_cstruct() const;
-    TexelCopyTextureInfo& setTexture(wgpu::raw::Texture value) &;
-    TexelCopyTextureInfo&& setTexture(wgpu::raw::Texture value) &&;
+    TexelCopyTextureInfo& setTexture(wgpu::Texture value) &;
+    TexelCopyTextureInfo&& setTexture(wgpu::Texture value) &&;
     TexelCopyTextureInfo& setMipLevel(uint32_t value) &;
     TexelCopyTextureInfo&& setMipLevel(uint32_t value) &&;
     TexelCopyTextureInfo& setOrigin(const wgpu::Origin3D& value) &;
@@ -4067,7 +4147,7 @@ struct TexelCopyTextureInfo {
     TexelCopyTextureInfo&& setOrigin(wgpu::Origin3D&& value) &&;
     TexelCopyTextureInfo& setAspect(wgpu::TextureAspect value) &;
     TexelCopyTextureInfo&& setAspect(wgpu::TextureAspect value) &&;
-    wgpu::raw::Texture texture;
+    wgpu::Texture texture;
     uint32_t mipLevel;
     wgpu::Origin3D origin;
     wgpu::TextureAspect aspect;
@@ -4170,15 +4250,15 @@ struct BindGroupDescriptor {
     BindGroupDescriptor&& setLabel(const wgpu::StringView& value) &&;
     BindGroupDescriptor& setLabel(wgpu::StringView&& value) &;
     BindGroupDescriptor&& setLabel(wgpu::StringView&& value) &&;
-    BindGroupDescriptor& setLayout(wgpu::raw::BindGroupLayout value) &;
-    BindGroupDescriptor&& setLayout(wgpu::raw::BindGroupLayout value) &&;
+    BindGroupDescriptor& setLayout(wgpu::BindGroupLayout value) &;
+    BindGroupDescriptor&& setLayout(wgpu::BindGroupLayout value) &&;
     template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::BindGroupEntry>
     BindGroupDescriptor& setEntries(T&& values) &;
     template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::BindGroupEntry>
     BindGroupDescriptor&& setEntries(T&& values) &&;
     NextInChain nextInChain;
     wgpu::StringView label;
-    wgpu::raw::BindGroupLayout layout;
+    wgpu::BindGroupLayout layout;
     std::vector<wgpu::BindGroupEntry> entries;
 };
 struct BindGroupLayoutDescriptor {
@@ -4242,15 +4322,15 @@ struct ComputePipelineDescriptor {
     ComputePipelineDescriptor&& setLabel(const wgpu::StringView& value) &&;
     ComputePipelineDescriptor& setLabel(wgpu::StringView&& value) &;
     ComputePipelineDescriptor&& setLabel(wgpu::StringView&& value) &&;
-    ComputePipelineDescriptor& setLayout(wgpu::raw::PipelineLayout value) &;
-    ComputePipelineDescriptor&& setLayout(wgpu::raw::PipelineLayout value) &&;
+    ComputePipelineDescriptor& setLayout(wgpu::PipelineLayout value) &;
+    ComputePipelineDescriptor&& setLayout(wgpu::PipelineLayout value) &&;
     ComputePipelineDescriptor& setCompute(const wgpu::ComputeState& value) &;
     ComputePipelineDescriptor&& setCompute(const wgpu::ComputeState& value) &&;
     ComputePipelineDescriptor& setCompute(wgpu::ComputeState&& value) &;
     ComputePipelineDescriptor&& setCompute(wgpu::ComputeState&& value) &&;
     NextInChain nextInChain;
     wgpu::StringView label;
-    wgpu::raw::PipelineLayout layout;
+    wgpu::PipelineLayout layout;
     wgpu::ComputeState compute;
 };
 struct RenderPassDescriptor {
@@ -4278,8 +4358,8 @@ struct RenderPassDescriptor {
     RenderPassDescriptor&& setDepthStencilAttachment(const wgpu::RenderPassDepthStencilAttachment& value) &&;
     RenderPassDescriptor& setDepthStencilAttachment(wgpu::RenderPassDepthStencilAttachment&& value) &;
     RenderPassDescriptor&& setDepthStencilAttachment(wgpu::RenderPassDepthStencilAttachment&& value) &&;
-    RenderPassDescriptor& setOcclusionQuerySet(wgpu::raw::QuerySet value) &;
-    RenderPassDescriptor&& setOcclusionQuerySet(wgpu::raw::QuerySet value) &&;
+    RenderPassDescriptor& setOcclusionQuerySet(wgpu::QuerySet value) &;
+    RenderPassDescriptor&& setOcclusionQuerySet(wgpu::QuerySet value) &&;
     RenderPassDescriptor& setTimestampWrites(const wgpu::PassTimestampWrites& value) &;
     RenderPassDescriptor&& setTimestampWrites(const wgpu::PassTimestampWrites& value) &&;
     RenderPassDescriptor& setTimestampWrites(wgpu::PassTimestampWrites&& value) &;
@@ -4288,7 +4368,7 @@ struct RenderPassDescriptor {
     wgpu::StringView label;
     std::vector<wgpu::RenderPassColorAttachment> colorAttachments;
     std::optional<wgpu::RenderPassDepthStencilAttachment> depthStencilAttachment;
-    wgpu::raw::QuerySet occlusionQuerySet;
+    wgpu::QuerySet occlusionQuerySet;
     std::optional<wgpu::PassTimestampWrites> timestampWrites;
 };
 struct VertexState {
@@ -4304,8 +4384,8 @@ struct VertexState {
     VertexState& setNextInChain(T&& value) &;
     template <typename T>
     VertexState&& setNextInChain(T&& value) &&;
-    VertexState& setModule(wgpu::raw::ShaderModule value) &;
-    VertexState&& setModule(wgpu::raw::ShaderModule value) &&;
+    VertexState& setModule(wgpu::ShaderModule value) &;
+    VertexState&& setModule(wgpu::ShaderModule value) &&;
     VertexState& setEntryPoint(const wgpu::StringView& value) &;
     VertexState&& setEntryPoint(const wgpu::StringView& value) &&;
     VertexState& setEntryPoint(wgpu::StringView&& value) &;
@@ -4319,7 +4399,7 @@ struct VertexState {
     template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::VertexBufferLayout>
     VertexState&& setBuffers(T&& values) &&;
     NextInChain nextInChain;
-    wgpu::raw::ShaderModule module;
+    wgpu::ShaderModule module;
     wgpu::StringView entryPoint;
     std::vector<wgpu::ConstantEntry> constants;
     std::vector<wgpu::VertexBufferLayout> buffers;
@@ -4336,8 +4416,8 @@ struct FragmentState {
     FragmentState& setNextInChain(T&& value) &;
     template <typename T>
     FragmentState&& setNextInChain(T&& value) &&;
-    FragmentState& setModule(wgpu::raw::ShaderModule value) &;
-    FragmentState&& setModule(wgpu::raw::ShaderModule value) &&;
+    FragmentState& setModule(wgpu::ShaderModule value) &;
+    FragmentState&& setModule(wgpu::ShaderModule value) &&;
     FragmentState& setEntryPoint(const wgpu::StringView& value) &;
     FragmentState&& setEntryPoint(const wgpu::StringView& value) &&;
     FragmentState& setEntryPoint(wgpu::StringView&& value) &;
@@ -4351,7 +4431,7 @@ struct FragmentState {
     template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::ColorTargetState>
     FragmentState&& setTargets(T&& values) &&;
     NextInChain nextInChain;
-    wgpu::raw::ShaderModule module;
+    wgpu::ShaderModule module;
     wgpu::StringView entryPoint;
     std::vector<wgpu::ConstantEntry> constants;
     std::vector<wgpu::ColorTargetState> targets;
@@ -4373,8 +4453,8 @@ struct RenderPipelineDescriptor {
     RenderPipelineDescriptor&& setLabel(const wgpu::StringView& value) &&;
     RenderPipelineDescriptor& setLabel(wgpu::StringView&& value) &;
     RenderPipelineDescriptor&& setLabel(wgpu::StringView&& value) &&;
-    RenderPipelineDescriptor& setLayout(wgpu::raw::PipelineLayout value) &;
-    RenderPipelineDescriptor&& setLayout(wgpu::raw::PipelineLayout value) &&;
+    RenderPipelineDescriptor& setLayout(wgpu::PipelineLayout value) &;
+    RenderPipelineDescriptor&& setLayout(wgpu::PipelineLayout value) &&;
     RenderPipelineDescriptor& setVertex(const wgpu::VertexState& value) &;
     RenderPipelineDescriptor&& setVertex(const wgpu::VertexState& value) &&;
     RenderPipelineDescriptor& setVertex(wgpu::VertexState&& value) &;
@@ -4397,7 +4477,7 @@ struct RenderPipelineDescriptor {
     RenderPipelineDescriptor&& setFragment(wgpu::FragmentState&& value) &&;
     NextInChain nextInChain;
     wgpu::StringView label;
-    wgpu::raw::PipelineLayout layout;
+    wgpu::PipelineLayout layout;
     wgpu::VertexState vertex;
     wgpu::PrimitiveState primitive;
     std::optional<wgpu::DepthStencilState> depthStencil;
@@ -4665,14 +4745,14 @@ PipelineLayoutDescriptor&& PipelineLayoutDescriptor::setNextInChain(T&& value) &
     this->nextInChain.setNext(std::forward<T>(value));
     return std::move(*this);
 }
-template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::raw::BindGroupLayout>
+template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::BindGroupLayout>
 PipelineLayoutDescriptor& PipelineLayoutDescriptor::setBindGroupLayouts(T&& values) & {
-    this->bindGroupLayouts = values | std::views::transform([](auto&& e) { return static_cast<wgpu::raw::BindGroupLayout>(e); }) | std::ranges::to<std::vector<wgpu::raw::BindGroupLayout>>();
+    this->bindGroupLayouts = values | std::views::transform([](auto&& e) { return static_cast<wgpu::BindGroupLayout>(e); }) | std::ranges::to<std::vector<wgpu::BindGroupLayout>>();
     return *this;
 }
-template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::raw::BindGroupLayout>
+template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::BindGroupLayout>
 PipelineLayoutDescriptor&& PipelineLayoutDescriptor::setBindGroupLayouts(T&& values) && {
-    this->bindGroupLayouts = values | std::views::transform([](auto&& e) { return static_cast<wgpu::raw::BindGroupLayout>(e); }) | std::ranges::to<std::vector<wgpu::raw::BindGroupLayout>>();
+    this->bindGroupLayouts = values | std::views::transform([](auto&& e) { return static_cast<wgpu::BindGroupLayout>(e); }) | std::ranges::to<std::vector<wgpu::BindGroupLayout>>();
     return std::move(*this);
 }
 template <typename T>
@@ -7199,7 +7279,8 @@ Extent3D&& Extent3D::setDepthOrArrayLayers(uint32_t value) && {
 }
 ExternalTextureBindingEntry::ExternalTextureBindingEntry(const WGPUExternalTextureBindingEntry& native) {
     this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
-    this->externalTexture = static_cast<wgpu::raw::ExternalTexture>(native.externalTexture);
+    this->externalTexture = static_cast<wgpu::ExternalTexture>(native.externalTexture);
+    if (this->externalTexture) this->externalTexture.addRef();
 }
 ExternalTextureBindingEntry::CStruct ExternalTextureBindingEntry::to_cstruct() const {
     CStruct cstruct;
@@ -7207,11 +7288,11 @@ ExternalTextureBindingEntry::CStruct ExternalTextureBindingEntry::to_cstruct() c
     cstruct.externalTexture = static_cast<WGPUExternalTexture>(this->externalTexture);
     return cstruct;
 }
-ExternalTextureBindingEntry& ExternalTextureBindingEntry::setExternalTexture(wgpu::raw::ExternalTexture value) & {
+ExternalTextureBindingEntry& ExternalTextureBindingEntry::setExternalTexture(wgpu::ExternalTexture value) & {
     this->externalTexture = std::move(value);
     return *this;
 }
-ExternalTextureBindingEntry&& ExternalTextureBindingEntry::setExternalTexture(wgpu::raw::ExternalTexture value) && {
+ExternalTextureBindingEntry&& ExternalTextureBindingEntry::setExternalTexture(wgpu::ExternalTexture value) && {
     this->externalTexture = std::move(value);
     return std::move(*this);
 }
@@ -7661,7 +7742,8 @@ Origin3D&& Origin3D::setZ(uint32_t value) && {
 }
 PassTimestampWrites::PassTimestampWrites(const WGPUPassTimestampWrites& native) {
     this->nextInChain.setNext(native.nextInChain);
-    this->querySet = static_cast<wgpu::raw::QuerySet>(native.querySet);
+    this->querySet = static_cast<wgpu::QuerySet>(native.querySet);
+    if (this->querySet) this->querySet.addRef();
     this->beginningOfPassWriteIndex = static_cast<uint32_t>(native.beginningOfPassWriteIndex);
     this->endOfPassWriteIndex = static_cast<uint32_t>(native.endOfPassWriteIndex);
 }
@@ -7673,11 +7755,11 @@ PassTimestampWrites::CStruct PassTimestampWrites::to_cstruct() const {
     cstruct.endOfPassWriteIndex = static_cast<uint32_t>(this->endOfPassWriteIndex);
     return cstruct;
 }
-PassTimestampWrites& PassTimestampWrites::setQuerySet(wgpu::raw::QuerySet value) & {
+PassTimestampWrites& PassTimestampWrites::setQuerySet(wgpu::QuerySet value) & {
     this->querySet = std::move(value);
     return *this;
 }
-PassTimestampWrites&& PassTimestampWrites::setQuerySet(wgpu::raw::QuerySet value) && {
+PassTimestampWrites&& PassTimestampWrites::setQuerySet(wgpu::QuerySet value) && {
     this->querySet = std::move(value);
     return std::move(*this);
 }
@@ -7700,7 +7782,7 @@ PassTimestampWrites&& PassTimestampWrites::setEndOfPassWriteIndex(uint32_t value
 PipelineLayoutDescriptor::PipelineLayoutDescriptor(const WGPUPipelineLayoutDescriptor& native) {
     this->nextInChain.setNext(native.nextInChain);
     this->label = static_cast<wgpu::StringView>(native.label);
-    this->bindGroupLayouts = std::span(native.bindGroupLayouts, native.bindGroupLayoutCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::raw::BindGroupLayout>(e); }) | std::ranges::to<std::vector<wgpu::raw::BindGroupLayout>>();
+    this->bindGroupLayouts = std::span(native.bindGroupLayouts, native.bindGroupLayoutCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::BindGroupLayout>(e); }) | std::ranges::to<std::vector<wgpu::BindGroupLayout>>();
     this->immediateSize = static_cast<uint32_t>(native.immediateSize);
 }
 PipelineLayoutDescriptor::CStruct PipelineLayoutDescriptor::to_cstruct() const {
@@ -7963,7 +8045,8 @@ RenderBundleEncoderDescriptor&& RenderBundleEncoderDescriptor::setStencilReadOnl
 }
 RenderPassDepthStencilAttachment::RenderPassDepthStencilAttachment(const WGPURenderPassDepthStencilAttachment& native) {
     this->nextInChain.setNext(native.nextInChain);
-    this->view = static_cast<wgpu::raw::TextureView>(native.view);
+    this->view = static_cast<wgpu::TextureView>(native.view);
+    if (this->view) this->view.addRef();
     this->depthLoadOp = static_cast<wgpu::LoadOp>(native.depthLoadOp);
     this->depthStoreOp = static_cast<wgpu::StoreOp>(native.depthStoreOp);
     this->depthClearValue = static_cast<float>(native.depthClearValue);
@@ -7987,11 +8070,11 @@ RenderPassDepthStencilAttachment::CStruct RenderPassDepthStencilAttachment::to_c
     cstruct.stencilReadOnly = static_cast<WGPUBool>(this->stencilReadOnly);
     return cstruct;
 }
-RenderPassDepthStencilAttachment& RenderPassDepthStencilAttachment::setView(wgpu::raw::TextureView value) & {
+RenderPassDepthStencilAttachment& RenderPassDepthStencilAttachment::setView(wgpu::TextureView value) & {
     this->view = std::move(value);
     return *this;
 }
-RenderPassDepthStencilAttachment&& RenderPassDepthStencilAttachment::setView(wgpu::raw::TextureView value) && {
+RenderPassDepthStencilAttachment&& RenderPassDepthStencilAttachment::setView(wgpu::TextureView value) && {
     this->view = std::move(value);
     return std::move(*this);
 }
@@ -8461,7 +8544,8 @@ SurfaceColorManagement&& SurfaceColorManagement::setToneMappingMode(wgpu::ToneMa
 }
 SurfaceConfiguration::SurfaceConfiguration(const WGPUSurfaceConfiguration& native) {
     this->nextInChain.setNext(native.nextInChain);
-    this->device = static_cast<wgpu::raw::Device>(native.device);
+    this->device = static_cast<wgpu::Device>(native.device);
+    if (this->device) this->device.addRef();
     this->format = static_cast<wgpu::TextureFormat>(native.format);
     this->usage = static_cast<wgpu::TextureUsage>(native.usage);
     this->width = static_cast<uint32_t>(native.width);
@@ -8484,11 +8568,11 @@ SurfaceConfiguration::CStruct SurfaceConfiguration::to_cstruct() const {
     cstruct.presentMode = static_cast<WGPUPresentMode>(this->presentMode);
     return cstruct;
 }
-SurfaceConfiguration& SurfaceConfiguration::setDevice(wgpu::raw::Device value) & {
+SurfaceConfiguration& SurfaceConfiguration::setDevice(wgpu::Device value) & {
     this->device = std::move(value);
     return *this;
 }
-SurfaceConfiguration&& SurfaceConfiguration::setDevice(wgpu::raw::Device value) && {
+SurfaceConfiguration&& SurfaceConfiguration::setDevice(wgpu::Device value) && {
     this->device = std::move(value);
     return std::move(*this);
 }
@@ -8983,11 +9067,14 @@ VertexAttribute&& VertexAttribute::setShaderLocation(uint32_t value) && {
 BindGroupEntry::BindGroupEntry(const WGPUBindGroupEntry& native) {
     this->nextInChain.setNext(native.nextInChain);
     this->binding = static_cast<uint32_t>(native.binding);
-    this->buffer = static_cast<wgpu::raw::Buffer>(native.buffer);
+    this->buffer = static_cast<wgpu::Buffer>(native.buffer);
+    if (this->buffer) this->buffer.addRef();
     this->offset = static_cast<uint64_t>(native.offset);
     this->size = static_cast<uint64_t>(native.size);
-    this->sampler = static_cast<wgpu::raw::Sampler>(native.sampler);
-    this->textureView = static_cast<wgpu::raw::TextureView>(native.textureView);
+    this->sampler = static_cast<wgpu::Sampler>(native.sampler);
+    if (this->sampler) this->sampler.addRef();
+    this->textureView = static_cast<wgpu::TextureView>(native.textureView);
+    if (this->textureView) this->textureView.addRef();
 }
 BindGroupEntry::CStruct BindGroupEntry::to_cstruct() const {
     CStruct cstruct;
@@ -9008,11 +9095,11 @@ BindGroupEntry&& BindGroupEntry::setBinding(uint32_t value) && {
     this->binding = std::move(value);
     return std::move(*this);
 }
-BindGroupEntry& BindGroupEntry::setBuffer(wgpu::raw::Buffer value) & {
+BindGroupEntry& BindGroupEntry::setBuffer(wgpu::Buffer value) & {
     this->buffer = std::move(value);
     return *this;
 }
-BindGroupEntry&& BindGroupEntry::setBuffer(wgpu::raw::Buffer value) && {
+BindGroupEntry&& BindGroupEntry::setBuffer(wgpu::Buffer value) && {
     this->buffer = std::move(value);
     return std::move(*this);
 }
@@ -9032,19 +9119,19 @@ BindGroupEntry&& BindGroupEntry::setSize(uint64_t value) && {
     this->size = std::move(value);
     return std::move(*this);
 }
-BindGroupEntry& BindGroupEntry::setSampler(wgpu::raw::Sampler value) & {
+BindGroupEntry& BindGroupEntry::setSampler(wgpu::Sampler value) & {
     this->sampler = std::move(value);
     return *this;
 }
-BindGroupEntry&& BindGroupEntry::setSampler(wgpu::raw::Sampler value) && {
+BindGroupEntry&& BindGroupEntry::setSampler(wgpu::Sampler value) && {
     this->sampler = std::move(value);
     return std::move(*this);
 }
-BindGroupEntry& BindGroupEntry::setTextureView(wgpu::raw::TextureView value) & {
+BindGroupEntry& BindGroupEntry::setTextureView(wgpu::TextureView value) & {
     this->textureView = std::move(value);
     return *this;
 }
-BindGroupEntry&& BindGroupEntry::setTextureView(wgpu::raw::TextureView value) && {
+BindGroupEntry&& BindGroupEntry::setTextureView(wgpu::TextureView value) && {
     this->textureView = std::move(value);
     return std::move(*this);
 }
@@ -9267,7 +9354,8 @@ ComputePassDescriptor&& ComputePassDescriptor::setTimestampWrites(wgpu::PassTime
 }
 ComputeState::ComputeState(const WGPUComputeState& native) {
     this->nextInChain.setNext(native.nextInChain);
-    this->module = static_cast<wgpu::raw::ShaderModule>(native.module);
+    this->module = static_cast<wgpu::ShaderModule>(native.module);
+    if (this->module) this->module.addRef();
     this->entryPoint = static_cast<wgpu::StringView>(native.entryPoint);
     this->constants = std::span(native.constants, native.constantCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::ConstantEntry>(e); }) | std::ranges::to<std::vector<wgpu::ConstantEntry>>();
 }
@@ -9281,11 +9369,11 @@ ComputeState::CStruct ComputeState::to_cstruct() const {
     cstruct.constantCount = static_cast<size_t>(cstruct.constants_vec.size());
     return cstruct;
 }
-ComputeState& ComputeState::setModule(wgpu::raw::ShaderModule value) & {
+ComputeState& ComputeState::setModule(wgpu::ShaderModule value) & {
     this->module = std::move(value);
     return *this;
 }
-ComputeState&& ComputeState::setModule(wgpu::raw::ShaderModule value) && {
+ComputeState&& ComputeState::setModule(wgpu::ShaderModule value) && {
     this->module = std::move(value);
     return std::move(*this);
 }
@@ -9613,9 +9701,11 @@ InstanceDescriptor&& InstanceDescriptor::setRequiredLimits(wgpu::InstanceLimits&
 }
 RenderPassColorAttachment::RenderPassColorAttachment(const WGPURenderPassColorAttachment& native) {
     this->nextInChain.setNext(native.nextInChain);
-    this->view = static_cast<wgpu::raw::TextureView>(native.view);
+    this->view = static_cast<wgpu::TextureView>(native.view);
+    if (this->view) this->view.addRef();
     this->depthSlice = static_cast<uint32_t>(native.depthSlice);
-    this->resolveTarget = static_cast<wgpu::raw::TextureView>(native.resolveTarget);
+    this->resolveTarget = static_cast<wgpu::TextureView>(native.resolveTarget);
+    if (this->resolveTarget) this->resolveTarget.addRef();
     this->loadOp = static_cast<wgpu::LoadOp>(native.loadOp);
     this->storeOp = static_cast<wgpu::StoreOp>(native.storeOp);
     this->clearValue = static_cast<wgpu::Color>(native.clearValue);
@@ -9631,11 +9721,11 @@ RenderPassColorAttachment::CStruct RenderPassColorAttachment::to_cstruct() const
     cstruct.clearValue = static_cast<WGPUColor>(this->clearValue.to_cstruct());
     return cstruct;
 }
-RenderPassColorAttachment& RenderPassColorAttachment::setView(wgpu::raw::TextureView value) & {
+RenderPassColorAttachment& RenderPassColorAttachment::setView(wgpu::TextureView value) & {
     this->view = std::move(value);
     return *this;
 }
-RenderPassColorAttachment&& RenderPassColorAttachment::setView(wgpu::raw::TextureView value) && {
+RenderPassColorAttachment&& RenderPassColorAttachment::setView(wgpu::TextureView value) && {
     this->view = std::move(value);
     return std::move(*this);
 }
@@ -9647,11 +9737,11 @@ RenderPassColorAttachment&& RenderPassColorAttachment::setDepthSlice(uint32_t va
     this->depthSlice = std::move(value);
     return std::move(*this);
 }
-RenderPassColorAttachment& RenderPassColorAttachment::setResolveTarget(wgpu::raw::TextureView value) & {
+RenderPassColorAttachment& RenderPassColorAttachment::setResolveTarget(wgpu::TextureView value) & {
     this->resolveTarget = std::move(value);
     return *this;
 }
-RenderPassColorAttachment&& RenderPassColorAttachment::setResolveTarget(wgpu::raw::TextureView value) && {
+RenderPassColorAttachment&& RenderPassColorAttachment::setResolveTarget(wgpu::TextureView value) && {
     this->resolveTarget = std::move(value);
     return std::move(*this);
 }
@@ -9693,7 +9783,8 @@ RequestAdapterOptions::RequestAdapterOptions(const WGPURequestAdapterOptions& na
     this->powerPreference = static_cast<wgpu::PowerPreference>(native.powerPreference);
     this->forceFallbackAdapter = static_cast<wgpu::Bool>(native.forceFallbackAdapter);
     this->backendType = static_cast<wgpu::BackendType>(native.backendType);
-    this->compatibleSurface = static_cast<wgpu::raw::Surface>(native.compatibleSurface);
+    this->compatibleSurface = static_cast<wgpu::Surface>(native.compatibleSurface);
+    if (this->compatibleSurface) this->compatibleSurface.addRef();
 }
 RequestAdapterOptions::CStruct RequestAdapterOptions::to_cstruct() const {
     CStruct cstruct;
@@ -9737,11 +9828,11 @@ RequestAdapterOptions&& RequestAdapterOptions::setBackendType(wgpu::BackendType 
     this->backendType = std::move(value);
     return std::move(*this);
 }
-RequestAdapterOptions& RequestAdapterOptions::setCompatibleSurface(wgpu::raw::Surface value) & {
+RequestAdapterOptions& RequestAdapterOptions::setCompatibleSurface(wgpu::Surface value) & {
     this->compatibleSurface = std::move(value);
     return *this;
 }
-RequestAdapterOptions&& RequestAdapterOptions::setCompatibleSurface(wgpu::raw::Surface value) && {
+RequestAdapterOptions&& RequestAdapterOptions::setCompatibleSurface(wgpu::Surface value) && {
     this->compatibleSurface = std::move(value);
     return std::move(*this);
 }
@@ -9799,7 +9890,8 @@ SurfaceDescriptor&& SurfaceDescriptor::setLabel(wgpu::StringView&& value) && {
 }
 TexelCopyBufferInfo::TexelCopyBufferInfo(const WGPUTexelCopyBufferInfo& native) {
     this->layout = static_cast<wgpu::TexelCopyBufferLayout>(native.layout);
-    this->buffer = static_cast<wgpu::raw::Buffer>(native.buffer);
+    this->buffer = static_cast<wgpu::Buffer>(native.buffer);
+    if (this->buffer) this->buffer.addRef();
 }
 TexelCopyBufferInfo::CStruct TexelCopyBufferInfo::to_cstruct() const {
     CStruct cstruct;
@@ -9823,16 +9915,17 @@ TexelCopyBufferInfo&& TexelCopyBufferInfo::setLayout(wgpu::TexelCopyBufferLayout
     this->layout = std::move(value);
     return std::move(*this);
 }
-TexelCopyBufferInfo& TexelCopyBufferInfo::setBuffer(wgpu::raw::Buffer value) & {
+TexelCopyBufferInfo& TexelCopyBufferInfo::setBuffer(wgpu::Buffer value) & {
     this->buffer = std::move(value);
     return *this;
 }
-TexelCopyBufferInfo&& TexelCopyBufferInfo::setBuffer(wgpu::raw::Buffer value) && {
+TexelCopyBufferInfo&& TexelCopyBufferInfo::setBuffer(wgpu::Buffer value) && {
     this->buffer = std::move(value);
     return std::move(*this);
 }
 TexelCopyTextureInfo::TexelCopyTextureInfo(const WGPUTexelCopyTextureInfo& native) {
-    this->texture = static_cast<wgpu::raw::Texture>(native.texture);
+    this->texture = static_cast<wgpu::Texture>(native.texture);
+    if (this->texture) this->texture.addRef();
     this->mipLevel = static_cast<uint32_t>(native.mipLevel);
     this->origin = static_cast<wgpu::Origin3D>(native.origin);
     this->aspect = static_cast<wgpu::TextureAspect>(native.aspect);
@@ -9845,11 +9938,11 @@ TexelCopyTextureInfo::CStruct TexelCopyTextureInfo::to_cstruct() const {
     cstruct.aspect = static_cast<WGPUTextureAspect>(this->aspect);
     return cstruct;
 }
-TexelCopyTextureInfo& TexelCopyTextureInfo::setTexture(wgpu::raw::Texture value) & {
+TexelCopyTextureInfo& TexelCopyTextureInfo::setTexture(wgpu::Texture value) & {
     this->texture = std::move(value);
     return *this;
 }
-TexelCopyTextureInfo&& TexelCopyTextureInfo::setTexture(wgpu::raw::Texture value) && {
+TexelCopyTextureInfo&& TexelCopyTextureInfo::setTexture(wgpu::Texture value) && {
     this->texture = std::move(value);
     return std::move(*this);
 }
@@ -10043,7 +10136,8 @@ VertexBufferLayout&& VertexBufferLayout::setArrayStride(uint64_t value) && {
 BindGroupDescriptor::BindGroupDescriptor(const WGPUBindGroupDescriptor& native) {
     this->nextInChain.setNext(native.nextInChain);
     this->label = static_cast<wgpu::StringView>(native.label);
-    this->layout = static_cast<wgpu::raw::BindGroupLayout>(native.layout);
+    this->layout = static_cast<wgpu::BindGroupLayout>(native.layout);
+    if (this->layout) this->layout.addRef();
     this->entries = std::span(native.entries, native.entryCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::BindGroupEntry>(e); }) | std::ranges::to<std::vector<wgpu::BindGroupEntry>>();
 }
 BindGroupDescriptor::CStruct BindGroupDescriptor::to_cstruct() const {
@@ -10072,11 +10166,11 @@ BindGroupDescriptor&& BindGroupDescriptor::setLabel(wgpu::StringView&& value) &&
     this->label = std::move(value);
     return std::move(*this);
 }
-BindGroupDescriptor& BindGroupDescriptor::setLayout(wgpu::raw::BindGroupLayout value) & {
+BindGroupDescriptor& BindGroupDescriptor::setLayout(wgpu::BindGroupLayout value) & {
     this->layout = std::move(value);
     return *this;
 }
-BindGroupDescriptor&& BindGroupDescriptor::setLayout(wgpu::raw::BindGroupLayout value) && {
+BindGroupDescriptor&& BindGroupDescriptor::setLayout(wgpu::BindGroupLayout value) && {
     this->layout = std::move(value);
     return std::move(*this);
 }
@@ -10167,7 +10261,8 @@ ColorTargetState&& ColorTargetState::setWriteMask(wgpu::ColorWriteMask value) &&
 ComputePipelineDescriptor::ComputePipelineDescriptor(const WGPUComputePipelineDescriptor& native) {
     this->nextInChain.setNext(native.nextInChain);
     this->label = static_cast<wgpu::StringView>(native.label);
-    this->layout = static_cast<wgpu::raw::PipelineLayout>(native.layout);
+    this->layout = static_cast<wgpu::PipelineLayout>(native.layout);
+    if (this->layout) this->layout.addRef();
     this->compute = static_cast<wgpu::ComputeState>(native.compute);
 }
 ComputePipelineDescriptor::CStruct ComputePipelineDescriptor::to_cstruct() const {
@@ -10195,11 +10290,11 @@ ComputePipelineDescriptor&& ComputePipelineDescriptor::setLabel(wgpu::StringView
     this->label = std::move(value);
     return std::move(*this);
 }
-ComputePipelineDescriptor& ComputePipelineDescriptor::setLayout(wgpu::raw::PipelineLayout value) & {
+ComputePipelineDescriptor& ComputePipelineDescriptor::setLayout(wgpu::PipelineLayout value) & {
     this->layout = std::move(value);
     return *this;
 }
-ComputePipelineDescriptor&& ComputePipelineDescriptor::setLayout(wgpu::raw::PipelineLayout value) && {
+ComputePipelineDescriptor&& ComputePipelineDescriptor::setLayout(wgpu::PipelineLayout value) && {
     this->layout = std::move(value);
     return std::move(*this);
 }
@@ -10228,7 +10323,8 @@ RenderPassDescriptor::RenderPassDescriptor(const WGPURenderPassDescriptor& nativ
     } else {
         this->depthStencilAttachment.reset();
     }
-    this->occlusionQuerySet = static_cast<wgpu::raw::QuerySet>(native.occlusionQuerySet);
+    this->occlusionQuerySet = static_cast<wgpu::QuerySet>(native.occlusionQuerySet);
+    if (this->occlusionQuerySet) this->occlusionQuerySet.addRef();
     if (native.timestampWrites != nullptr) {
         this->timestampWrites = static_cast<wgpu::PassTimestampWrites>(*(native.timestampWrites));
     } else {
@@ -10289,11 +10385,11 @@ RenderPassDescriptor&& RenderPassDescriptor::setDepthStencilAttachment(wgpu::Ren
     this->depthStencilAttachment.emplace(std::move(value));
     return std::move(*this);
 }
-RenderPassDescriptor& RenderPassDescriptor::setOcclusionQuerySet(wgpu::raw::QuerySet value) & {
+RenderPassDescriptor& RenderPassDescriptor::setOcclusionQuerySet(wgpu::QuerySet value) & {
     this->occlusionQuerySet = std::move(value);
     return *this;
 }
-RenderPassDescriptor&& RenderPassDescriptor::setOcclusionQuerySet(wgpu::raw::QuerySet value) && {
+RenderPassDescriptor&& RenderPassDescriptor::setOcclusionQuerySet(wgpu::QuerySet value) && {
     this->occlusionQuerySet = std::move(value);
     return std::move(*this);
 }
@@ -10315,7 +10411,8 @@ RenderPassDescriptor&& RenderPassDescriptor::setTimestampWrites(wgpu::PassTimest
 }
 VertexState::VertexState(const WGPUVertexState& native) {
     this->nextInChain.setNext(native.nextInChain);
-    this->module = static_cast<wgpu::raw::ShaderModule>(native.module);
+    this->module = static_cast<wgpu::ShaderModule>(native.module);
+    if (this->module) this->module.addRef();
     this->entryPoint = static_cast<wgpu::StringView>(native.entryPoint);
     this->constants = std::span(native.constants, native.constantCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::ConstantEntry>(e); }) | std::ranges::to<std::vector<wgpu::ConstantEntry>>();
     this->buffers = std::span(native.buffers, native.bufferCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::VertexBufferLayout>(e); }) | std::ranges::to<std::vector<wgpu::VertexBufferLayout>>();
@@ -10334,11 +10431,11 @@ VertexState::CStruct VertexState::to_cstruct() const {
     cstruct.bufferCount = static_cast<size_t>(cstruct.buffers_vec.size());
     return cstruct;
 }
-VertexState& VertexState::setModule(wgpu::raw::ShaderModule value) & {
+VertexState& VertexState::setModule(wgpu::ShaderModule value) & {
     this->module = std::move(value);
     return *this;
 }
-VertexState&& VertexState::setModule(wgpu::raw::ShaderModule value) && {
+VertexState&& VertexState::setModule(wgpu::ShaderModule value) && {
     this->module = std::move(value);
     return std::move(*this);
 }
@@ -10360,7 +10457,8 @@ VertexState&& VertexState::setEntryPoint(wgpu::StringView&& value) && {
 }
 FragmentState::FragmentState(const WGPUFragmentState& native) {
     this->nextInChain.setNext(native.nextInChain);
-    this->module = static_cast<wgpu::raw::ShaderModule>(native.module);
+    this->module = static_cast<wgpu::ShaderModule>(native.module);
+    if (this->module) this->module.addRef();
     this->entryPoint = static_cast<wgpu::StringView>(native.entryPoint);
     this->constants = std::span(native.constants, native.constantCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::ConstantEntry>(e); }) | std::ranges::to<std::vector<wgpu::ConstantEntry>>();
     this->targets = std::span(native.targets, native.targetCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::ColorTargetState>(e); }) | std::ranges::to<std::vector<wgpu::ColorTargetState>>();
@@ -10378,11 +10476,11 @@ FragmentState::CStruct FragmentState::to_cstruct() const {
     cstruct.targetCount = static_cast<size_t>(cstruct.targets_vec.size());
     return cstruct;
 }
-FragmentState& FragmentState::setModule(wgpu::raw::ShaderModule value) & {
+FragmentState& FragmentState::setModule(wgpu::ShaderModule value) & {
     this->module = std::move(value);
     return *this;
 }
-FragmentState&& FragmentState::setModule(wgpu::raw::ShaderModule value) && {
+FragmentState&& FragmentState::setModule(wgpu::ShaderModule value) && {
     this->module = std::move(value);
     return std::move(*this);
 }
@@ -10405,7 +10503,8 @@ FragmentState&& FragmentState::setEntryPoint(wgpu::StringView&& value) && {
 RenderPipelineDescriptor::RenderPipelineDescriptor(const WGPURenderPipelineDescriptor& native) {
     this->nextInChain.setNext(native.nextInChain);
     this->label = static_cast<wgpu::StringView>(native.label);
-    this->layout = static_cast<wgpu::raw::PipelineLayout>(native.layout);
+    this->layout = static_cast<wgpu::PipelineLayout>(native.layout);
+    if (this->layout) this->layout.addRef();
     this->vertex = static_cast<wgpu::VertexState>(native.vertex);
     this->primitive = static_cast<wgpu::PrimitiveState>(native.primitive);
     if (native.depthStencil != nullptr) {
@@ -10459,11 +10558,11 @@ RenderPipelineDescriptor&& RenderPipelineDescriptor::setLabel(wgpu::StringView&&
     this->label = std::move(value);
     return std::move(*this);
 }
-RenderPipelineDescriptor& RenderPipelineDescriptor::setLayout(wgpu::raw::PipelineLayout value) & {
+RenderPipelineDescriptor& RenderPipelineDescriptor::setLayout(wgpu::PipelineLayout value) & {
     this->layout = std::move(value);
     return *this;
 }
-RenderPipelineDescriptor&& RenderPipelineDescriptor::setLayout(wgpu::raw::PipelineLayout value) && {
+RenderPipelineDescriptor&& RenderPipelineDescriptor::setLayout(wgpu::PipelineLayout value) && {
     this->layout = std::move(value);
     return std::move(*this);
 }

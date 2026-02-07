@@ -34,6 +34,8 @@ void set_up_parser(ArgsParser& parser) {
         ArgsParser::ArgSpec("--use-raii",
                             "Generate RAII wrappers for handles, and make non raii handles use raw namespace")
             .set_flag(true));
+    parser.add_arg_spec(ArgsParser::ArgSpec("--force-raii", "while using raii, also force structs to store raii handle")
+                            .set_flag(true));
     parser.print_help();
 }
 
@@ -670,7 +672,7 @@ WebGpuApiCpp produce_webgpu_cpp(const WebGpuApi& api, const TemplateMeta& templa
     auto get_cpp_field_type = [&](std::string type, bool owning) -> std::string {
         if (type.starts_with("WGPU")) {
             type = type.substr(4);
-            if (parser.contains("--use-raii") && (!owning) &&
+            if (!parser.contains("--force-raii") && parser.contains("--use-raii") && !owning &&
                 std::ranges::contains(api.handles, type, [](const HandleApi& h) { return h.name; })) {
                 return ns + "::raw::" + type;
             } else {
@@ -1030,6 +1032,13 @@ template <typename T>
             field_cpp.assign_from_native = std::format(R"(
     this->{} = static_cast<{}>(native.{});)",
                                                        field.name, field_cpp.type, field.name);
+            if (field.type.starts_with("WGPU") && parser.contains("--force-raii") && !struct_api.owning &&
+                std::ranges::contains(api.handles, field.type.substr(4), [](const HandleApi& h) { return h.name; })) {
+                // handle field and force-raii, need addRef
+                field_cpp.assign_from_native += std::format(R"(
+    if (this->{0}) this->{0}.addRef();)",
+                                                            field.name);
+            }
             if (field.type.starts_with("WGPU") &&
                 std::ranges::contains(api.structs, field.type.substr(4), [](const StructApi& s) { return s.name; })) {
                 if (field.is_pointer)
@@ -1646,7 +1655,7 @@ void generate_webgpu_cpp(const WebGpuApiCpp& api_cpp, const TemplateMeta& templa
             raii_friends_text += std::format(" \\\n    friend class raw::{};", handle_cpp.name);
         }
         for (const auto& struct_cpp : api.structs) {
-            if (struct_cpp.owning) {
+            if (struct_cpp.owning || parser.contains("--force-raii")) {
                 raii_friends_text += std::format(" \\\n    friend struct {};", struct_cpp.name);
             }
         }
