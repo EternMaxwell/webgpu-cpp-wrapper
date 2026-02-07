@@ -924,6 +924,7 @@ struct QueueWorkDoneCallback;
 struct RequestAdapterCallback;
 struct RequestDeviceCallback;
 struct UncapturedErrorCallback;
+struct LogCallback;
 }
 namespace wgpu::raw {
 class Adapter {
@@ -936,9 +937,9 @@ public:
     bool operator==(const Adapter& other) const { return m_raw == other.m_raw; }
     bool operator!=(const Adapter& other) const { return m_raw != other.m_raw; }
     Adapter& operator=(std::nullptr_t) { m_raw = nullptr; return *this; }
-    void getFeatures(wgpu::SupportedFeatures& features) const;
-    wgpu::Status getInfo(wgpu::AdapterInfo& info) const;
-    wgpu::Status getLimits(wgpu::Limits& limits) const;
+    void getFeatures(wgpu::SupportedFeatures* features) const;
+    wgpu::Status getInfo(wgpu::AdapterInfo* info) const;
+    wgpu::Status getLimits(wgpu::Limits* limits) const;
     wgpu::Bool hasFeature(wgpu::FeatureName feature) const;
     wgpu::Future requestDevice(wgpu::DeviceDescriptor const* descriptor, wgpu::RequestDeviceCallbackInfo callbackInfo) const;
     void addRef() const;
@@ -1072,6 +1073,10 @@ public:
     void setPipeline(wgpu::ComputePipeline const& pipeline) const;
     void addRef() const;
     void release() const;
+    void setPushConstants(uint32_t offset, uint32_t sizeBytes, void const* data) const;
+    void beginPipelineStatisticsQuery(wgpu::QuerySet const& querySet, uint32_t queryIndex) const;
+    void endPipelineStatisticsQuery() const;
+    void writeTimestamp(wgpu::QuerySet const& querySet, uint32_t queryIndex) const;
 private:
     WGPUComputePassEncoder m_raw;
 };
@@ -1120,8 +1125,8 @@ public:
     wgpu::Texture createTexture(wgpu::TextureDescriptor const& descriptor) const;
     void destroy() const;
     wgpu::AdapterInfo getAdapterInfo() const;
-    void getFeatures(wgpu::SupportedFeatures& features) const;
-    wgpu::Status getLimits(wgpu::Limits& limits) const;
+    void getFeatures(wgpu::SupportedFeatures* features) const;
+    wgpu::Status getLimits(wgpu::Limits* limits) const;
     wgpu::Future getLostFuture() const;
     wgpu::Queue getQueue() const;
     wgpu::Bool hasFeature(wgpu::FeatureName feature) const;
@@ -1130,6 +1135,9 @@ public:
     void setLabel(wgpu::StringView label) const;
     void addRef() const;
     void release() const;
+    wgpu::Bool poll(wgpu::Bool wait, wgpu::SubmissionIndex const& wrappedSubmissionIndex) const;
+    wgpu::Bool poll(wgpu::Bool wait) const;
+    wgpu::ShaderModule createShaderModuleSpirV(wgpu::ShaderModuleDescriptorSpirV const& descriptor) const;
 private:
     WGPUDevice m_raw;
 };
@@ -1144,13 +1152,14 @@ public:
     bool operator!=(const Instance& other) const { return m_raw != other.m_raw; }
     Instance& operator=(std::nullptr_t) { m_raw = nullptr; return *this; }
     wgpu::Surface createSurface(wgpu::SurfaceDescriptor const& descriptor) const;
-    wgpu::Status getWGSLLanguageFeatures(wgpu::SupportedWGSLLanguageFeatures& features) const;
+    wgpu::Status getWGSLLanguageFeatures(wgpu::SupportedWGSLLanguageFeatures* features) const;
     wgpu::Bool hasWGSLLanguageFeature(wgpu::WGSLLanguageFeatureName feature) const;
     void processEvents() const;
     wgpu::Future requestAdapter(wgpu::RequestAdapterOptions const* options, wgpu::RequestAdapterCallbackInfo callbackInfo) const;
     wgpu::WaitStatus waitAny(size_t futureCount, wgpu::FutureWaitInfo* futures, uint64_t timeoutNS) const;
     void addRef() const;
     void release() const;
+    size_t enumerateAdapters(wgpu::InstanceEnumerateAdapterOptions const* options, wgpu::Adapter* adapters) const;
     WEBGPU_CPP_NAMESPACE::Adapter requestAdapter(const RequestAdapterOptions& options) const;
 private:
     WGPUInstance m_raw;
@@ -1208,6 +1217,8 @@ public:
     void writeTexture(wgpu::TexelCopyTextureInfo const& destination, void const* data, size_t dataSize, wgpu::TexelCopyBufferLayout const& dataLayout, wgpu::Extent3D const& writeSize) const;
     void addRef() const;
     void release() const;
+    wgpu::SubmissionIndex submitForIndex(std::span<wgpu::CommandBuffer const> commands) const;
+    wgpu::SubmissionIndex submitForIndex(const wgpu::CommandBuffer& commands) const;
 private:
     WGPUQueue m_raw;
 };
@@ -1254,6 +1265,7 @@ public:
     void setVertexBuffer(uint32_t slot, wgpu::Buffer const& buffer, uint64_t offset, uint64_t size) const;
     void addRef() const;
     void release() const;
+    void setPushConstants(wgpu::ShaderStage stages, uint32_t offset, uint32_t sizeBytes, void const* data) const;
 private:
     WGPURenderBundleEncoder m_raw;
 };
@@ -1291,6 +1303,14 @@ public:
     void setViewport(float x, float y, float width, float height, float minDepth, float maxDepth) const;
     void addRef() const;
     void release() const;
+    void setPushConstants(wgpu::ShaderStage stages, uint32_t offset, uint32_t sizeBytes, void const* data) const;
+    void multiDrawIndirect(wgpu::Buffer const& buffer, uint64_t offset, uint32_t count) const;
+    void multiDrawIndexedIndirect(wgpu::Buffer const& buffer, uint64_t offset, uint32_t count) const;
+    void multiDrawIndirectCount(wgpu::Buffer const& buffer, uint64_t offset, wgpu::Buffer const& count_buffer, uint64_t count_buffer_offset, uint32_t max_count) const;
+    void multiDrawIndexedIndirectCount(wgpu::Buffer const& buffer, uint64_t offset, wgpu::Buffer const& count_buffer, uint64_t count_buffer_offset, uint32_t max_count) const;
+    void beginPipelineStatisticsQuery(wgpu::QuerySet const& querySet, uint32_t queryIndex) const;
+    void endPipelineStatisticsQuery() const;
+    void writeTimestamp(wgpu::QuerySet const& querySet, uint32_t queryIndex) const;
 private:
     WGPURenderPassEncoder m_raw;
 };
@@ -1355,8 +1375,8 @@ public:
     bool operator!=(const Surface& other) const { return m_raw != other.m_raw; }
     Surface& operator=(std::nullptr_t) { m_raw = nullptr; return *this; }
     void configure(wgpu::SurfaceConfiguration const& config) const;
-    wgpu::Status getCapabilities(wgpu::Adapter const& adapter, wgpu::SurfaceCapabilities& capabilities) const;
-    void getCurrentTexture(wgpu::SurfaceTexture& surfaceTexture) const;
+    wgpu::Status getCapabilities(wgpu::Adapter const& adapter, wgpu::SurfaceCapabilities* capabilities) const;
+    void getCurrentTexture(wgpu::SurfaceTexture* surfaceTexture) const;
     wgpu::Status present() const;
     void setLabel(wgpu::StringView label) const;
     void unconfigure() const;
@@ -1535,7 +1555,11 @@ private:
     friend struct SurfaceConfigurationExtras; \
     friend wgpu::Instance createInstance(wgpu::InstanceDescriptor const& descriptor); \
     friend wgpu::Instance createInstance(); \
-    friend wgpu::Status getInstanceCapabilities(wgpu::InstanceCapabilities& capabilities);
+    friend wgpu::Status getInstanceCapabilities(wgpu::InstanceCapabilities* capabilities); \
+    friend void generateReport(wgpu::Instance const& instance, wgpu::GlobalReport* report); \
+    friend void setLogCallback(wgpu::LogCallback callback, void* userdata); \
+    friend void setLogLevel(wgpu::LogLevel level); \
+    friend uint32_t getVersion();
 namespace wgpu {
 class Adapter : public raw::Adapter {
 public:
@@ -2331,6 +2355,37 @@ public:
     UncapturedErrorCallback(const F& f);
     void operator()(wgpu::Device const& device, wgpu::ErrorType type, wgpu::StringView message) const;
     void operator()(WGPUDevice const* device, WGPUErrorType type, WGPUStringView message) const;
+    void reset() { if (data && --data->count == 0) { delete data; } data = nullptr; }
+    operator bool() const { return data != nullptr; }
+};
+struct LogCallback {
+    struct Control {
+        std::atomic<std::size_t> count{1};
+        virtual ~Control() = default;
+        virtual void invoke(wgpu::LogLevel level, wgpu::StringView message) const = 0;
+        virtual void invoke_c(WGPULogLevel level, WGPUStringView message) const;
+    };
+private:
+    template <typename F>
+    struct ControlImpl : Control {
+        F func;
+        ControlImpl(const F& f) : func(f) {}
+        void invoke(wgpu::LogLevel level, wgpu::StringView message) const override;
+    };
+    Control* data;
+public:
+    LogCallback() : data(nullptr) {}
+    LogCallback(WGPULogCallback native, void* userdata);
+    LogCallback(const LogCallback& other) : data(other.data) { if (data) ++data->count; }
+    LogCallback(LogCallback&& other) noexcept : data(other.data) { other.data = nullptr; }
+    LogCallback& operator=(const LogCallback& other);
+    LogCallback& operator=(LogCallback&& other);
+    LogCallback& operator=(std::nullptr_t) { reset(); return *this; }
+    ~LogCallback() { if (data && --data->count == 0) { delete data; } }
+    template <std::invocable<wgpu::LogLevel, wgpu::StringView> F>
+    LogCallback(const F& f);
+    void operator()(wgpu::LogLevel level, wgpu::StringView message) const;
+    void operator()(WGPULogLevel level, WGPUStringView message) const;
     void reset() { if (data && --data->count == 0) { delete data; } data = nullptr; }
     operator bool() const { return data != nullptr; }
 };
@@ -4812,7 +4867,11 @@ struct SurfaceConfigurationExtras {
 namespace wgpu {
 wgpu::Instance createInstance(wgpu::InstanceDescriptor const& descriptor);
 wgpu::Instance createInstance();
-wgpu::Status getInstanceCapabilities(wgpu::InstanceCapabilities& capabilities);
+wgpu::Status getInstanceCapabilities(wgpu::InstanceCapabilities* capabilities);
+void generateReport(wgpu::Instance const& instance, wgpu::GlobalReport* report);
+void setLogCallback(wgpu::LogCallback callback, void* userdata);
+void setLogLevel(wgpu::LogLevel level);
+uint32_t getVersion();
 }
 }
 namespace wgpu {
@@ -5909,6 +5968,14 @@ UncapturedErrorCallback::UncapturedErrorCallback(const F& f) {
 template <typename F>
 void UncapturedErrorCallback::ControlImpl<F>::invoke(wgpu::Device const& device, wgpu::ErrorType type, wgpu::StringView message) const {
     func(device, type, message);
+}
+template <std::invocable<wgpu::LogLevel, wgpu::StringView> F>
+LogCallback::LogCallback(const F& f) {
+    data = new ControlImpl<F>(f);
+}
+template <typename F>
+void LogCallback::ControlImpl<F>::invoke(wgpu::LogLevel level, wgpu::StringView message) const {
+    func(level, message);
 }
 }
 namespace wgpu {
@@ -11748,23 +11815,23 @@ SurfaceConfigurationExtras&& SurfaceConfigurationExtras::setDesiredMaximumFrameL
 }
 }
 namespace wgpu::raw {
-void Adapter::getFeatures(wgpu::SupportedFeatures& features) const {
+void Adapter::getFeatures(wgpu::SupportedFeatures* features) const {
     WGPUSupportedFeatures features_native;
     wgpuAdapterGetFeatures(m_raw, &features_native);
-    features = static_cast<wgpu::SupportedFeatures>(features_native);
+    *features = static_cast<wgpu::SupportedFeatures>(features_native);
     wgpuSupportedFeaturesFreeMembers(features_native);
 }
-wgpu::Status Adapter::getInfo(wgpu::AdapterInfo& info) const {
+wgpu::Status Adapter::getInfo(wgpu::AdapterInfo* info) const {
     WGPUAdapterInfo info_native;
     wgpu::Status res = static_cast<wgpu::Status>(wgpuAdapterGetInfo(m_raw, &info_native));
-    info = static_cast<wgpu::AdapterInfo>(info_native);
+    *info = static_cast<wgpu::AdapterInfo>(info_native);
     wgpuAdapterInfoFreeMembers(info_native);
     return res;
 }
-wgpu::Status Adapter::getLimits(wgpu::Limits& limits) const {
+wgpu::Status Adapter::getLimits(wgpu::Limits* limits) const {
     WGPULimits limits_native;
     wgpu::Status res = static_cast<wgpu::Status>(wgpuAdapterGetLimits(m_raw, &limits_native));
-    limits = static_cast<wgpu::Limits>(limits_native);
+    *limits = static_cast<wgpu::Limits>(limits_native);
     return res;
 }
 wgpu::Bool Adapter::hasFeature(wgpu::FeatureName feature) const {
@@ -11968,6 +12035,18 @@ void ComputePassEncoder::addRef() const {
 void ComputePassEncoder::release() const {
     wgpuComputePassEncoderRelease(m_raw);
 }
+void ComputePassEncoder::setPushConstants(uint32_t offset, uint32_t sizeBytes, void const* data) const {
+    wgpuComputePassEncoderSetPushConstants(m_raw, offset, sizeBytes, data);
+}
+void ComputePassEncoder::beginPipelineStatisticsQuery(wgpu::QuerySet const& querySet, uint32_t queryIndex) const {
+    wgpuComputePassEncoderBeginPipelineStatisticsQuery(m_raw, *reinterpret_cast<WGPUQuerySet const*>(&querySet), queryIndex);
+}
+void ComputePassEncoder::endPipelineStatisticsQuery() const {
+    wgpuComputePassEncoderEndPipelineStatisticsQuery(m_raw);
+}
+void ComputePassEncoder::writeTimestamp(wgpu::QuerySet const& querySet, uint32_t queryIndex) const {
+    wgpuComputePassEncoderWriteTimestamp(m_raw, *reinterpret_cast<WGPUQuerySet const*>(&querySet), queryIndex);
+}
 wgpu::BindGroupLayout ComputePipeline::getBindGroupLayout(uint32_t groupIndex) const {
     wgpu::BindGroupLayout res = static_cast<wgpu::BindGroupLayout>(wgpuComputePipelineGetBindGroupLayout(m_raw, groupIndex));
     return res;
@@ -12069,16 +12148,16 @@ wgpu::AdapterInfo Device::getAdapterInfo() const {
     wgpu::AdapterInfo res = static_cast<wgpu::AdapterInfo>(wgpuDeviceGetAdapterInfo(m_raw));
     return res;
 }
-void Device::getFeatures(wgpu::SupportedFeatures& features) const {
+void Device::getFeatures(wgpu::SupportedFeatures* features) const {
     WGPUSupportedFeatures features_native;
     wgpuDeviceGetFeatures(m_raw, &features_native);
-    features = static_cast<wgpu::SupportedFeatures>(features_native);
+    *features = static_cast<wgpu::SupportedFeatures>(features_native);
     wgpuSupportedFeaturesFreeMembers(features_native);
 }
-wgpu::Status Device::getLimits(wgpu::Limits& limits) const {
+wgpu::Status Device::getLimits(wgpu::Limits* limits) const {
     WGPULimits limits_native;
     wgpu::Status res = static_cast<wgpu::Status>(wgpuDeviceGetLimits(m_raw, &limits_native));
-    limits = static_cast<wgpu::Limits>(limits_native);
+    *limits = static_cast<wgpu::Limits>(limits_native);
     return res;
 }
 wgpu::Future Device::getLostFuture() const {
@@ -12111,15 +12190,28 @@ void Device::addRef() const {
 void Device::release() const {
     wgpuDeviceRelease(m_raw);
 }
+wgpu::Bool Device::poll(wgpu::Bool wait, wgpu::SubmissionIndex const& wrappedSubmissionIndex) const {
+    wgpu::Bool res = static_cast<wgpu::Bool>(wgpuDevicePoll(m_raw, static_cast<WGPUBool>(wait), reinterpret_cast<WGPUSubmissionIndex const*>(&wrappedSubmissionIndex)));
+    return res;
+}
+wgpu::Bool Device::poll(wgpu::Bool wait) const {
+    wgpu::Bool res = static_cast<wgpu::Bool>(wgpuDevicePoll(m_raw, static_cast<WGPUBool>(wait), nullptr));
+    return res;
+}
+wgpu::ShaderModule Device::createShaderModuleSpirV(wgpu::ShaderModuleDescriptorSpirV const& descriptor) const {
+    wgpu::ShaderModuleDescriptorSpirV::CStruct descriptor_cstruct = descriptor.to_cstruct();
+    wgpu::ShaderModule res = static_cast<wgpu::ShaderModule>(wgpuDeviceCreateShaderModuleSpirV(m_raw, &descriptor_cstruct));
+    return res;
+}
 wgpu::Surface Instance::createSurface(wgpu::SurfaceDescriptor const& descriptor) const {
     wgpu::SurfaceDescriptor::CStruct descriptor_cstruct = descriptor.to_cstruct();
     wgpu::Surface res = static_cast<wgpu::Surface>(wgpuInstanceCreateSurface(m_raw, &descriptor_cstruct));
     return res;
 }
-wgpu::Status Instance::getWGSLLanguageFeatures(wgpu::SupportedWGSLLanguageFeatures& features) const {
+wgpu::Status Instance::getWGSLLanguageFeatures(wgpu::SupportedWGSLLanguageFeatures* features) const {
     WGPUSupportedWGSLLanguageFeatures features_native;
     wgpu::Status res = static_cast<wgpu::Status>(wgpuInstanceGetWGSLLanguageFeatures(m_raw, &features_native));
-    features = static_cast<wgpu::SupportedWGSLLanguageFeatures>(features_native);
+    *features = static_cast<wgpu::SupportedWGSLLanguageFeatures>(features_native);
     wgpuSupportedWGSLLanguageFeaturesFreeMembers(features_native);
     return res;
 }
@@ -12148,6 +12240,12 @@ void Instance::addRef() const {
 }
 void Instance::release() const {
     wgpuInstanceRelease(m_raw);
+}
+size_t Instance::enumerateAdapters(wgpu::InstanceEnumerateAdapterOptions const* options, wgpu::Adapter* adapters) const {
+    wgpu::InstanceEnumerateAdapterOptions::CStruct options_cstruct;
+    if (options) options_cstruct = options->to_cstruct();
+    size_t res = static_cast<size_t>(wgpuInstanceEnumerateAdapters(m_raw, options? &options_cstruct : nullptr, reinterpret_cast<WGPUAdapter*>(adapters)));
+    return res;
 }
 void PipelineLayout::setLabel(wgpu::StringView label) const {
     wgpu::StringView::CStruct label_cstruct = label.to_cstruct();
@@ -12209,6 +12307,13 @@ void Queue::addRef() const {
 }
 void Queue::release() const {
     wgpuQueueRelease(m_raw);
+}
+wgpu::SubmissionIndex Queue::submitForIndex(std::span<wgpu::CommandBuffer const> commands) const {
+    wgpu::SubmissionIndex res = static_cast<wgpu::SubmissionIndex>(wgpuQueueSubmitForIndex(m_raw, static_cast<size_t>(commands.size()), reinterpret_cast<WGPUCommandBuffer const*>(commands.data())));
+    return res;
+}
+wgpu::SubmissionIndex Queue::submitForIndex(const wgpu::CommandBuffer& commands) const {
+    return submitForIndex(std::span<const wgpu::CommandBuffer>(&commands, 1));
 }
 void RenderBundle::setLabel(wgpu::StringView label) const {
     wgpu::StringView::CStruct label_cstruct = label.to_cstruct();
@@ -12276,6 +12381,9 @@ void RenderBundleEncoder::addRef() const {
 }
 void RenderBundleEncoder::release() const {
     wgpuRenderBundleEncoderRelease(m_raw);
+}
+void RenderBundleEncoder::setPushConstants(wgpu::ShaderStage stages, uint32_t offset, uint32_t sizeBytes, void const* data) const {
+    wgpuRenderBundleEncoderSetPushConstants(m_raw, static_cast<WGPUShaderStage>(stages), offset, sizeBytes, data);
 }
 void RenderPassEncoder::beginOcclusionQuery(uint32_t queryIndex) const {
     wgpuRenderPassEncoderBeginOcclusionQuery(m_raw, queryIndex);
@@ -12353,6 +12461,30 @@ void RenderPassEncoder::addRef() const {
 void RenderPassEncoder::release() const {
     wgpuRenderPassEncoderRelease(m_raw);
 }
+void RenderPassEncoder::setPushConstants(wgpu::ShaderStage stages, uint32_t offset, uint32_t sizeBytes, void const* data) const {
+    wgpuRenderPassEncoderSetPushConstants(m_raw, static_cast<WGPUShaderStage>(stages), offset, sizeBytes, data);
+}
+void RenderPassEncoder::multiDrawIndirect(wgpu::Buffer const& buffer, uint64_t offset, uint32_t count) const {
+    wgpuRenderPassEncoderMultiDrawIndirect(m_raw, *reinterpret_cast<WGPUBuffer const*>(&buffer), offset, count);
+}
+void RenderPassEncoder::multiDrawIndexedIndirect(wgpu::Buffer const& buffer, uint64_t offset, uint32_t count) const {
+    wgpuRenderPassEncoderMultiDrawIndexedIndirect(m_raw, *reinterpret_cast<WGPUBuffer const*>(&buffer), offset, count);
+}
+void RenderPassEncoder::multiDrawIndirectCount(wgpu::Buffer const& buffer, uint64_t offset, wgpu::Buffer const& count_buffer, uint64_t count_buffer_offset, uint32_t max_count) const {
+    wgpuRenderPassEncoderMultiDrawIndirectCount(m_raw, *reinterpret_cast<WGPUBuffer const*>(&buffer), offset, *reinterpret_cast<WGPUBuffer const*>(&count_buffer), count_buffer_offset, max_count);
+}
+void RenderPassEncoder::multiDrawIndexedIndirectCount(wgpu::Buffer const& buffer, uint64_t offset, wgpu::Buffer const& count_buffer, uint64_t count_buffer_offset, uint32_t max_count) const {
+    wgpuRenderPassEncoderMultiDrawIndexedIndirectCount(m_raw, *reinterpret_cast<WGPUBuffer const*>(&buffer), offset, *reinterpret_cast<WGPUBuffer const*>(&count_buffer), count_buffer_offset, max_count);
+}
+void RenderPassEncoder::beginPipelineStatisticsQuery(wgpu::QuerySet const& querySet, uint32_t queryIndex) const {
+    wgpuRenderPassEncoderBeginPipelineStatisticsQuery(m_raw, *reinterpret_cast<WGPUQuerySet const*>(&querySet), queryIndex);
+}
+void RenderPassEncoder::endPipelineStatisticsQuery() const {
+    wgpuRenderPassEncoderEndPipelineStatisticsQuery(m_raw);
+}
+void RenderPassEncoder::writeTimestamp(wgpu::QuerySet const& querySet, uint32_t queryIndex) const {
+    wgpuRenderPassEncoderWriteTimestamp(m_raw, *reinterpret_cast<WGPUQuerySet const*>(&querySet), queryIndex);
+}
 wgpu::BindGroupLayout RenderPipeline::getBindGroupLayout(uint32_t groupIndex) const {
     wgpu::BindGroupLayout res = static_cast<wgpu::BindGroupLayout>(wgpuRenderPipelineGetBindGroupLayout(m_raw, groupIndex));
     return res;
@@ -12396,17 +12528,17 @@ void Surface::configure(wgpu::SurfaceConfiguration const& config) const {
     wgpu::SurfaceConfiguration::CStruct config_cstruct = config.to_cstruct();
     wgpuSurfaceConfigure(m_raw, &config_cstruct);
 }
-wgpu::Status Surface::getCapabilities(wgpu::Adapter const& adapter, wgpu::SurfaceCapabilities& capabilities) const {
+wgpu::Status Surface::getCapabilities(wgpu::Adapter const& adapter, wgpu::SurfaceCapabilities* capabilities) const {
     WGPUSurfaceCapabilities capabilities_native;
     wgpu::Status res = static_cast<wgpu::Status>(wgpuSurfaceGetCapabilities(m_raw, *reinterpret_cast<WGPUAdapter const*>(&adapter), &capabilities_native));
-    capabilities = static_cast<wgpu::SurfaceCapabilities>(capabilities_native);
+    *capabilities = static_cast<wgpu::SurfaceCapabilities>(capabilities_native);
     wgpuSurfaceCapabilitiesFreeMembers(capabilities_native);
     return res;
 }
-void Surface::getCurrentTexture(wgpu::SurfaceTexture& surfaceTexture) const {
+void Surface::getCurrentTexture(wgpu::SurfaceTexture* surfaceTexture) const {
     WGPUSurfaceTexture surfaceTexture_native;
     wgpuSurfaceGetCurrentTexture(m_raw, &surfaceTexture_native);
-    surfaceTexture = static_cast<wgpu::SurfaceTexture>(surfaceTexture_native);
+    *surfaceTexture = static_cast<wgpu::SurfaceTexture>(surfaceTexture_native);
 }
 wgpu::Status Surface::present() const {
     wgpu::Status res = static_cast<wgpu::Status>(wgpuSurfacePresent(m_raw));
@@ -12882,6 +13014,44 @@ UncapturedErrorCallback& UncapturedErrorCallback::operator=(UncapturedErrorCallb
 }
 void UncapturedErrorCallback::operator()(wgpu::Device const& device, wgpu::ErrorType type, wgpu::StringView message) const { if (data) data->invoke(device, type, message); }
 void UncapturedErrorCallback::operator()(WGPUDevice const* device, WGPUErrorType type, WGPUStringView message) const { if (data) data->invoke_c(device, type, message); }
+struct LogCallbackControlNative : LogCallback::Control {
+    WGPULogCallback native;
+    void* userdata;
+    LogCallbackControlNative(WGPULogCallback n, void* userdata) : native(n), userdata(userdata) {}
+    void invoke(wgpu::LogLevel level, wgpu::StringView message) const override {}
+    void invoke_c(WGPULogLevel level, WGPUStringView message) const override;
+};
+void LogCallbackControlNative::invoke_c(WGPULogLevel level, WGPUStringView message) const {
+    native(level, message, userdata);
+}
+LogCallback::LogCallback(WGPULogCallback native, void* userdata) {
+    if (native) {
+        data = new LogCallbackControlNative(native, userdata);
+    } else {
+        data = nullptr;
+    }
+}
+void LogCallback::Control::invoke_c(WGPULogLevel level, WGPUStringView message) const {
+    invoke(static_cast<wgpu::LogLevel>(level), static_cast<wgpu::StringView>(message));
+}
+LogCallback& LogCallback::operator=(const LogCallback& other) {
+    if (this != &other) {
+        if (data && --data->count == 0) { delete data; }
+        data = other.data;
+        if (data) ++data->count;
+    }
+    return *this;
+}
+LogCallback& LogCallback::operator=(LogCallback&& other) {
+    if (this != &other) {
+        if (data && --data->count == 0) { delete data; }
+        data = other.data;
+        other.data = nullptr;
+    }
+    return *this;
+}
+void LogCallback::operator()(wgpu::LogLevel level, wgpu::StringView message) const { if (data) data->invoke(level, message); }
+void LogCallback::operator()(WGPULogLevel level, WGPUStringView message) const { if (data) data->invoke_c(level, message); }
 }
 namespace wgpu {
 wgpu::Instance createInstance(wgpu::InstanceDescriptor const& descriptor) {
@@ -12893,10 +13063,33 @@ wgpu::Instance createInstance() {
     wgpu::Instance res = static_cast<wgpu::Instance>(wgpuCreateInstance(nullptr));
     return res;
 }
-wgpu::Status getInstanceCapabilities(wgpu::InstanceCapabilities& capabilities) {
+wgpu::Status getInstanceCapabilities(wgpu::InstanceCapabilities* capabilities) {
     WGPUInstanceCapabilities capabilities_native;
     wgpu::Status res = static_cast<wgpu::Status>(wgpuGetInstanceCapabilities(&capabilities_native));
-    capabilities = static_cast<wgpu::InstanceCapabilities>(capabilities_native);
+    *capabilities = static_cast<wgpu::InstanceCapabilities>(capabilities_native);
+    return res;
+}
+void generateReport(wgpu::Instance const& instance, wgpu::GlobalReport* report) {
+    WGPUGlobalReport report_native;
+    wgpuGenerateReport(*reinterpret_cast<WGPUInstance const*>(&instance), &report_native);
+    *report = static_cast<wgpu::GlobalReport>(report_native);
+}
+void setLogCallback(wgpu::LogCallback callback, void* userdata) {
+    WGPULogCallback callback_native = nullptr;
+    if (callback) {
+        callback_native = [](WGPULogLevel level, WGPUStringView message, void* userdata) {
+            auto callback = std::move(*reinterpret_cast<wgpu::LogCallback*>(userdata));
+            callback(level, message);
+        };
+        new (userdata) wgpu::LogCallback(callback);
+    }
+    wgpuSetLogCallback(callback_native, userdata);
+}
+void setLogLevel(wgpu::LogLevel level) {
+    wgpuSetLogLevel(static_cast<WGPULogLevel>(level));
+}
+uint32_t getVersion() {
+    uint32_t res = static_cast<uint32_t>(wgpuGetVersion());
     return res;
 }
 }

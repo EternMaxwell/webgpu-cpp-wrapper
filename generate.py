@@ -161,6 +161,7 @@ class FuncParamApiCpp:
 	is_const: bool = False
 	is_struct: bool = False
 	is_handle: bool = False
+	is_callback: bool = False
 	binary_compatible: bool = False
 	nullable: bool = False
 
@@ -171,31 +172,46 @@ class FuncParamApiCpp:
 		elif self.is_pointer:
 			if self.is_const:
 				full += " const"
-			full += "*" if self.nullable or not self.type.startswith(namespace + "::") else "&"
+			if not self.is_const:
+				full += "*"
+			else:
+				full += "*" if self.nullable or not self.type.startswith(namespace + "::") else "&"
 		return full
 
 	def get_assign_from_native(self, namespace: str) -> Tuple[str, str]:
 		assign = ""
 		temp_data = ""
 		if self.is_handle:
-			assign = (
-				f"{'*' if not self.nullable else ''}reinterpret_cast<{self.type}{'' if (self.is_pointer and not self.is_const) else ' const'}*>({'' if self.is_pointer else '&'}{self.name})"
-			)
+			if self.is_pointer and not self.is_const:
+				assign = f"reinterpret_cast<{self.type}*>({self.name})"
+			else:
+				assign = (
+					f"{'*' if not self.nullable else ''}reinterpret_cast<{self.type}{'' if (self.is_pointer and not self.is_const) else ' const'}*>({'' if self.is_pointer else '&'}{self.name})"
+				)
 		elif self.is_pointer and self.is_struct:
-			if self.nullable:
+			if not self.is_const:
 				if self.binary_compatible:
-					assign = f"reinterpret_cast<{self.type}{' const' if self.is_const else ''}*>({self.name})"
+					assign = f"reinterpret_cast<{self.type}*>({self.name})"
 				else:
 					temp_data = (
 						f"\n    {self.type} {self.name}_temp;\n    if ({self.name}) {self.name}_temp = static_cast<{self.type}>(*{self.name});"
 					)
-					assign = f"{self.name}? &{self.name}_temp : nullptr"
+					assign = f"{self.name}? &{self.name}_temp : nullptr" if self.nullable else f"&{self.name}_temp"
 			else:
-				if self.binary_compatible:
-					assign = f"*reinterpret_cast<{self.type} const*>({self.name})"
+				if self.nullable:
+					if self.binary_compatible:
+						assign = f"reinterpret_cast<{self.type} const*>({self.name})"
+					else:
+						temp_data = (
+							f"\n    {self.type} {self.name}_temp;\n    if ({self.name}) {self.name}_temp = static_cast<{self.type}>(*{self.name});"
+						)
+						assign = f"{self.name}? &{self.name}_temp : nullptr"
 				else:
-					temp_data = f"\t{self.type} {self.name}_temp = static_cast<{self.type}>(*{self.name});\n"
-					assign = f"{self.name}_temp"
+					if self.binary_compatible:
+						assign = f"*reinterpret_cast<{self.type} const*>({self.name})"
+					else:
+						temp_data = f"\t{self.type} {self.name}_temp = static_cast<{self.type}>(*{self.name});\n"
+						assign = f"{self.name}_temp"
 		else:
 			assign = f"static_cast<{self.type}>({self.name})"
 		return assign, temp_data
@@ -692,11 +708,11 @@ def parse_header(api: WebGpuApi, header_content: str) -> None:
 	lines = header_content.split("\n")
 	struct_re = re.compile(r"typedef +struct +WGPU(\w+) *\{")
 	handle_re = re.compile(r"typedef +struct .*\* *WGPU(\w+)\s+WGPU_OBJECT_ATTRIBUTE;")
-	func_re = re.compile(r"WGPU_EXPORT +([\w *]+) +wgpu(\w+)\s*\(([^)]*)\)\s+WGPU_FUNCTION_ATTRIBUTE;")
+	func_re = re.compile(r"(?:WGPU_EXPORT +)?([\w *]+) +wgpu(\w+)\s*\(([^)]*)\)\s*(?:WGPU_FUNCTION_ATTRIBUTE)?;")
 	enum_re = re.compile(r"typedef +enum +WGPU(\w+) *\{")
 	flag_enum_re = re.compile(r"typedef +WGPUFlags +WGPU(\w+)\s*;")
 	flat_value_re = re.compile(r"static +const +WGPU(\w+) +WGPU(\w+)_(\w+) *= *(\w+)( /\*(.*)\*/)?;")
-	callback_re = re.compile(r"typedef +void +\(\*WGPU(\w+)Callback\)\((.*)\)\s*WGPU_FUNCTION_ATTRIBUTE;")
+	callback_re = re.compile(r"typedef +void +\(\*WGPU(\w+)Callback\)\((.*)\)\s*(?:WGPU_FUNCTION_ATTRIBUTE)?;")
 	init_macro_re = re.compile(r"#define +(WGPU_[A-Z0-9_]+_INIT)")
 	typedef_re = re.compile(r"typedef +(\w+) +WGPU(\w+)\s*;")
 
@@ -877,11 +893,16 @@ def produce_webgpu_cpp(api: WebGpuApi, template_meta: TemplateMeta, args: argpar
 	for handle_api in api.handles:
 		result.handles.append(HandleApiCpp(name=handle_api.name))
 
+	callback_types = {f"WGPU{cb.name}Callback" for cb in api.callbacks}
+
 	def get_func_param_cpp_type(param: FuncParamApi) -> FuncParamApiCpp:
 		type_without_wgpu = param.type
 		if type_without_wgpu.startswith("WGPU"):
 			type_without_wgpu = type_without_wgpu[4:]
-		if param.type.startswith("WGPU"):
+		is_callback = param.type in callback_types
+		if is_callback:
+			cpp_type = namespace + "::" + type_without_wgpu
+		elif param.type.startswith("WGPU"):
 			cpp_type = namespace + "::" + param.type[4:]
 		else:
 			cpp_type = param.type
@@ -891,12 +912,45 @@ def produce_webgpu_cpp(api: WebGpuApi, template_meta: TemplateMeta, args: argpar
 			is_pointer=param.is_pointer,
 			nullable=param.nullable,
 			is_const=param.is_const,
+			is_callback=is_callback,
 		)
 		if param.type.startswith("WGPU") and any(h.name == type_without_wgpu for h in api.handles):
 			param_cpp.is_handle = True
 		if param.type.startswith("WGPU") and any(s.name == type_without_wgpu for s in api.structs):
 			param_cpp.is_struct = True
 		return param_cpp
+
+	def build_native_call_args(params_cpp: List[FuncParamApiCpp]) -> Tuple[str, str, str]:
+		temp_parts: List[str] = []
+		write_parts: List[str] = []
+		arg_exprs: List[str] = []
+		for param in params_cpp:
+			if param.is_callback:
+				type_without_wgpu = param.type
+				if type_without_wgpu.startswith(namespace + "::"):
+					type_without_wgpu = type_without_wgpu[len(namespace) + 2:]
+				callback_api = next(c for c in api.callbacks if c.name + "Callback" == type_without_wgpu)
+				userdata_name = next(p.name for p in callback_api.params if p.name.startswith("userdata"))
+				callback_native_name = f"{param.name}_native"
+				temp_parts.append(
+					f"\n    WGPU{callback_api.name}Callback {callback_native_name} = nullptr;\n"
+					f"    if ({param.name}) {{\n"
+					f"        {callback_native_name} = []({', '.join(p.full_type() + ' ' + p.name for p in callback_api.params)}) {{\n"
+					f"            auto callback = std::move(*reinterpret_cast<{param.type}*>({userdata_name}));\n"
+					f"            callback({', '.join(p.name for p in callback_api.params if not p.name.startswith('userdata'))});\n"
+					f"        }};\n"
+					f"        new ({userdata_name}) {param.type}({param.name});\n"
+					f"    }}"
+				)
+				arg_exprs.append(callback_native_name)
+				continue
+			assign, temp, write = get_assign_to_native(param)
+			if temp:
+				temp_parts.append(temp)
+			if write:
+				write_parts.append(write)
+			arg_exprs.append(assign)
+		return "\n".join(temp_parts), ", ".join(arg_exprs), "\n".join(write_parts)
 
 	for callback_api in api.callbacks:
 		callback_cpp = CallbackApiCpp(name=callback_api.name + "Callback")
@@ -1198,10 +1252,13 @@ def produce_webgpu_cpp(api: WebGpuApi, template_meta: TemplateMeta, args: argpar
 		has_free_members = any(f.name == type_without_wgpu + "FreeMembers" for f in api.functions)
 		free_members = f"wgpu{type_without_wgpu}FreeMembers" if has_free_members else ""
 		if param.is_handle:
-			prefix = "" if param.is_pointer else "*"
-			const_suffix = " const" if (param.is_const or not param.is_pointer) else ""
-			addr_prefix = "" if (param.nullable and param.is_pointer) else "&"
-			assign = f"{prefix}reinterpret_cast<WGPU{type_without_wgpu}{const_suffix}*>({addr_prefix}{param.name})"
+			if param.is_pointer and not param.is_const:
+				assign = f"reinterpret_cast<WGPU{type_without_wgpu}*>({param.name})"
+			else:
+				prefix = "" if param.is_pointer else "*"
+				const_suffix = " const" if (param.is_const or not param.is_pointer) else ""
+				addr_prefix = "" if (param.nullable and param.is_pointer) else "&"
+				assign = f"{prefix}reinterpret_cast<WGPU{type_without_wgpu}{const_suffix}*>({addr_prefix}{param.name})"
 		elif param.is_pointer and param.is_struct:
 			if param.nullable:
 				if param.binary_compatible:
@@ -1219,19 +1276,26 @@ def produce_webgpu_cpp(api: WebGpuApi, template_meta: TemplateMeta, args: argpar
 						write_back += f"\n    if ({param.name}) {free_members}({param.name}_native);"
 			else:
 				if param.binary_compatible:
-					assign = f"reinterpret_cast<WGPU{type_without_wgpu}{' const' if param.is_const else ''}*>(&{param.name})"
+					if param.is_const:
+						assign = f"reinterpret_cast<WGPU{type_without_wgpu} const*>(&{param.name})"
+					else:
+						assign = f"reinterpret_cast<WGPU{type_without_wgpu}*>({param.name})"
 				elif param.is_const:
 					temp_data = f"\n    {param.type}::CStruct {param.name}_cstruct = {param.name}.to_cstruct();"
 					assign = f"&{param.name}_cstruct"
 				else:
 					temp_data = f"\n    WGPU{type_without_wgpu} {param.name}_native;"
 					assign = f"&{param.name}_native"
-					write_back = f"\n    {param.name} = static_cast<{param.type}>({param.name}_native);"
+					write_back = f"\n    *{param.name} = static_cast<{param.type}>({param.name}_native);"
 					if has_free_members:
 						write_back += f"\n    {free_members}({param.name}_native);"
 		elif param.is_struct:
 			temp_data = f"\n    {param.type}::CStruct {param.name}_cstruct = {param.name}.to_cstruct();"
 			assign = f"{param.name}_cstruct"
+		elif param.is_pointer:
+			const_suffix = " const" if param.is_const else ""
+			addr_prefix = "&" if (param.is_const and not param.nullable) else ""
+			assign = f"reinterpret_cast<WGPU{type_without_wgpu}{const_suffix}*>({addr_prefix}{param.name})"
 		else:
 			assign = f"static_cast<WGPU{type_without_wgpu}>({param.name})"
 		return assign, temp_data, write_back
@@ -1244,6 +1308,7 @@ def produce_webgpu_cpp(api: WebGpuApi, template_meta: TemplateMeta, args: argpar
 			is_const=param.is_const,
 			is_struct=param.is_struct,
 			is_handle=param.is_handle,
+			is_callback=param.is_callback,
 			binary_compatible=param.binary_compatible,
 			nullable=param.nullable,
 		)
@@ -1447,9 +1512,7 @@ def produce_webgpu_cpp(api: WebGpuApi, template_meta: TemplateMeta, args: argpar
 				nullable_overload = True
 			func_decl = f"{return_type} {func_name}({', '.join(p.full_type(namespace) + ' ' + p.name for p in params_cpp)});"
 			arg3 = ", ".join(p.full_type(namespace) + " " + p.name for p in params_cpp)
-			arg4 = "\n".join(get_assign_to_native(p)[1] for p in params_cpp)
-			arg5 = ", ".join(get_assign_to_native(p)[0] for p in params_cpp)
-			arg6 = "\n".join(get_assign_to_native(p)[2] for p in params_cpp)
+			arg4, arg5, arg6 = build_native_call_args(params_cpp)
 			if return_type == "void":
 				func_impl = (
 					f"\n{return_type} {func_name}({arg3}) {{\n{arg4}\n    wgpu{func_api.name}({arg5});\n{arg6}\n}}"
@@ -1464,9 +1527,7 @@ def produce_webgpu_cpp(api: WebGpuApi, template_meta: TemplateMeta, args: argpar
 				params_cpp.pop()
 				func_decl = f"{return_type} {func_name}({', '.join(p.full_type(namespace) + ' ' + p.name for p in params_cpp)});"
 				arg3 = ", ".join(p.full_type(namespace) + " " + p.name for p in params_cpp)
-				arg4 = "\n".join(get_assign_to_native(p)[1] for p in params_cpp)
-				arg5 = ", ".join(get_assign_to_native(p)[0] for p in params_cpp)
-				arg6 = "\n".join(get_assign_to_native(p)[2] for p in params_cpp)
+				arg4, arg5, arg6 = build_native_call_args(params_cpp)
 				arg7 = "nullptr" if not params_cpp else ", nullptr"
 				if return_type == "void":
 					func_impl = (
@@ -1521,11 +1582,9 @@ def produce_webgpu_cpp(api: WebGpuApi, template_meta: TemplateMeta, args: argpar
 				f"\n    {return_type} {func_name}({', '.join(p.full_type(namespace) + ' ' + p.name for p in params_cpp)}) const;"
 			)
 			arg3 = ", ".join(p.full_type(namespace) + " " + p.name for p in params_cpp)
-			arg4 = "\n".join(get_assign_to_native(p)[1] for p in params_cpp)
+			arg4, arg7, arg8 = build_native_call_args(params_cpp)
 			arg5 = func_api.name
 			arg6 = "m_raw" if not params_cpp else "m_raw, "
-			arg7 = ", ".join(get_assign_to_native(p)[0] for p in params_cpp)
-			arg8 = "\n".join(get_assign_to_native(p)[2] for p in params_cpp)
 			if return_type == "void":
 				handle_cpp.methods_impl.append(
 					f"\n{return_type} {handle_cpp.name}::{func_name}({arg3}) const {{\n{arg4}\n    wgpu{arg5}({arg6}{arg7});\n{arg8}\n}}"
@@ -1540,10 +1599,8 @@ def produce_webgpu_cpp(api: WebGpuApi, template_meta: TemplateMeta, args: argpar
 					f"\n    {return_type} {func_name}({', '.join(p.full_type(namespace) + ' ' + p.name for p in params_cpp)}) const;"
 				)
 				arg3 = ", ".join(p.full_type(namespace) + " " + p.name for p in params_cpp)
-				arg4 = "\n".join(get_assign_to_native(p)[1] for p in params_cpp)
+				arg4, arg7, arg8 = build_native_call_args(params_cpp)
 				arg6 = "m_raw" if not params_cpp else "m_raw, "
-				arg7 = ", ".join(get_assign_to_native(p)[0] for p in params_cpp)
-				arg8 = "\n".join(get_assign_to_native(p)[2] for p in params_cpp)
 				if return_type == "void":
 					handle_cpp.methods_impl.append(
 						f"\n{return_type} {handle_cpp.name}::{func_name}({arg3}) const {{\n{arg4}\n    wgpu{arg5}({arg6}{arg7}, nullptr);\n{arg8}\n}}"
