@@ -4,6 +4,7 @@
 #define WEBGPU_CPP_NAMESPACE wgpu
 #define WEBGPU_CPP_USE_RAII
 #include <atomic>
+#include <cstddef>
 #include <iostream>
 #include <vector>
 #include <functional>
@@ -11,10 +12,14 @@
 #include <concepts>
 #include <cmath>
 #include <memory>
+#include <new>
+#include <initializer_list>
 #include <string_view>
 #include <span>
 #include <optional>
 #include <ranges>
+#include <type_traits>
+#include <utility>
 export module webgpu;
 export {
 namespace wgpu {
@@ -2391,6 +2396,175 @@ public:
 };
 }
 namespace wgpu {
+template <typename T, size_t N = 4>
+struct SmallVec {
+	static_assert(N > 0, "SmallVec requires N > 0");
+	using value_type = T;
+	SmallVec() noexcept = default;
+	SmallVec(std::initializer_list<T> init) {
+		reserve(init.size());
+		for (const auto& value : init) {
+			emplace_back(value);
+		}
+	}
+	SmallVec(const SmallVec& other) {
+		reserve(other.size_);
+		for (size_t i = 0; i < other.size_; ++i) {
+			emplace_back(other[i]);
+		}
+	}
+	SmallVec(SmallVec&& other) noexcept(std::is_nothrow_move_constructible_v<T>) {
+		move_from(std::move(other));
+	}
+	~SmallVec() {
+		clear();
+		deallocate_heap();
+	}
+	SmallVec& operator=(const SmallVec& other) {
+		if (this == &other) {
+			return *this;
+		}
+		clear();
+		reserve(other.size_);
+		for (size_t i = 0; i < other.size_; ++i) {
+			emplace_back(other[i]);
+		}
+		return *this;
+	}
+	SmallVec& operator=(SmallVec&& other) noexcept(std::is_nothrow_move_constructible_v<T>) {
+		if (this == &other) {
+			return *this;
+		}
+		clear();
+		deallocate_heap();
+		move_from(std::move(other));
+		return *this;
+	}
+	[[nodiscard]] bool empty() const noexcept { return size_ == 0; }
+	[[nodiscard]] size_t size() const noexcept { return size_; }
+	[[nodiscard]] size_t capacity() const noexcept { return capacity_; }
+	T* data() noexcept { return storage(); }
+	const T* data() const noexcept { return storage(); }
+	T* begin() noexcept { return storage(); }
+	const T* begin() const noexcept { return storage(); }
+	const T* cbegin() const noexcept { return storage(); }
+	T* end() noexcept { return storage() + size_; }
+	const T* end() const noexcept { return storage() + size_; }
+	const T* cend() const noexcept { return storage() + size_; }
+	T& operator[](size_t index) noexcept { return storage()[index]; }
+	const T& operator[](size_t index) const noexcept { return storage()[index]; }
+	template <typename... Args>
+	T& emplace_back(Args&&... args) {
+		if (size_ == capacity()) {
+			reserve(grow_capacity());
+		}
+		T* slot = storage() + size_;
+		::new (static_cast<void*>(slot)) T(std::forward<Args>(args)...);
+		++size_;
+		return *slot;
+	}
+	void push_back(const T& value) { emplace_back(value); }
+	void push_back(T&& value) { emplace_back(std::move(value)); }
+	void pop_back() {
+		if (size_ == 0) {
+			return;
+		}
+		--size_;
+		std::destroy_at(storage() + size_);
+	}
+	void clear() noexcept {
+		destroy_elements();
+		size_ = 0;
+	}
+	void reserve(size_t new_cap) {
+		if (new_cap <= capacity()) {
+			return;
+		}
+		T* new_storage = allocate(new_cap);
+		move_elements(new_storage);
+		deallocate_heap();
+		heap_storage = new_storage;
+		capacity_ = new_cap;
+	}
+	void shrink_to_fit() {
+		if (capacity_ == N) {
+			return;
+		}
+		if (size_ <= N) {
+			T* inline_ptr = inline_storage;
+			move_elements(inline_ptr);
+			deallocate_heap();
+			capacity_ = N;
+			return;
+		}
+		if (size_ == capacity_) {
+			return;
+		}
+		T* new_storage = allocate(size_);
+		move_elements(new_storage);
+		deallocate_heap();
+		heap_storage = new_storage;
+		capacity_ = size_;
+	}
+private:
+	size_t size_ = 0;
+	size_t capacity_ = N;
+	union {
+		alignas(T) std::byte inline_storage[sizeof(T) * N];
+		T* heap_storage;
+	};
+	T* storage() noexcept {
+		return capacity_ > N ? heap_storage : std::launder(reinterpret_cast<T*>(inline_storage));
+	}
+	const T* storage() const noexcept {
+		return capacity_ > N ? heap_storage : std::launder(reinterpret_cast<const T*>(inline_storage));
+	}
+	static T* allocate(size_t cap) {
+		return static_cast<T*>(::operator new(sizeof(T) * cap, std::align_val_t{alignof(T)}));
+	}
+	void deallocate_heap() noexcept {
+		if (capacity_ == N) {
+			return;
+		}
+		::operator delete(static_cast<void*>(heap_storage), std::align_val_t{alignof(T)});
+	}
+	void destroy_elements() noexcept {
+		T* ptr = storage();
+		for (size_t i = 0; i < size_; ++i) {
+			std::destroy_at(ptr + i);
+		}
+	}
+	void move_elements(T* dest) {
+		T* src = storage();
+		for (size_t i = 0; i < size_; ++i) {
+			::new (static_cast<void*>(dest + i)) T(std::move(src[i]));
+			std::destroy_at(src + i);
+		}
+	}
+	size_t grow_capacity() const noexcept {
+		const size_t cap = capacity();
+		return cap == 0 ? 1 : cap * 2;
+	}
+	void move_from(SmallVec&& other) {
+		if (other.capacity_ > N) {
+			heap_storage = other.heap_storage;
+			size_ = other.size_;
+			capacity_ = other.capacity_;
+			other.heap_storage = nullptr;
+			other.size_ = 0;
+			other.capacity_ = N;
+			return;
+		}
+		size_ = other.size_;
+		capacity_ = N;
+		T* src = other.storage();
+		for (size_t i = 0; i < size_; ++i) {
+			::new (static_cast<void*>(storage() + i)) T(std::move(src[i]));
+			std::destroy_at(src + i);
+		}
+		other.size_ = 0;
+	}
+};
 template <typename Struct>
 struct NextInChainBase {
     std::atomic<std::size_t> ref_count{1};
@@ -3178,7 +3352,7 @@ struct PipelineLayoutDescriptor {
     PipelineLayoutDescriptor&& setBindGroupLayouts(T&& values) &&;
     NextInChain<WGPUChainedStruct const> nextInChain{};
     wgpu::StringView label{};
-    std::vector<wgpu::BindGroupLayout> bindGroupLayouts{};
+    SmallVec<wgpu::BindGroupLayout> bindGroupLayouts{};
 };
 struct PrimitiveState {
     struct CStruct : public WGPUPrimitiveState {
@@ -3292,7 +3466,7 @@ struct RenderBundleEncoderDescriptor {
     RenderBundleEncoderDescriptor&& setStencilReadOnly(wgpu::Bool value) &&;
     NextInChain<WGPUChainedStruct const> nextInChain{};
     wgpu::StringView label{};
-    std::vector<wgpu::TextureFormat> colorFormats{};
+    SmallVec<wgpu::TextureFormat> colorFormats{};
     wgpu::TextureFormat depthStencilFormat{};
     uint32_t sampleCount{};
     wgpu::Bool depthReadOnly{};
@@ -3554,7 +3728,7 @@ struct SupportedFeatures {
     SupportedFeatures& setFeatures(T&& values) &;
     template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::FeatureName>
     SupportedFeatures&& setFeatures(T&& values) &&;
-    std::vector<wgpu::FeatureName> features{};
+    SmallVec<wgpu::FeatureName> features{};
 };
 struct SupportedWGSLLanguageFeatures {
     struct CStruct : public WGPUSupportedWGSLLanguageFeatures {
@@ -3566,7 +3740,7 @@ struct SupportedWGSLLanguageFeatures {
     SupportedWGSLLanguageFeatures& setFeatures(T&& values) &;
     template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::WGSLLanguageFeatureName>
     SupportedWGSLLanguageFeatures&& setFeatures(T&& values) &&;
-    std::vector<wgpu::WGSLLanguageFeatureName> features{};
+    SmallVec<wgpu::WGSLLanguageFeatureName> features{};
 };
 struct SurfaceCapabilities {
     struct CStruct : public WGPUSurfaceCapabilities {
@@ -3594,9 +3768,9 @@ struct SurfaceCapabilities {
     SurfaceCapabilities&& setAlphaModes(T&& values) &&;
     NextInChain<WGPUChainedStructOut> nextInChain{};
     wgpu::TextureUsage usages{};
-    std::vector<wgpu::TextureFormat> formats{};
-    std::vector<wgpu::PresentMode> presentModes{};
-    std::vector<wgpu::CompositeAlphaMode> alphaModes{};
+    SmallVec<wgpu::TextureFormat> formats{};
+    SmallVec<wgpu::PresentMode> presentModes{};
+    SmallVec<wgpu::CompositeAlphaMode> alphaModes{};
 };
 struct SurfaceConfiguration {
     struct CStruct : public WGPUSurfaceConfiguration {
@@ -3632,7 +3806,7 @@ struct SurfaceConfiguration {
     wgpu::TextureUsage usage{};
     uint32_t width{};
     uint32_t height{};
-    std::vector<wgpu::TextureFormat> viewFormats{};
+    SmallVec<wgpu::TextureFormat> viewFormats{};
     wgpu::CompositeAlphaMode alphaMode{};
     wgpu::PresentMode presentMode{};
 };
@@ -3891,7 +4065,7 @@ struct BindGroupDescriptor {
     NextInChain<WGPUChainedStruct const> nextInChain{};
     wgpu::StringView label{};
     wgpu::BindGroupLayout layout{};
-    std::vector<wgpu::BindGroupEntry> entries{};
+    SmallVec<wgpu::BindGroupEntry> entries{};
 };
 struct BindGroupLayoutEntry {
     struct CStruct : public WGPUBindGroupLayoutEntry {
@@ -3964,7 +4138,7 @@ struct CompilationInfo {
     template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::CompilationMessage>
     CompilationInfo&& setMessages(T&& values) &&;
     NextInChain<WGPUChainedStruct const> nextInChain{};
-    std::vector<wgpu::CompilationMessage> messages{};
+    SmallVec<wgpu::CompilationMessage> messages{};
 };
 struct ComputePassDescriptor {
     struct CStruct : public WGPUComputePassDescriptor {
@@ -4071,7 +4245,7 @@ struct DeviceDescriptor {
     DeviceDescriptor&& setUncapturedErrorCallbackInfo(wgpu::UncapturedErrorCallbackInfo&& value) &&;
     NextInChain<WGPUChainedStruct const> nextInChain{};
     wgpu::StringView label{};
-    std::vector<wgpu::FeatureName> requiredFeatures{};
+    SmallVec<wgpu::FeatureName> requiredFeatures{};
     std::optional<wgpu::Limits> requiredLimits{};
     wgpu::QueueDescriptor defaultQueue{};
     wgpu::DeviceLostCallbackInfo deviceLostCallbackInfo{};
@@ -4133,7 +4307,7 @@ struct ProgrammableStageDescriptor {
     NextInChain<WGPUChainedStruct const> nextInChain{};
     wgpu::ShaderModule module{};
     wgpu::StringView entryPoint{};
-    std::vector<wgpu::ConstantEntry> constants{};
+    SmallVec<wgpu::ConstantEntry> constants{};
 };
 struct RenderPassColorAttachment {
     struct CStruct : public WGPURenderPassColorAttachment {
@@ -4243,7 +4417,7 @@ struct TextureDescriptor {
     wgpu::TextureFormat format{};
     uint32_t mipLevelCount{};
     uint32_t sampleCount{};
-    std::vector<wgpu::TextureFormat> viewFormats{};
+    SmallVec<wgpu::TextureFormat> viewFormats{};
 };
 struct VertexBufferLayout {
     struct CStruct : public WGPUVertexBufferLayout {
@@ -4261,7 +4435,7 @@ struct VertexBufferLayout {
     VertexBufferLayout&& setAttributes(T&& values) &&;
     wgpu::VertexStepMode stepMode{};
     uint64_t arrayStride{};
-    std::vector<wgpu::VertexAttribute> attributes{};
+    SmallVec<wgpu::VertexAttribute> attributes{};
 };
 struct BindGroupLayoutDescriptor {
     struct CStruct : public WGPUBindGroupLayoutDescriptor {
@@ -4284,7 +4458,7 @@ struct BindGroupLayoutDescriptor {
     BindGroupLayoutDescriptor&& setEntries(T&& values) &&;
     NextInChain<WGPUChainedStruct const> nextInChain{};
     wgpu::StringView label{};
-    std::vector<wgpu::BindGroupLayoutEntry> entries{};
+    SmallVec<wgpu::BindGroupLayoutEntry> entries{};
 };
 struct ColorTargetState {
     struct CStruct : public WGPUColorTargetState {
@@ -4366,7 +4540,7 @@ struct RenderPassDescriptor {
     RenderPassDescriptor&& setTimestampWrites(wgpu::RenderPassTimestampWrites&& value) &&;
     NextInChain<WGPUChainedStruct const> nextInChain{};
     wgpu::StringView label{};
-    std::vector<wgpu::RenderPassColorAttachment> colorAttachments{};
+    SmallVec<wgpu::RenderPassColorAttachment> colorAttachments{};
     std::optional<wgpu::RenderPassDepthStencilAttachment> depthStencilAttachment{};
     wgpu::QuerySet occlusionQuerySet{};
     std::optional<wgpu::RenderPassTimestampWrites> timestampWrites{};
@@ -4400,8 +4574,8 @@ struct VertexState {
     NextInChain<WGPUChainedStruct const> nextInChain{};
     wgpu::ShaderModule module{};
     wgpu::StringView entryPoint{};
-    std::vector<wgpu::ConstantEntry> constants{};
-    std::vector<wgpu::VertexBufferLayout> buffers{};
+    SmallVec<wgpu::ConstantEntry> constants{};
+    SmallVec<wgpu::VertexBufferLayout> buffers{};
 };
 struct FragmentState {
     struct CStruct : public WGPUFragmentState {
@@ -4432,8 +4606,8 @@ struct FragmentState {
     NextInChain<WGPUChainedStruct const> nextInChain{};
     wgpu::ShaderModule module{};
     wgpu::StringView entryPoint{};
-    std::vector<wgpu::ConstantEntry> constants{};
-    std::vector<wgpu::ColorTargetState> targets{};
+    SmallVec<wgpu::ConstantEntry> constants{};
+    SmallVec<wgpu::ColorTargetState> targets{};
 };
 struct RenderPipelineDescriptor {
     struct CStruct : public WGPURenderPipelineDescriptor {
@@ -4583,7 +4757,7 @@ struct PipelineLayoutExtras {
     template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::PushConstantRange>
     PipelineLayoutExtras&& setPushConstantRanges(T&& values) &&;
     wgpu::ChainedStruct chain{};
-    std::vector<wgpu::PushConstantRange> pushConstantRanges{};
+    SmallVec<wgpu::PushConstantRange> pushConstantRanges{};
 };
 struct ShaderDefine {
     struct CStruct : public WGPUShaderDefine {
@@ -4625,7 +4799,7 @@ struct ShaderModuleGLSLDescriptor {
     wgpu::ChainedStruct chain{};
     wgpu::ShaderStage stage{};
     wgpu::StringView code{};
-    mutable std::vector<wgpu::ShaderDefine> defines{};
+    mutable SmallVec<wgpu::ShaderDefine> defines{};
 };
 struct ShaderModuleDescriptorSpirV {
     struct CStruct : public WGPUShaderModuleDescriptorSpirV {
@@ -4811,9 +4985,9 @@ struct BindGroupEntryExtras {
     template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::TextureView>
     BindGroupEntryExtras&& setTextureViews(T&& values) &&;
     wgpu::ChainedStruct chain{};
-    std::vector<wgpu::Buffer> buffers{};
-    std::vector<wgpu::Sampler> samplers{};
-    std::vector<wgpu::TextureView> textureViews{};
+    SmallVec<wgpu::Buffer> buffers{};
+    SmallVec<wgpu::Sampler> samplers{};
+    SmallVec<wgpu::TextureView> textureViews{};
 };
 struct BindGroupLayoutEntryExtras {
     struct CStruct : public WGPUBindGroupLayoutEntryExtras {
@@ -4845,7 +5019,7 @@ struct QuerySetDescriptorExtras {
     template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::PipelineStatisticName>
     QuerySetDescriptorExtras&& setPipelineStatistics(T&& values) &&;
     wgpu::ChainedStruct chain{};
-    std::vector<wgpu::PipelineStatisticName> pipelineStatistics{};
+    SmallVec<wgpu::PipelineStatisticName> pipelineStatistics{};
 };
 struct SurfaceConfigurationExtras {
     struct CStruct : public WGPUSurfaceConfigurationExtras {
@@ -5117,12 +5291,12 @@ PipelineLayoutDescriptor&& PipelineLayoutDescriptor::setNextInChain(T&& value) &
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::BindGroupLayout>
 PipelineLayoutDescriptor& PipelineLayoutDescriptor::setBindGroupLayouts(T&& values) & {
-    this->bindGroupLayouts = values | std::views::transform([](auto&& e) { return static_cast<wgpu::BindGroupLayout>(e); }) | std::ranges::to<std::vector<wgpu::BindGroupLayout>>();
+    this->bindGroupLayouts = values | std::views::transform([](auto&& e) { return static_cast<wgpu::BindGroupLayout>(e); }) | std::ranges::to<SmallVec<wgpu::BindGroupLayout>>();
     return *this;
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::BindGroupLayout>
 PipelineLayoutDescriptor&& PipelineLayoutDescriptor::setBindGroupLayouts(T&& values) && {
-    this->bindGroupLayouts = values | std::views::transform([](auto&& e) { return static_cast<wgpu::BindGroupLayout>(e); }) | std::ranges::to<std::vector<wgpu::BindGroupLayout>>();
+    this->bindGroupLayouts = values | std::views::transform([](auto&& e) { return static_cast<wgpu::BindGroupLayout>(e); }) | std::ranges::to<SmallVec<wgpu::BindGroupLayout>>();
     return std::move(*this);
 }
 template <typename T>
@@ -5177,12 +5351,12 @@ RenderBundleEncoderDescriptor&& RenderBundleEncoderDescriptor::setNextInChain(T&
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::TextureFormat>
 RenderBundleEncoderDescriptor& RenderBundleEncoderDescriptor::setColorFormats(T&& values) & {
-    this->colorFormats = values | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureFormat>(e); }) | std::ranges::to<std::vector<wgpu::TextureFormat>>();
+    this->colorFormats = values | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureFormat>(e); }) | std::ranges::to<SmallVec<wgpu::TextureFormat>>();
     return *this;
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::TextureFormat>
 RenderBundleEncoderDescriptor&& RenderBundleEncoderDescriptor::setColorFormats(T&& values) && {
-    this->colorFormats = values | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureFormat>(e); }) | std::ranges::to<std::vector<wgpu::TextureFormat>>();
+    this->colorFormats = values | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureFormat>(e); }) | std::ranges::to<SmallVec<wgpu::TextureFormat>>();
     return std::move(*this);
 }
 template <typename T>
@@ -5267,22 +5441,22 @@ StorageTextureBindingLayout&& StorageTextureBindingLayout::setNextInChain(T&& va
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::FeatureName>
 SupportedFeatures& SupportedFeatures::setFeatures(T&& values) & {
-    this->features = values | std::views::transform([](auto&& e) { return static_cast<wgpu::FeatureName>(e); }) | std::ranges::to<std::vector<wgpu::FeatureName>>();
+    this->features = values | std::views::transform([](auto&& e) { return static_cast<wgpu::FeatureName>(e); }) | std::ranges::to<SmallVec<wgpu::FeatureName>>();
     return *this;
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::FeatureName>
 SupportedFeatures&& SupportedFeatures::setFeatures(T&& values) && {
-    this->features = values | std::views::transform([](auto&& e) { return static_cast<wgpu::FeatureName>(e); }) | std::ranges::to<std::vector<wgpu::FeatureName>>();
+    this->features = values | std::views::transform([](auto&& e) { return static_cast<wgpu::FeatureName>(e); }) | std::ranges::to<SmallVec<wgpu::FeatureName>>();
     return std::move(*this);
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::WGSLLanguageFeatureName>
 SupportedWGSLLanguageFeatures& SupportedWGSLLanguageFeatures::setFeatures(T&& values) & {
-    this->features = values | std::views::transform([](auto&& e) { return static_cast<wgpu::WGSLLanguageFeatureName>(e); }) | std::ranges::to<std::vector<wgpu::WGSLLanguageFeatureName>>();
+    this->features = values | std::views::transform([](auto&& e) { return static_cast<wgpu::WGSLLanguageFeatureName>(e); }) | std::ranges::to<SmallVec<wgpu::WGSLLanguageFeatureName>>();
     return *this;
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::WGSLLanguageFeatureName>
 SupportedWGSLLanguageFeatures&& SupportedWGSLLanguageFeatures::setFeatures(T&& values) && {
-    this->features = values | std::views::transform([](auto&& e) { return static_cast<wgpu::WGSLLanguageFeatureName>(e); }) | std::ranges::to<std::vector<wgpu::WGSLLanguageFeatureName>>();
+    this->features = values | std::views::transform([](auto&& e) { return static_cast<wgpu::WGSLLanguageFeatureName>(e); }) | std::ranges::to<SmallVec<wgpu::WGSLLanguageFeatureName>>();
     return std::move(*this);
 }
 template <typename T>
@@ -5297,32 +5471,32 @@ SurfaceCapabilities&& SurfaceCapabilities::setNextInChain(T&& value) && {
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::TextureFormat>
 SurfaceCapabilities& SurfaceCapabilities::setFormats(T&& values) & {
-    this->formats = values | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureFormat>(e); }) | std::ranges::to<std::vector<wgpu::TextureFormat>>();
+    this->formats = values | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureFormat>(e); }) | std::ranges::to<SmallVec<wgpu::TextureFormat>>();
     return *this;
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::TextureFormat>
 SurfaceCapabilities&& SurfaceCapabilities::setFormats(T&& values) && {
-    this->formats = values | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureFormat>(e); }) | std::ranges::to<std::vector<wgpu::TextureFormat>>();
+    this->formats = values | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureFormat>(e); }) | std::ranges::to<SmallVec<wgpu::TextureFormat>>();
     return std::move(*this);
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::PresentMode>
 SurfaceCapabilities& SurfaceCapabilities::setPresentModes(T&& values) & {
-    this->presentModes = values | std::views::transform([](auto&& e) { return static_cast<wgpu::PresentMode>(e); }) | std::ranges::to<std::vector<wgpu::PresentMode>>();
+    this->presentModes = values | std::views::transform([](auto&& e) { return static_cast<wgpu::PresentMode>(e); }) | std::ranges::to<SmallVec<wgpu::PresentMode>>();
     return *this;
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::PresentMode>
 SurfaceCapabilities&& SurfaceCapabilities::setPresentModes(T&& values) && {
-    this->presentModes = values | std::views::transform([](auto&& e) { return static_cast<wgpu::PresentMode>(e); }) | std::ranges::to<std::vector<wgpu::PresentMode>>();
+    this->presentModes = values | std::views::transform([](auto&& e) { return static_cast<wgpu::PresentMode>(e); }) | std::ranges::to<SmallVec<wgpu::PresentMode>>();
     return std::move(*this);
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::CompositeAlphaMode>
 SurfaceCapabilities& SurfaceCapabilities::setAlphaModes(T&& values) & {
-    this->alphaModes = values | std::views::transform([](auto&& e) { return static_cast<wgpu::CompositeAlphaMode>(e); }) | std::ranges::to<std::vector<wgpu::CompositeAlphaMode>>();
+    this->alphaModes = values | std::views::transform([](auto&& e) { return static_cast<wgpu::CompositeAlphaMode>(e); }) | std::ranges::to<SmallVec<wgpu::CompositeAlphaMode>>();
     return *this;
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::CompositeAlphaMode>
 SurfaceCapabilities&& SurfaceCapabilities::setAlphaModes(T&& values) && {
-    this->alphaModes = values | std::views::transform([](auto&& e) { return static_cast<wgpu::CompositeAlphaMode>(e); }) | std::ranges::to<std::vector<wgpu::CompositeAlphaMode>>();
+    this->alphaModes = values | std::views::transform([](auto&& e) { return static_cast<wgpu::CompositeAlphaMode>(e); }) | std::ranges::to<SmallVec<wgpu::CompositeAlphaMode>>();
     return std::move(*this);
 }
 template <typename T>
@@ -5337,12 +5511,12 @@ SurfaceConfiguration&& SurfaceConfiguration::setNextInChain(T&& value) && {
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::TextureFormat>
 SurfaceConfiguration& SurfaceConfiguration::setViewFormats(T&& values) & {
-    this->viewFormats = values | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureFormat>(e); }) | std::ranges::to<std::vector<wgpu::TextureFormat>>();
+    this->viewFormats = values | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureFormat>(e); }) | std::ranges::to<SmallVec<wgpu::TextureFormat>>();
     return *this;
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::TextureFormat>
 SurfaceConfiguration&& SurfaceConfiguration::setViewFormats(T&& values) && {
-    this->viewFormats = values | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureFormat>(e); }) | std::ranges::to<std::vector<wgpu::TextureFormat>>();
+    this->viewFormats = values | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureFormat>(e); }) | std::ranges::to<SmallVec<wgpu::TextureFormat>>();
     return std::move(*this);
 }
 template <typename T>
@@ -5457,12 +5631,12 @@ BindGroupDescriptor&& BindGroupDescriptor::setNextInChain(T&& value) && {
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::BindGroupEntry>
 BindGroupDescriptor& BindGroupDescriptor::setEntries(T&& values) & {
-    this->entries = values | std::views::transform([](auto&& e) { return static_cast<wgpu::BindGroupEntry>(e); }) | std::ranges::to<std::vector<wgpu::BindGroupEntry>>();
+    this->entries = values | std::views::transform([](auto&& e) { return static_cast<wgpu::BindGroupEntry>(e); }) | std::ranges::to<SmallVec<wgpu::BindGroupEntry>>();
     return *this;
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::BindGroupEntry>
 BindGroupDescriptor&& BindGroupDescriptor::setEntries(T&& values) && {
-    this->entries = values | std::views::transform([](auto&& e) { return static_cast<wgpu::BindGroupEntry>(e); }) | std::ranges::to<std::vector<wgpu::BindGroupEntry>>();
+    this->entries = values | std::views::transform([](auto&& e) { return static_cast<wgpu::BindGroupEntry>(e); }) | std::ranges::to<SmallVec<wgpu::BindGroupEntry>>();
     return std::move(*this);
 }
 template <typename T>
@@ -5487,12 +5661,12 @@ CompilationInfo&& CompilationInfo::setNextInChain(T&& value) && {
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::CompilationMessage>
 CompilationInfo& CompilationInfo::setMessages(T&& values) & {
-    this->messages = values | std::views::transform([](auto&& e) { return static_cast<wgpu::CompilationMessage>(e); }) | std::ranges::to<std::vector<wgpu::CompilationMessage>>();
+    this->messages = values | std::views::transform([](auto&& e) { return static_cast<wgpu::CompilationMessage>(e); }) | std::ranges::to<SmallVec<wgpu::CompilationMessage>>();
     return *this;
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::CompilationMessage>
 CompilationInfo&& CompilationInfo::setMessages(T&& values) && {
-    this->messages = values | std::views::transform([](auto&& e) { return static_cast<wgpu::CompilationMessage>(e); }) | std::ranges::to<std::vector<wgpu::CompilationMessage>>();
+    this->messages = values | std::views::transform([](auto&& e) { return static_cast<wgpu::CompilationMessage>(e); }) | std::ranges::to<SmallVec<wgpu::CompilationMessage>>();
     return std::move(*this);
 }
 template <typename T>
@@ -5527,12 +5701,12 @@ DeviceDescriptor&& DeviceDescriptor::setNextInChain(T&& value) && {
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::FeatureName>
 DeviceDescriptor& DeviceDescriptor::setRequiredFeatures(T&& values) & {
-    this->requiredFeatures = values | std::views::transform([](auto&& e) { return static_cast<wgpu::FeatureName>(e); }) | std::ranges::to<std::vector<wgpu::FeatureName>>();
+    this->requiredFeatures = values | std::views::transform([](auto&& e) { return static_cast<wgpu::FeatureName>(e); }) | std::ranges::to<SmallVec<wgpu::FeatureName>>();
     return *this;
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::FeatureName>
 DeviceDescriptor&& DeviceDescriptor::setRequiredFeatures(T&& values) && {
-    this->requiredFeatures = values | std::views::transform([](auto&& e) { return static_cast<wgpu::FeatureName>(e); }) | std::ranges::to<std::vector<wgpu::FeatureName>>();
+    this->requiredFeatures = values | std::views::transform([](auto&& e) { return static_cast<wgpu::FeatureName>(e); }) | std::ranges::to<SmallVec<wgpu::FeatureName>>();
     return std::move(*this);
 }
 template <typename T>
@@ -5557,12 +5731,12 @@ ProgrammableStageDescriptor&& ProgrammableStageDescriptor::setNextInChain(T&& va
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::ConstantEntry>
 ProgrammableStageDescriptor& ProgrammableStageDescriptor::setConstants(T&& values) & {
-    this->constants = values | std::views::transform([](auto&& e) { return static_cast<wgpu::ConstantEntry>(e); }) | std::ranges::to<std::vector<wgpu::ConstantEntry>>();
+    this->constants = values | std::views::transform([](auto&& e) { return static_cast<wgpu::ConstantEntry>(e); }) | std::ranges::to<SmallVec<wgpu::ConstantEntry>>();
     return *this;
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::ConstantEntry>
 ProgrammableStageDescriptor&& ProgrammableStageDescriptor::setConstants(T&& values) && {
-    this->constants = values | std::views::transform([](auto&& e) { return static_cast<wgpu::ConstantEntry>(e); }) | std::ranges::to<std::vector<wgpu::ConstantEntry>>();
+    this->constants = values | std::views::transform([](auto&& e) { return static_cast<wgpu::ConstantEntry>(e); }) | std::ranges::to<SmallVec<wgpu::ConstantEntry>>();
     return std::move(*this);
 }
 template <typename T>
@@ -5587,22 +5761,22 @@ TextureDescriptor&& TextureDescriptor::setNextInChain(T&& value) && {
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::TextureFormat>
 TextureDescriptor& TextureDescriptor::setViewFormats(T&& values) & {
-    this->viewFormats = values | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureFormat>(e); }) | std::ranges::to<std::vector<wgpu::TextureFormat>>();
+    this->viewFormats = values | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureFormat>(e); }) | std::ranges::to<SmallVec<wgpu::TextureFormat>>();
     return *this;
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::TextureFormat>
 TextureDescriptor&& TextureDescriptor::setViewFormats(T&& values) && {
-    this->viewFormats = values | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureFormat>(e); }) | std::ranges::to<std::vector<wgpu::TextureFormat>>();
+    this->viewFormats = values | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureFormat>(e); }) | std::ranges::to<SmallVec<wgpu::TextureFormat>>();
     return std::move(*this);
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::VertexAttribute>
 VertexBufferLayout& VertexBufferLayout::setAttributes(T&& values) & {
-    this->attributes = values | std::views::transform([](auto&& e) { return static_cast<wgpu::VertexAttribute>(e); }) | std::ranges::to<std::vector<wgpu::VertexAttribute>>();
+    this->attributes = values | std::views::transform([](auto&& e) { return static_cast<wgpu::VertexAttribute>(e); }) | std::ranges::to<SmallVec<wgpu::VertexAttribute>>();
     return *this;
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::VertexAttribute>
 VertexBufferLayout&& VertexBufferLayout::setAttributes(T&& values) && {
-    this->attributes = values | std::views::transform([](auto&& e) { return static_cast<wgpu::VertexAttribute>(e); }) | std::ranges::to<std::vector<wgpu::VertexAttribute>>();
+    this->attributes = values | std::views::transform([](auto&& e) { return static_cast<wgpu::VertexAttribute>(e); }) | std::ranges::to<SmallVec<wgpu::VertexAttribute>>();
     return std::move(*this);
 }
 template <typename T>
@@ -5617,12 +5791,12 @@ BindGroupLayoutDescriptor&& BindGroupLayoutDescriptor::setNextInChain(T&& value)
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::BindGroupLayoutEntry>
 BindGroupLayoutDescriptor& BindGroupLayoutDescriptor::setEntries(T&& values) & {
-    this->entries = values | std::views::transform([](auto&& e) { return static_cast<wgpu::BindGroupLayoutEntry>(e); }) | std::ranges::to<std::vector<wgpu::BindGroupLayoutEntry>>();
+    this->entries = values | std::views::transform([](auto&& e) { return static_cast<wgpu::BindGroupLayoutEntry>(e); }) | std::ranges::to<SmallVec<wgpu::BindGroupLayoutEntry>>();
     return *this;
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::BindGroupLayoutEntry>
 BindGroupLayoutDescriptor&& BindGroupLayoutDescriptor::setEntries(T&& values) && {
-    this->entries = values | std::views::transform([](auto&& e) { return static_cast<wgpu::BindGroupLayoutEntry>(e); }) | std::ranges::to<std::vector<wgpu::BindGroupLayoutEntry>>();
+    this->entries = values | std::views::transform([](auto&& e) { return static_cast<wgpu::BindGroupLayoutEntry>(e); }) | std::ranges::to<SmallVec<wgpu::BindGroupLayoutEntry>>();
     return std::move(*this);
 }
 template <typename T>
@@ -5657,12 +5831,12 @@ RenderPassDescriptor&& RenderPassDescriptor::setNextInChain(T&& value) && {
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::RenderPassColorAttachment>
 RenderPassDescriptor& RenderPassDescriptor::setColorAttachments(T&& values) & {
-    this->colorAttachments = values | std::views::transform([](auto&& e) { return static_cast<wgpu::RenderPassColorAttachment>(e); }) | std::ranges::to<std::vector<wgpu::RenderPassColorAttachment>>();
+    this->colorAttachments = values | std::views::transform([](auto&& e) { return static_cast<wgpu::RenderPassColorAttachment>(e); }) | std::ranges::to<SmallVec<wgpu::RenderPassColorAttachment>>();
     return *this;
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::RenderPassColorAttachment>
 RenderPassDescriptor&& RenderPassDescriptor::setColorAttachments(T&& values) && {
-    this->colorAttachments = values | std::views::transform([](auto&& e) { return static_cast<wgpu::RenderPassColorAttachment>(e); }) | std::ranges::to<std::vector<wgpu::RenderPassColorAttachment>>();
+    this->colorAttachments = values | std::views::transform([](auto&& e) { return static_cast<wgpu::RenderPassColorAttachment>(e); }) | std::ranges::to<SmallVec<wgpu::RenderPassColorAttachment>>();
     return std::move(*this);
 }
 template <typename T>
@@ -5677,22 +5851,22 @@ VertexState&& VertexState::setNextInChain(T&& value) && {
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::ConstantEntry>
 VertexState& VertexState::setConstants(T&& values) & {
-    this->constants = values | std::views::transform([](auto&& e) { return static_cast<wgpu::ConstantEntry>(e); }) | std::ranges::to<std::vector<wgpu::ConstantEntry>>();
+    this->constants = values | std::views::transform([](auto&& e) { return static_cast<wgpu::ConstantEntry>(e); }) | std::ranges::to<SmallVec<wgpu::ConstantEntry>>();
     return *this;
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::ConstantEntry>
 VertexState&& VertexState::setConstants(T&& values) && {
-    this->constants = values | std::views::transform([](auto&& e) { return static_cast<wgpu::ConstantEntry>(e); }) | std::ranges::to<std::vector<wgpu::ConstantEntry>>();
+    this->constants = values | std::views::transform([](auto&& e) { return static_cast<wgpu::ConstantEntry>(e); }) | std::ranges::to<SmallVec<wgpu::ConstantEntry>>();
     return std::move(*this);
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::VertexBufferLayout>
 VertexState& VertexState::setBuffers(T&& values) & {
-    this->buffers = values | std::views::transform([](auto&& e) { return static_cast<wgpu::VertexBufferLayout>(e); }) | std::ranges::to<std::vector<wgpu::VertexBufferLayout>>();
+    this->buffers = values | std::views::transform([](auto&& e) { return static_cast<wgpu::VertexBufferLayout>(e); }) | std::ranges::to<SmallVec<wgpu::VertexBufferLayout>>();
     return *this;
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::VertexBufferLayout>
 VertexState&& VertexState::setBuffers(T&& values) && {
-    this->buffers = values | std::views::transform([](auto&& e) { return static_cast<wgpu::VertexBufferLayout>(e); }) | std::ranges::to<std::vector<wgpu::VertexBufferLayout>>();
+    this->buffers = values | std::views::transform([](auto&& e) { return static_cast<wgpu::VertexBufferLayout>(e); }) | std::ranges::to<SmallVec<wgpu::VertexBufferLayout>>();
     return std::move(*this);
 }
 template <typename T>
@@ -5707,22 +5881,22 @@ FragmentState&& FragmentState::setNextInChain(T&& value) && {
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::ConstantEntry>
 FragmentState& FragmentState::setConstants(T&& values) & {
-    this->constants = values | std::views::transform([](auto&& e) { return static_cast<wgpu::ConstantEntry>(e); }) | std::ranges::to<std::vector<wgpu::ConstantEntry>>();
+    this->constants = values | std::views::transform([](auto&& e) { return static_cast<wgpu::ConstantEntry>(e); }) | std::ranges::to<SmallVec<wgpu::ConstantEntry>>();
     return *this;
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::ConstantEntry>
 FragmentState&& FragmentState::setConstants(T&& values) && {
-    this->constants = values | std::views::transform([](auto&& e) { return static_cast<wgpu::ConstantEntry>(e); }) | std::ranges::to<std::vector<wgpu::ConstantEntry>>();
+    this->constants = values | std::views::transform([](auto&& e) { return static_cast<wgpu::ConstantEntry>(e); }) | std::ranges::to<SmallVec<wgpu::ConstantEntry>>();
     return std::move(*this);
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::ColorTargetState>
 FragmentState& FragmentState::setTargets(T&& values) & {
-    this->targets = values | std::views::transform([](auto&& e) { return static_cast<wgpu::ColorTargetState>(e); }) | std::ranges::to<std::vector<wgpu::ColorTargetState>>();
+    this->targets = values | std::views::transform([](auto&& e) { return static_cast<wgpu::ColorTargetState>(e); }) | std::ranges::to<SmallVec<wgpu::ColorTargetState>>();
     return *this;
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::ColorTargetState>
 FragmentState&& FragmentState::setTargets(T&& values) && {
-    this->targets = values | std::views::transform([](auto&& e) { return static_cast<wgpu::ColorTargetState>(e); }) | std::ranges::to<std::vector<wgpu::ColorTargetState>>();
+    this->targets = values | std::views::transform([](auto&& e) { return static_cast<wgpu::ColorTargetState>(e); }) | std::ranges::to<SmallVec<wgpu::ColorTargetState>>();
     return std::move(*this);
 }
 template <typename T>
@@ -5767,12 +5941,12 @@ PipelineLayoutExtras&& PipelineLayoutExtras::setNext(T&& value) && {
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::PushConstantRange>
 PipelineLayoutExtras& PipelineLayoutExtras::setPushConstantRanges(T&& values) & {
-    this->pushConstantRanges = values | std::views::transform([](auto&& e) { return static_cast<wgpu::PushConstantRange>(e); }) | std::ranges::to<std::vector<wgpu::PushConstantRange>>();
+    this->pushConstantRanges = values | std::views::transform([](auto&& e) { return static_cast<wgpu::PushConstantRange>(e); }) | std::ranges::to<SmallVec<wgpu::PushConstantRange>>();
     return *this;
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::PushConstantRange>
 PipelineLayoutExtras&& PipelineLayoutExtras::setPushConstantRanges(T&& values) && {
-    this->pushConstantRanges = values | std::views::transform([](auto&& e) { return static_cast<wgpu::PushConstantRange>(e); }) | std::ranges::to<std::vector<wgpu::PushConstantRange>>();
+    this->pushConstantRanges = values | std::views::transform([](auto&& e) { return static_cast<wgpu::PushConstantRange>(e); }) | std::ranges::to<SmallVec<wgpu::PushConstantRange>>();
     return std::move(*this);
 }
 template <typename T>
@@ -5787,12 +5961,12 @@ ShaderModuleGLSLDescriptor&& ShaderModuleGLSLDescriptor::setNext(T&& value) && {
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::ShaderDefine>
 ShaderModuleGLSLDescriptor& ShaderModuleGLSLDescriptor::setDefines(T&& values) & {
-    this->defines = values | std::views::transform([](auto&& e) { return static_cast<wgpu::ShaderDefine>(e); }) | std::ranges::to<std::vector<wgpu::ShaderDefine>>();
+    this->defines = values | std::views::transform([](auto&& e) { return static_cast<wgpu::ShaderDefine>(e); }) | std::ranges::to<SmallVec<wgpu::ShaderDefine>>();
     return *this;
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::ShaderDefine>
 ShaderModuleGLSLDescriptor&& ShaderModuleGLSLDescriptor::setDefines(T&& values) && {
-    this->defines = values | std::views::transform([](auto&& e) { return static_cast<wgpu::ShaderDefine>(e); }) | std::ranges::to<std::vector<wgpu::ShaderDefine>>();
+    this->defines = values | std::views::transform([](auto&& e) { return static_cast<wgpu::ShaderDefine>(e); }) | std::ranges::to<SmallVec<wgpu::ShaderDefine>>();
     return std::move(*this);
 }
 template <typename T>
@@ -5817,32 +5991,32 @@ BindGroupEntryExtras&& BindGroupEntryExtras::setNext(T&& value) && {
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::Buffer>
 BindGroupEntryExtras& BindGroupEntryExtras::setBuffers(T&& values) & {
-    this->buffers = values | std::views::transform([](auto&& e) { return static_cast<wgpu::Buffer>(e); }) | std::ranges::to<std::vector<wgpu::Buffer>>();
+    this->buffers = values | std::views::transform([](auto&& e) { return static_cast<wgpu::Buffer>(e); }) | std::ranges::to<SmallVec<wgpu::Buffer>>();
     return *this;
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::Buffer>
 BindGroupEntryExtras&& BindGroupEntryExtras::setBuffers(T&& values) && {
-    this->buffers = values | std::views::transform([](auto&& e) { return static_cast<wgpu::Buffer>(e); }) | std::ranges::to<std::vector<wgpu::Buffer>>();
+    this->buffers = values | std::views::transform([](auto&& e) { return static_cast<wgpu::Buffer>(e); }) | std::ranges::to<SmallVec<wgpu::Buffer>>();
     return std::move(*this);
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::Sampler>
 BindGroupEntryExtras& BindGroupEntryExtras::setSamplers(T&& values) & {
-    this->samplers = values | std::views::transform([](auto&& e) { return static_cast<wgpu::Sampler>(e); }) | std::ranges::to<std::vector<wgpu::Sampler>>();
+    this->samplers = values | std::views::transform([](auto&& e) { return static_cast<wgpu::Sampler>(e); }) | std::ranges::to<SmallVec<wgpu::Sampler>>();
     return *this;
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::Sampler>
 BindGroupEntryExtras&& BindGroupEntryExtras::setSamplers(T&& values) && {
-    this->samplers = values | std::views::transform([](auto&& e) { return static_cast<wgpu::Sampler>(e); }) | std::ranges::to<std::vector<wgpu::Sampler>>();
+    this->samplers = values | std::views::transform([](auto&& e) { return static_cast<wgpu::Sampler>(e); }) | std::ranges::to<SmallVec<wgpu::Sampler>>();
     return std::move(*this);
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::TextureView>
 BindGroupEntryExtras& BindGroupEntryExtras::setTextureViews(T&& values) & {
-    this->textureViews = values | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureView>(e); }) | std::ranges::to<std::vector<wgpu::TextureView>>();
+    this->textureViews = values | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureView>(e); }) | std::ranges::to<SmallVec<wgpu::TextureView>>();
     return *this;
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::TextureView>
 BindGroupEntryExtras&& BindGroupEntryExtras::setTextureViews(T&& values) && {
-    this->textureViews = values | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureView>(e); }) | std::ranges::to<std::vector<wgpu::TextureView>>();
+    this->textureViews = values | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureView>(e); }) | std::ranges::to<SmallVec<wgpu::TextureView>>();
     return std::move(*this);
 }
 template <typename T>
@@ -5867,12 +6041,12 @@ QuerySetDescriptorExtras&& QuerySetDescriptorExtras::setNext(T&& value) && {
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::PipelineStatisticName>
 QuerySetDescriptorExtras& QuerySetDescriptorExtras::setPipelineStatistics(T&& values) & {
-    this->pipelineStatistics = values | std::views::transform([](auto&& e) { return static_cast<wgpu::PipelineStatisticName>(e); }) | std::ranges::to<std::vector<wgpu::PipelineStatisticName>>();
+    this->pipelineStatistics = values | std::views::transform([](auto&& e) { return static_cast<wgpu::PipelineStatisticName>(e); }) | std::ranges::to<SmallVec<wgpu::PipelineStatisticName>>();
     return *this;
 }
 template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::PipelineStatisticName>
 QuerySetDescriptorExtras&& QuerySetDescriptorExtras::setPipelineStatistics(T&& values) && {
-    this->pipelineStatistics = values | std::views::transform([](auto&& e) { return static_cast<wgpu::PipelineStatisticName>(e); }) | std::ranges::to<std::vector<wgpu::PipelineStatisticName>>();
+    this->pipelineStatistics = values | std::views::transform([](auto&& e) { return static_cast<wgpu::PipelineStatisticName>(e); }) | std::ranges::to<SmallVec<wgpu::PipelineStatisticName>>();
     return std::move(*this);
 }
 template <typename T>
@@ -8345,7 +8519,7 @@ Origin3D&& Origin3D::setZ(uint32_t value) && {
 PipelineLayoutDescriptor::PipelineLayoutDescriptor(const WGPUPipelineLayoutDescriptor& native) {
     this->nextInChain.setNext(native.nextInChain);
     this->label = static_cast<wgpu::StringView>(native.label);
-    this->bindGroupLayouts = std::span(native.bindGroupLayouts, native.bindGroupLayoutCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::BindGroupLayout>(e); }) | std::ranges::to<std::vector<wgpu::BindGroupLayout>>();
+    this->bindGroupLayouts = std::span(native.bindGroupLayouts, native.bindGroupLayoutCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::BindGroupLayout>(e); }) | std::ranges::to<SmallVec<wgpu::BindGroupLayout>>();
 }
 PipelineLayoutDescriptor::CStruct PipelineLayoutDescriptor::to_cstruct() const {
     CStruct cstruct;
@@ -8530,7 +8704,7 @@ RenderBundleDescriptor&& RenderBundleDescriptor::setLabel(wgpu::StringView&& val
 RenderBundleEncoderDescriptor::RenderBundleEncoderDescriptor(const WGPURenderBundleEncoderDescriptor& native) {
     this->nextInChain.setNext(native.nextInChain);
     this->label = static_cast<wgpu::StringView>(native.label);
-    this->colorFormats = std::span(native.colorFormats, native.colorFormatCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureFormat>(e); }) | std::ranges::to<std::vector<wgpu::TextureFormat>>();
+    this->colorFormats = std::span(native.colorFormats, native.colorFormatCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureFormat>(e); }) | std::ranges::to<SmallVec<wgpu::TextureFormat>>();
     this->depthStencilFormat = static_cast<wgpu::TextureFormat>(native.depthStencilFormat);
     this->sampleCount = static_cast<uint32_t>(native.sampleCount);
     this->depthReadOnly = static_cast<wgpu::Bool>(native.depthReadOnly);
@@ -9116,7 +9290,7 @@ StorageTextureBindingLayout&& StorageTextureBindingLayout::setViewDimension(wgpu
     return std::move(*this);
 }
 SupportedFeatures::SupportedFeatures(const WGPUSupportedFeatures& native) {
-    this->features = std::span(native.features, native.featureCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::FeatureName>(e); }) | std::ranges::to<std::vector<wgpu::FeatureName>>();
+    this->features = std::span(native.features, native.featureCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::FeatureName>(e); }) | std::ranges::to<SmallVec<wgpu::FeatureName>>();
 }
 SupportedFeatures::CStruct SupportedFeatures::to_cstruct() const {
     CStruct cstruct;
@@ -9125,7 +9299,7 @@ SupportedFeatures::CStruct SupportedFeatures::to_cstruct() const {
     return cstruct;
 }
 SupportedWGSLLanguageFeatures::SupportedWGSLLanguageFeatures(const WGPUSupportedWGSLLanguageFeatures& native) {
-    this->features = std::span(native.features, native.featureCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::WGSLLanguageFeatureName>(e); }) | std::ranges::to<std::vector<wgpu::WGSLLanguageFeatureName>>();
+    this->features = std::span(native.features, native.featureCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::WGSLLanguageFeatureName>(e); }) | std::ranges::to<SmallVec<wgpu::WGSLLanguageFeatureName>>();
 }
 SupportedWGSLLanguageFeatures::CStruct SupportedWGSLLanguageFeatures::to_cstruct() const {
     CStruct cstruct;
@@ -9136,9 +9310,9 @@ SupportedWGSLLanguageFeatures::CStruct SupportedWGSLLanguageFeatures::to_cstruct
 SurfaceCapabilities::SurfaceCapabilities(const WGPUSurfaceCapabilities& native) {
     this->nextInChain.setNext(native.nextInChain);
     this->usages = static_cast<wgpu::TextureUsage>(native.usages);
-    this->formats = std::span(native.formats, native.formatCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureFormat>(e); }) | std::ranges::to<std::vector<wgpu::TextureFormat>>();
-    this->presentModes = std::span(native.presentModes, native.presentModeCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::PresentMode>(e); }) | std::ranges::to<std::vector<wgpu::PresentMode>>();
-    this->alphaModes = std::span(native.alphaModes, native.alphaModeCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::CompositeAlphaMode>(e); }) | std::ranges::to<std::vector<wgpu::CompositeAlphaMode>>();
+    this->formats = std::span(native.formats, native.formatCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureFormat>(e); }) | std::ranges::to<SmallVec<wgpu::TextureFormat>>();
+    this->presentModes = std::span(native.presentModes, native.presentModeCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::PresentMode>(e); }) | std::ranges::to<SmallVec<wgpu::PresentMode>>();
+    this->alphaModes = std::span(native.alphaModes, native.alphaModeCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::CompositeAlphaMode>(e); }) | std::ranges::to<SmallVec<wgpu::CompositeAlphaMode>>();
 }
 SurfaceCapabilities::CStruct SurfaceCapabilities::to_cstruct() const {
     CStruct cstruct;
@@ -9168,7 +9342,7 @@ SurfaceConfiguration::SurfaceConfiguration(const WGPUSurfaceConfiguration& nativ
     this->usage = static_cast<wgpu::TextureUsage>(native.usage);
     this->width = static_cast<uint32_t>(native.width);
     this->height = static_cast<uint32_t>(native.height);
-    this->viewFormats = std::span(native.viewFormats, native.viewFormatCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureFormat>(e); }) | std::ranges::to<std::vector<wgpu::TextureFormat>>();
+    this->viewFormats = std::span(native.viewFormats, native.viewFormatCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureFormat>(e); }) | std::ranges::to<SmallVec<wgpu::TextureFormat>>();
     this->alphaMode = static_cast<wgpu::CompositeAlphaMode>(native.alphaMode);
     this->presentMode = static_cast<wgpu::PresentMode>(native.presentMode);
 }
@@ -9665,7 +9839,7 @@ BindGroupDescriptor::BindGroupDescriptor(const WGPUBindGroupDescriptor& native) 
     this->label = static_cast<wgpu::StringView>(native.label);
     this->layout = static_cast<wgpu::BindGroupLayout>(native.layout);
     if (this->layout) this->layout.addRef();
-    this->entries = std::span(native.entries, native.entryCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::BindGroupEntry>(e); }) | std::ranges::to<std::vector<wgpu::BindGroupEntry>>();
+    this->entries = std::span(native.entries, native.entryCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::BindGroupEntry>(e); }) | std::ranges::to<SmallVec<wgpu::BindGroupEntry>>();
 }
 BindGroupDescriptor::CStruct BindGroupDescriptor::to_cstruct() const {
     CStruct cstruct;
@@ -9845,7 +10019,7 @@ BlendState&& BlendState::setAlpha(wgpu::BlendComponent&& value) && {
 }
 CompilationInfo::CompilationInfo(const WGPUCompilationInfo& native) {
     this->nextInChain.setNext(native.nextInChain);
-    this->messages = std::span(native.messages, native.messageCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::CompilationMessage>(e); }) | std::ranges::to<std::vector<wgpu::CompilationMessage>>();
+    this->messages = std::span(native.messages, native.messageCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::CompilationMessage>(e); }) | std::ranges::to<SmallVec<wgpu::CompilationMessage>>();
 }
 CompilationInfo::CStruct CompilationInfo::to_cstruct() const {
     CStruct cstruct;
@@ -10034,7 +10208,7 @@ DepthStencilState&& DepthStencilState::setDepthBiasClamp(float value) && {
 DeviceDescriptor::DeviceDescriptor(const WGPUDeviceDescriptor& native) {
     this->nextInChain.setNext(native.nextInChain);
     this->label = static_cast<wgpu::StringView>(native.label);
-    this->requiredFeatures = std::span(native.requiredFeatures, native.requiredFeatureCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::FeatureName>(e); }) | std::ranges::to<std::vector<wgpu::FeatureName>>();
+    this->requiredFeatures = std::span(native.requiredFeatures, native.requiredFeatureCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::FeatureName>(e); }) | std::ranges::to<SmallVec<wgpu::FeatureName>>();
     if (native.requiredLimits != nullptr) {
         this->requiredLimits = static_cast<wgpu::Limits>(*(native.requiredLimits));
     } else {
@@ -10206,7 +10380,7 @@ ProgrammableStageDescriptor::ProgrammableStageDescriptor(const WGPUProgrammableS
     this->module = static_cast<wgpu::ShaderModule>(native.module);
     if (this->module) this->module.addRef();
     this->entryPoint = static_cast<wgpu::StringView>(native.entryPoint);
-    this->constants = std::span(native.constants, native.constantCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::ConstantEntry>(e); }) | std::ranges::to<std::vector<wgpu::ConstantEntry>>();
+    this->constants = std::span(native.constants, native.constantCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::ConstantEntry>(e); }) | std::ranges::to<SmallVec<wgpu::ConstantEntry>>();
 }
 ProgrammableStageDescriptor::CStruct ProgrammableStageDescriptor::to_cstruct() const {
     CStruct cstruct;
@@ -10419,7 +10593,7 @@ TextureDescriptor::TextureDescriptor(const WGPUTextureDescriptor& native) {
     this->format = static_cast<wgpu::TextureFormat>(native.format);
     this->mipLevelCount = static_cast<uint32_t>(native.mipLevelCount);
     this->sampleCount = static_cast<uint32_t>(native.sampleCount);
-    this->viewFormats = std::span(native.viewFormats, native.viewFormatCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureFormat>(e); }) | std::ranges::to<std::vector<wgpu::TextureFormat>>();
+    this->viewFormats = std::span(native.viewFormats, native.viewFormatCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureFormat>(e); }) | std::ranges::to<SmallVec<wgpu::TextureFormat>>();
 }
 TextureDescriptor::CStruct TextureDescriptor::to_cstruct() const {
     CStruct cstruct;
@@ -10510,7 +10684,7 @@ TextureDescriptor&& TextureDescriptor::setSampleCount(uint32_t value) && {
 VertexBufferLayout::VertexBufferLayout(const WGPUVertexBufferLayout& native) {
     this->stepMode = static_cast<wgpu::VertexStepMode>(native.stepMode);
     this->arrayStride = static_cast<uint64_t>(native.arrayStride);
-    this->attributes = std::span(native.attributes, native.attributeCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::VertexAttribute>(e); }) | std::ranges::to<std::vector<wgpu::VertexAttribute>>();
+    this->attributes = std::span(native.attributes, native.attributeCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::VertexAttribute>(e); }) | std::ranges::to<SmallVec<wgpu::VertexAttribute>>();
 }
 VertexBufferLayout::CStruct VertexBufferLayout::to_cstruct() const {
     CStruct cstruct;
@@ -10539,7 +10713,7 @@ VertexBufferLayout&& VertexBufferLayout::setArrayStride(uint64_t value) && {
 BindGroupLayoutDescriptor::BindGroupLayoutDescriptor(const WGPUBindGroupLayoutDescriptor& native) {
     this->nextInChain.setNext(native.nextInChain);
     this->label = static_cast<wgpu::StringView>(native.label);
-    this->entries = std::span(native.entries, native.entryCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::BindGroupLayoutEntry>(e); }) | std::ranges::to<std::vector<wgpu::BindGroupLayoutEntry>>();
+    this->entries = std::span(native.entries, native.entryCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::BindGroupLayoutEntry>(e); }) | std::ranges::to<SmallVec<wgpu::BindGroupLayoutEntry>>();
 }
 BindGroupLayoutDescriptor::CStruct BindGroupLayoutDescriptor::to_cstruct() const {
     CStruct cstruct;
@@ -10679,7 +10853,7 @@ ComputePipelineDescriptor&& ComputePipelineDescriptor::setCompute(wgpu::Programm
 RenderPassDescriptor::RenderPassDescriptor(const WGPURenderPassDescriptor& native) {
     this->nextInChain.setNext(native.nextInChain);
     this->label = static_cast<wgpu::StringView>(native.label);
-    this->colorAttachments = std::span(native.colorAttachments, native.colorAttachmentCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::RenderPassColorAttachment>(e); }) | std::ranges::to<std::vector<wgpu::RenderPassColorAttachment>>();
+    this->colorAttachments = std::span(native.colorAttachments, native.colorAttachmentCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::RenderPassColorAttachment>(e); }) | std::ranges::to<SmallVec<wgpu::RenderPassColorAttachment>>();
     if (native.depthStencilAttachment != nullptr) {
         this->depthStencilAttachment = static_cast<wgpu::RenderPassDepthStencilAttachment>(*(native.depthStencilAttachment));
     } else {
@@ -10774,8 +10948,8 @@ VertexState::VertexState(const WGPUVertexState& native) {
     this->module = static_cast<wgpu::ShaderModule>(native.module);
     if (this->module) this->module.addRef();
     this->entryPoint = static_cast<wgpu::StringView>(native.entryPoint);
-    this->constants = std::span(native.constants, native.constantCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::ConstantEntry>(e); }) | std::ranges::to<std::vector<wgpu::ConstantEntry>>();
-    this->buffers = std::span(native.buffers, native.bufferCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::VertexBufferLayout>(e); }) | std::ranges::to<std::vector<wgpu::VertexBufferLayout>>();
+    this->constants = std::span(native.constants, native.constantCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::ConstantEntry>(e); }) | std::ranges::to<SmallVec<wgpu::ConstantEntry>>();
+    this->buffers = std::span(native.buffers, native.bufferCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::VertexBufferLayout>(e); }) | std::ranges::to<SmallVec<wgpu::VertexBufferLayout>>();
 }
 VertexState::CStruct VertexState::to_cstruct() const {
     CStruct cstruct;
@@ -10819,8 +10993,8 @@ FragmentState::FragmentState(const WGPUFragmentState& native) {
     this->module = static_cast<wgpu::ShaderModule>(native.module);
     if (this->module) this->module.addRef();
     this->entryPoint = static_cast<wgpu::StringView>(native.entryPoint);
-    this->constants = std::span(native.constants, native.constantCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::ConstantEntry>(e); }) | std::ranges::to<std::vector<wgpu::ConstantEntry>>();
-    this->targets = std::span(native.targets, native.targetCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::ColorTargetState>(e); }) | std::ranges::to<std::vector<wgpu::ColorTargetState>>();
+    this->constants = std::span(native.constants, native.constantCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::ConstantEntry>(e); }) | std::ranges::to<SmallVec<wgpu::ConstantEntry>>();
+    this->targets = std::span(native.targets, native.targetCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::ColorTargetState>(e); }) | std::ranges::to<SmallVec<wgpu::ColorTargetState>>();
 }
 FragmentState::CStruct FragmentState::to_cstruct() const {
     CStruct cstruct;
@@ -11197,7 +11371,7 @@ PushConstantRange&& PushConstantRange::setEnd(uint32_t value) && {
 }
 PipelineLayoutExtras::PipelineLayoutExtras(const WGPUPipelineLayoutExtras& native) {
     this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
-    this->pushConstantRanges = std::span(native.pushConstantRanges, native.pushConstantRangeCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::PushConstantRange>(e); }) | std::ranges::to<std::vector<wgpu::PushConstantRange>>();
+    this->pushConstantRanges = std::span(native.pushConstantRanges, native.pushConstantRangeCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::PushConstantRange>(e); }) | std::ranges::to<SmallVec<wgpu::PushConstantRange>>();
 }
 PipelineLayoutExtras::CStruct PipelineLayoutExtras::to_cstruct() const {
     CStruct cstruct;
@@ -11252,7 +11426,7 @@ ShaderModuleGLSLDescriptor::ShaderModuleGLSLDescriptor(const WGPUShaderModuleGLS
     this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
     this->stage = static_cast<wgpu::ShaderStage>(native.stage);
     this->code = static_cast<wgpu::StringView>(native.code);
-    this->defines = std::span(native.defines, native.defineCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::ShaderDefine>(e); }) | std::ranges::to<std::vector<wgpu::ShaderDefine>>();
+    this->defines = std::span(native.defines, native.defineCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::ShaderDefine>(e); }) | std::ranges::to<SmallVec<wgpu::ShaderDefine>>();
 }
 ShaderModuleGLSLDescriptor::CStruct ShaderModuleGLSLDescriptor::to_cstruct() const {
     CStruct cstruct;
@@ -11751,9 +11925,9 @@ InstanceEnumerateAdapterOptions&& InstanceEnumerateAdapterOptions::setBackends(w
 }
 BindGroupEntryExtras::BindGroupEntryExtras(const WGPUBindGroupEntryExtras& native) {
     this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
-    this->buffers = std::span(native.buffers, native.bufferCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::Buffer>(e); }) | std::ranges::to<std::vector<wgpu::Buffer>>();
-    this->samplers = std::span(native.samplers, native.samplerCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::Sampler>(e); }) | std::ranges::to<std::vector<wgpu::Sampler>>();
-    this->textureViews = std::span(native.textureViews, native.textureViewCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureView>(e); }) | std::ranges::to<std::vector<wgpu::TextureView>>();
+    this->buffers = std::span(native.buffers, native.bufferCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::Buffer>(e); }) | std::ranges::to<SmallVec<wgpu::Buffer>>();
+    this->samplers = std::span(native.samplers, native.samplerCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::Sampler>(e); }) | std::ranges::to<SmallVec<wgpu::Sampler>>();
+    this->textureViews = std::span(native.textureViews, native.textureViewCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureView>(e); }) | std::ranges::to<SmallVec<wgpu::TextureView>>();
 }
 BindGroupEntryExtras::CStruct BindGroupEntryExtras::to_cstruct() const {
     CStruct cstruct;
@@ -11786,7 +11960,7 @@ BindGroupLayoutEntryExtras&& BindGroupLayoutEntryExtras::setCount(uint32_t value
 }
 QuerySetDescriptorExtras::QuerySetDescriptorExtras(const WGPUQuerySetDescriptorExtras& native) {
     this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
-    this->pipelineStatistics = std::span(native.pipelineStatistics, native.pipelineStatisticCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::PipelineStatisticName>(e); }) | std::ranges::to<std::vector<wgpu::PipelineStatisticName>>();
+    this->pipelineStatistics = std::span(native.pipelineStatistics, native.pipelineStatisticCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::PipelineStatisticName>(e); }) | std::ranges::to<SmallVec<wgpu::PipelineStatisticName>>();
 }
 QuerySetDescriptorExtras::CStruct QuerySetDescriptorExtras::to_cstruct() const {
     CStruct cstruct;

@@ -3,6 +3,7 @@
 {{webgpu_includes}}
 
 #include <atomic>
+#include <cstddef>
 #include <iostream>
 #include <vector>
 #include <functional>
@@ -10,10 +11,14 @@
 #include <concepts>
 #include <cmath>
 #include <memory>
+#include <new>
+#include <initializer_list>
 #include <string_view>
 #include <span>
 #include <optional>
 #include <ranges>
+#include <type_traits>
+#include <utility>
 
 export module webgpu;
 
