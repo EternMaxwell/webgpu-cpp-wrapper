@@ -4043,7 +4043,7 @@ struct VertexAttribute {
 };
 struct BindGroupDescriptor {
     struct CStruct : public WGPUBindGroupDescriptor {
-        std::vector<WGPUBindGroupEntry> entries_vec;
+        SmallVec<WGPUBindGroupEntry> entries_vec;
     };
     BindGroupDescriptor(const WGPUBindGroupDescriptor& native);
     BindGroupDescriptor() {};
@@ -4124,7 +4124,7 @@ struct BlendState {
 };
 struct CompilationInfo {
     struct CStruct : public WGPUCompilationInfo {
-        std::vector<WGPUCompilationMessage> messages_vec;
+        SmallVec<WGPUCompilationMessage> messages_vec;
     };
     CompilationInfo(const WGPUCompilationInfo& native);
     CompilationInfo() {};
@@ -4285,7 +4285,7 @@ struct InstanceDescriptor {
 };
 struct ProgrammableStageDescriptor {
     struct CStruct : public WGPUProgrammableStageDescriptor {
-        std::vector<WGPUConstantEntry> constants_vec;
+        SmallVec<WGPUConstantEntry> constants_vec;
     };
     ProgrammableStageDescriptor(const WGPUProgrammableStageDescriptor& native);
     ProgrammableStageDescriptor() {};
@@ -4439,7 +4439,7 @@ struct VertexBufferLayout {
 };
 struct BindGroupLayoutDescriptor {
     struct CStruct : public WGPUBindGroupLayoutDescriptor {
-        std::vector<WGPUBindGroupLayoutEntry> entries_vec;
+        SmallVec<WGPUBindGroupLayoutEntry> entries_vec;
     };
     BindGroupLayoutDescriptor(const WGPUBindGroupLayoutDescriptor& native);
     BindGroupLayoutDescriptor() {};
@@ -4511,7 +4511,7 @@ struct ComputePipelineDescriptor {
 };
 struct RenderPassDescriptor {
     struct CStruct : public WGPURenderPassDescriptor {
-        std::vector<WGPURenderPassColorAttachment> colorAttachments_vec;
+        SmallVec<WGPURenderPassColorAttachment> colorAttachments_vec;
     };
     RenderPassDescriptor(const WGPURenderPassDescriptor& native);
     RenderPassDescriptor() {};
@@ -4547,8 +4547,8 @@ struct RenderPassDescriptor {
 };
 struct VertexState {
     struct CStruct : public WGPUVertexState {
-        std::vector<WGPUConstantEntry> constants_vec;
-        std::vector<WGPUVertexBufferLayout> buffers_vec;
+        SmallVec<WGPUConstantEntry> constants_vec;
+        SmallVec<WGPUVertexBufferLayout> buffers_vec;
     };
     VertexState(const WGPUVertexState& native);
     VertexState() {};
@@ -4579,8 +4579,8 @@ struct VertexState {
 };
 struct FragmentState {
     struct CStruct : public WGPUFragmentState {
-        std::vector<WGPUConstantEntry> constants_vec;
-        std::vector<WGPUColorTargetState> targets_vec;
+        SmallVec<WGPUConstantEntry> constants_vec;
+        SmallVec<WGPUColorTargetState> targets_vec;
     };
     FragmentState(const WGPUFragmentState& native);
     FragmentState() {};
@@ -9846,7 +9846,7 @@ BindGroupDescriptor::CStruct BindGroupDescriptor::to_cstruct() const {
     cstruct.nextInChain = this->nextInChain.getNext();
     cstruct.label = static_cast<WGPUStringView>(this->label.to_cstruct());
     cstruct.layout = static_cast<WGPUBindGroupLayout>(this->layout);
-    cstruct.entries_vec = this->entries | std::views::transform([](auto&& e) { return static_cast<WGPUBindGroupEntry>(e.to_cstruct()); }) | std::ranges::to<std::vector<WGPUBindGroupEntry>>();
+    cstruct.entries_vec = this->entries | std::views::transform([](auto&& e) { return static_cast<WGPUBindGroupEntry>(e.to_cstruct()); }) | std::ranges::to<SmallVec<WGPUBindGroupEntry>>();
     cstruct.entries = cstruct.entries_vec.data();
     cstruct.entryCount = static_cast<size_t>(cstruct.entries_vec.size());
     return cstruct;
@@ -10024,7 +10024,7 @@ CompilationInfo::CompilationInfo(const WGPUCompilationInfo& native) {
 CompilationInfo::CStruct CompilationInfo::to_cstruct() const {
     CStruct cstruct;
     cstruct.nextInChain = this->nextInChain.getNext();
-    cstruct.messages_vec = this->messages | std::views::transform([](auto&& e) { return static_cast<WGPUCompilationMessage>(e.to_cstruct()); }) | std::ranges::to<std::vector<WGPUCompilationMessage>>();
+    cstruct.messages_vec = this->messages | std::views::transform([](auto&& e) { return static_cast<WGPUCompilationMessage>(e.to_cstruct()); }) | std::ranges::to<SmallVec<WGPUCompilationMessage>>();
     cstruct.messages = cstruct.messages_vec.data();
     cstruct.messageCount = static_cast<size_t>(cstruct.messages_vec.size());
     return cstruct;
@@ -10387,7 +10387,7 @@ ProgrammableStageDescriptor::CStruct ProgrammableStageDescriptor::to_cstruct() c
     cstruct.nextInChain = this->nextInChain.getNext();
     cstruct.module = static_cast<WGPUShaderModule>(this->module);
     cstruct.entryPoint = static_cast<WGPUStringView>(this->entryPoint.to_cstruct());
-    cstruct.constants_vec = this->constants | std::views::transform([](auto&& e) { return static_cast<WGPUConstantEntry>(e.to_cstruct()); }) | std::ranges::to<std::vector<WGPUConstantEntry>>();
+    cstruct.constants_vec = this->constants | std::views::transform([](auto&& e) { return static_cast<WGPUConstantEntry>(e.to_cstruct()); }) | std::ranges::to<SmallVec<WGPUConstantEntry>>();
     cstruct.constants = cstruct.constants_vec.data();
     cstruct.constantCount = static_cast<size_t>(cstruct.constants_vec.size());
     return cstruct;
@@ -10719,7 +10719,7 @@ BindGroupLayoutDescriptor::CStruct BindGroupLayoutDescriptor::to_cstruct() const
     CStruct cstruct;
     cstruct.nextInChain = this->nextInChain.getNext();
     cstruct.label = static_cast<WGPUStringView>(this->label.to_cstruct());
-    cstruct.entries_vec = this->entries | std::views::transform([](auto&& e) { return static_cast<WGPUBindGroupLayoutEntry>(e.to_cstruct()); }) | std::ranges::to<std::vector<WGPUBindGroupLayoutEntry>>();
+    cstruct.entries_vec = this->entries | std::views::transform([](auto&& e) { return static_cast<WGPUBindGroupLayoutEntry>(e.to_cstruct()); }) | std::ranges::to<SmallVec<WGPUBindGroupLayoutEntry>>();
     cstruct.entries = cstruct.entries_vec.data();
     cstruct.entryCount = static_cast<size_t>(cstruct.entries_vec.size());
     return cstruct;
@@ -10871,7 +10871,7 @@ RenderPassDescriptor::CStruct RenderPassDescriptor::to_cstruct() const {
     CStruct cstruct;
     cstruct.nextInChain = this->nextInChain.getNext();
     cstruct.label = static_cast<WGPUStringView>(this->label.to_cstruct());
-    cstruct.colorAttachments_vec = this->colorAttachments | std::views::transform([](auto&& e) { return static_cast<WGPURenderPassColorAttachment>(e.to_cstruct()); }) | std::ranges::to<std::vector<WGPURenderPassColorAttachment>>();
+    cstruct.colorAttachments_vec = this->colorAttachments | std::views::transform([](auto&& e) { return static_cast<WGPURenderPassColorAttachment>(e.to_cstruct()); }) | std::ranges::to<SmallVec<WGPURenderPassColorAttachment>>();
     cstruct.colorAttachments = cstruct.colorAttachments_vec.data();
     cstruct.colorAttachmentCount = static_cast<size_t>(cstruct.colorAttachments_vec.size());
     if (this->depthStencilAttachment.has_value()) {
@@ -10956,10 +10956,10 @@ VertexState::CStruct VertexState::to_cstruct() const {
     cstruct.nextInChain = this->nextInChain.getNext();
     cstruct.module = static_cast<WGPUShaderModule>(this->module);
     cstruct.entryPoint = static_cast<WGPUStringView>(this->entryPoint.to_cstruct());
-    cstruct.constants_vec = this->constants | std::views::transform([](auto&& e) { return static_cast<WGPUConstantEntry>(e.to_cstruct()); }) | std::ranges::to<std::vector<WGPUConstantEntry>>();
+    cstruct.constants_vec = this->constants | std::views::transform([](auto&& e) { return static_cast<WGPUConstantEntry>(e.to_cstruct()); }) | std::ranges::to<SmallVec<WGPUConstantEntry>>();
     cstruct.constants = cstruct.constants_vec.data();
     cstruct.constantCount = static_cast<size_t>(cstruct.constants_vec.size());
-    cstruct.buffers_vec = this->buffers | std::views::transform([](auto&& e) { return static_cast<WGPUVertexBufferLayout>(e.to_cstruct()); }) | std::ranges::to<std::vector<WGPUVertexBufferLayout>>();
+    cstruct.buffers_vec = this->buffers | std::views::transform([](auto&& e) { return static_cast<WGPUVertexBufferLayout>(e.to_cstruct()); }) | std::ranges::to<SmallVec<WGPUVertexBufferLayout>>();
     cstruct.buffers = cstruct.buffers_vec.data();
     cstruct.bufferCount = static_cast<size_t>(cstruct.buffers_vec.size());
     return cstruct;
@@ -11001,10 +11001,10 @@ FragmentState::CStruct FragmentState::to_cstruct() const {
     cstruct.nextInChain = this->nextInChain.getNext();
     cstruct.module = static_cast<WGPUShaderModule>(this->module);
     cstruct.entryPoint = static_cast<WGPUStringView>(this->entryPoint.to_cstruct());
-    cstruct.constants_vec = this->constants | std::views::transform([](auto&& e) { return static_cast<WGPUConstantEntry>(e.to_cstruct()); }) | std::ranges::to<std::vector<WGPUConstantEntry>>();
+    cstruct.constants_vec = this->constants | std::views::transform([](auto&& e) { return static_cast<WGPUConstantEntry>(e.to_cstruct()); }) | std::ranges::to<SmallVec<WGPUConstantEntry>>();
     cstruct.constants = cstruct.constants_vec.data();
     cstruct.constantCount = static_cast<size_t>(cstruct.constants_vec.size());
-    cstruct.targets_vec = this->targets | std::views::transform([](auto&& e) { return static_cast<WGPUColorTargetState>(e.to_cstruct()); }) | std::ranges::to<std::vector<WGPUColorTargetState>>();
+    cstruct.targets_vec = this->targets | std::views::transform([](auto&& e) { return static_cast<WGPUColorTargetState>(e.to_cstruct()); }) | std::ranges::to<SmallVec<WGPUColorTargetState>>();
     cstruct.targets = cstruct.targets_vec.data();
     cstruct.targetCount = static_cast<size_t>(cstruct.targets_vec.size());
     return cstruct;

@@ -1212,18 +1212,18 @@ def produce_webgpu_cpp(api: WebGpuApi, template_meta: TemplateMeta, args: argpar
 						f"    cstruct.{field.counter} = static_cast<{counter_type}>(this->{field.name}.size());"
 					)
 				elif not get_struct_api_cpp(field.type[4:]).extra_cstruct_members:
-					struct_cpp.extra_cstruct_members.append(f"std::vector<{field.type}> {field.name}_vec;")
+					struct_cpp.extra_cstruct_members.append(f"SmallVec<{field.type}> {field.name}_vec;")
 					field_cpp.assign_to_cstruct = (
-						f"\n    cstruct.{field.name}_vec = this->{field.name} | std::views::transform([](auto&& e) {{ return static_cast<{field.type}>(e.to_cstruct()); }}) | std::ranges::to<std::vector<{field.type}>>();\n"
+						f"\n    cstruct.{field.name}_vec = this->{field.name} | std::views::transform([](auto&& e) {{ return static_cast<{field.type}>(e.to_cstruct()); }}) | std::ranges::to<SmallVec<{field.type}>>();\n"
 						f"    cstruct.{field.name} = cstruct.{field.name}_vec.data();\n"
 						f"    cstruct.{field.counter} = static_cast<{counter_type}>(cstruct.{field.name}_vec.size());"
 					)
 				else:
-					struct_cpp.extra_cstruct_members.append(f"std::vector<{cpp_type}::CStruct> {field.name}_cstruct_vec;")
-					struct_cpp.extra_cstruct_members.append(f"std::vector<{field.type}> {field.name}_vec;")
+					struct_cpp.extra_cstruct_members.append(f"SmallVec<{cpp_type}::CStruct> {field.name}_cstruct_vec;")
+					struct_cpp.extra_cstruct_members.append(f"SmallVec<{field.type}> {field.name}_vec;")
 					field_cpp.assign_to_cstruct = (
-						f"\n    cstruct.{field.name}_cstruct_vec = this->{field.name} | std::views::transform([](auto&& e) {{ return e.to_cstruct(); }}) | std::ranges::to<std::vector<{cpp_type}::CStruct>>();\n"
-						f"    cstruct.{field.name}_vec = cstruct.{field.name}_cstruct_vec | std::views::transform([](auto&& e) {{ return static_cast<{field.type}>(e); }}) | std::ranges::to<std::vector<{field.type}>>();\n"
+						f"\n    cstruct.{field.name}_cstruct_vec = this->{field.name} | std::views::transform([](auto&& e) {{ return e.to_cstruct(); }}) | std::ranges::to<SmallVec<{cpp_type}::CStruct>>();\n"
+						f"    cstruct.{field.name}_vec = cstruct.{field.name}_cstruct_vec | std::views::transform([](auto&& e) {{ return static_cast<{field.type}>(e); }}) | std::ranges::to<SmallVec<{field.type}>>();\n"
 						f"    cstruct.{field.name} = cstruct.{field.name}_vec.data();\n"
 						f"    cstruct.{field.counter} = static_cast<{counter_type}>(cstruct.{field.name}_vec.size());"
 					)
