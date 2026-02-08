@@ -1747,50 +1747,49 @@ template <typename T>
             auto arg3 = params_cpp |
                         std::views::transform([](const FuncParamApiCpp& p) { return p.full_type() + " " + p.name; }) |
                         std::views::join_with(std::string(", ")) | std::ranges::to<std::string>();
-            auto arg4 = params_cpp | std::views::transform(get_assign_to_native) | std::views::elements<1> |
-                        std::views::join_with(std::string("\n")) | std::ranges::to<std::string>();
             auto arg5               = func_api.name;
             auto arg6               = params_cpp.empty() ? "m_raw" : "m_raw, ";
             auto [arg4, arg7, arg8] = build_native_call_args(params_cpp);
+            handle_cpp.methods_impl.push_back(std::vformat(
+                return_type == "void" ? impl_str2 : impl_str1,
                 std::make_format_args(handle_cpp.name, func_name, return_type, arg3, arg4, arg5, arg6, arg7, arg8)));
 
-                if (nullable_overload) {
-                    params_cpp.pop_back();  // remove the last param
-                    handle_cpp.methods_decl.push_back(std::format(
-                        R"(
+            if (nullable_overload) {
+                params_cpp.pop_back();  // remove the last param
+                handle_cpp.methods_decl.push_back(std::format(
+                    R"(
     {} {}({}) const;)",
-                        return_type, func_name,
-                        params_cpp | std::views::transform([](const FuncParamApiCpp& p) {
-                            return p.full_type() + " " + p.name;
-                        }) | std::views::join_with(std::string(", ")) |
-                            std::ranges::to<std::string>()));
+                    return_type, func_name,
+                    params_cpp |
+                        std::views::transform([](const FuncParamApiCpp& p) { return p.full_type() + " " + p.name; }) |
+                        std::views::join_with(std::string(", ")) | std::ranges::to<std::string>()));
 
-                    std::string impl_str1 = R"(
+                std::string impl_str1 = R"(
 {2} {0}::{1}({3}) const {{
 {4}
     {2} res = static_cast<{2}>(wgpu{5}({6}{7}, nullptr));
 {8}
     return res;
 }})";
-                    std::string impl_str2 = R"(
+                std::string impl_str2 = R"(
 {2} {0}::{1}({3}) const {{
 {4}
     wgpu{5}({6}{7}, nullptr);
 {8}
 }})";
 
-                    auto arg3 =
-                        params_cpp |
-                        std::views::transform([](const FuncParamApiCpp& p) { return p.full_type() + " " + p.name; }) |
-                        std::views::join_with(std::string(", ")) | std::ranges::to<std::string>();
-                    auto arg4 = params_cpp | std::views::transform(get_assign_to_native) | std::views::elements<1> |
-                                std::views::join_with(std::string("\n")) | std::ranges::to<std::string>();
-                    auto arg5               = func_api.name;
-                    auto arg6               = params_cpp.empty() ? "m_raw" : "m_raw, ";
-                    auto [arg4, arg7, arg8] = build_native_call_args(params_cpp);
+                auto arg3 =
+                    params_cpp |
+                    std::views::transform([](const FuncParamApiCpp& p) { return p.full_type() + " " + p.name; }) |
+                    std::views::join_with(std::string(", ")) | std::ranges::to<std::string>();
+                auto arg5               = func_api.name;
+                auto arg6               = params_cpp.empty() ? "m_raw" : "m_raw, ";
+                auto [arg4, arg7, arg8] = build_native_call_args(params_cpp);
+                handle_cpp.methods_impl.push_back(
+                    std::vformat(return_type == "void" ? impl_str2 : impl_str1,
                                  std::make_format_args(handle_cpp.name, func_name, return_type, arg3, arg4, arg5, arg6,
                                                        arg7, arg8)));
-                }
+            }
         }
     }
 
