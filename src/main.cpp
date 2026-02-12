@@ -8,6 +8,7 @@
 #include <regex>
 #include <sstream>
 #include <stacktrace>
+#include <streambuf>
 #include <string>
 #include <unordered_set>
 
@@ -37,6 +38,9 @@ void set_up_parser(ArgsParser& parser) {
             .set_flag(true));
     parser.add_arg_spec(ArgsParser::ArgSpec("--force-raii", "while using raii, also force structs to store raii handle")
                             .set_flag(true));
+    parser.add_arg_spec(ArgsParser::ArgSpec("--log-path", "Path to write parser logs. Empty disables logging")
+                            .set_flag(false)
+                            .add_default_value(""));
     parser.print_help();
 }
 
@@ -49,7 +53,14 @@ std::string strip(const std::string& str) {
     return str.substr(first, last - first + 1);
 }
 
-std::ofstream log_file("parser.log");
+struct NullBuffer : std::streambuf {
+    int overflow(int ch) override { return ch; }
+};
+
+NullBuffer null_buffer;
+std::ostream null_stream(&null_buffer);
+std::ofstream log_file;
+std::ostream* log_out = &null_stream;
 
 ArgsParser parser("Webgpu C++ Wrapper Program");
 
@@ -1428,7 +1439,7 @@ template <typename T>
                 param.binary_compatible = get_struct_api_cpp(type_without_wgpu, nullptr).binary_compatible;
             }
 
-            std::println(log_file,
+            std::println(*log_out,
                          "Callback param: {} {}, is_handle: {}, is_struct: {}, binary_compatible: {}, is_pointer: {}, "
                          "nullable: {}",
                          param.type, param.name, param.is_handle, param.is_struct, param.binary_compatible,
@@ -2259,6 +2270,14 @@ int main(int argc, char** argv) {
     set_up_parser(parser);
     parser.parse(argc, argv);
 
+    auto log_path = parser.get_single("--log-path").value_or("");
+    if (!log_path.empty()) {
+        log_file.open(log_path);
+        if (log_file.is_open()) {
+            log_out = &log_file;
+        }
+    }
+
     template_meta = loadTemplate(std::string(parser.get_single("--template").value()));
     auto headers  = parser.get_all("--header");
     for (const auto& header : *headers) {
@@ -2318,34 +2337,34 @@ void parse_header(WebGpuApi& api, const std::string& header_content) {
             // Parse typedef
             std::string original_type = match[1];
             std::string alias_name    = match[2];
-            std::println(log_file, "Parsing typedef: {} -> {}", alias_name, original_type);
+            std::println(*log_out, "Parsing typedef: {} -> {}", alias_name, original_type);
             api.type_aliases.push_back(TypeAliasApi{alias_name, original_type});
         } else if (std::regex_search(lines[0], match, struct_re)) {
             // Parse struct
             std::string struct_name = match[1];
-            std::println(log_file, "Parsing struct: {}", struct_name);
+            std::println(*log_out, "Parsing struct: {}", struct_name);
             api.structs.emplace_back(parse_struct(struct_name, lines = lines.subspan(1)));
         } else if (std::regex_search(lines[0], match, handle_re)) {
             // Parse handle
             std::string handle_name = match[1];
-            std::println(log_file, "Parsing handle: {}", handle_name);
+            std::println(*log_out, "Parsing handle: {}", handle_name);
             api.handles.push_back(HandleApi{std::move(handle_name)});
         } else if (std::regex_search(lines[0], match, func_re)) {
             // Parse function
             std::string return_type = match[1];
             std::string func_name   = match[2];
             std::string params_str  = match[3];
-            std::println(log_file, "Parsing function: {}", func_name);
+            std::println(*log_out, "Parsing function: {}", func_name);
             api.functions.push_back(parse_func(func_name, return_type, params_str));
         } else if (std::regex_search(lines[0], match, enum_re)) {
             // Parse enum
             std::string enum_name = match[1];
-            std::println(log_file, "Parsing enum: {}", enum_name);
+            std::println(*log_out, "Parsing enum: {}", enum_name);
             api.enums.emplace_back(parse_enum(enum_name, lines = lines.subspan(1)));
         } else if (std::regex_search(lines[0], match, flag_enum_re)) {
             // Parse flag enum alias
             std::string enum_name = match[1];
-            std::println(log_file, "Parsing flag enum alias: {}", enum_name);
+            std::println(*log_out, "Parsing flag enum alias: {}", enum_name);
             api.enums.emplace_back(EnumApi{enum_name, true, {}});
         } else if (std::regex_search(lines[0], match, flat_value_re)) {
             // Parse flat value
@@ -2355,7 +2374,7 @@ void parse_header(WebGpuApi& api, const std::string& header_content) {
             EnumentryApi entry;
             entry.name  = match[3];
             entry.value = std::format("WGPU{}_{}", enum_name, entry.name);
-            std::println(log_file, "Parsing flag value: enum: {}, entry: {}, value: {}", enum_name, entry.name,
+            std::println(*log_out, "Parsing flag value: enum: {}, entry: {}, value: {}", enum_name, entry.name,
                          entry.value);
             bool found = false;
             for (auto& enum_api : api.enums) {
@@ -2369,7 +2388,7 @@ void parse_header(WebGpuApi& api, const std::string& header_content) {
                 api.enums.emplace_back(EnumApi{enum_name, true, {std::move(entry)}});
             }
         } else if (std::regex_search(lines[0], match, callback_re)) {
-            std::println(log_file, "Parsing callback: {}", (std::string)match[1]);
+            std::println(*log_out, "Parsing callback: {}", (std::string)match[1]);
             auto params = parse_params(match[2]);
             api.callbacks.push_back(CallbackApi{match[1], params});
         } else if (std::regex_search(lines[0], match, init_macro_re)) {
@@ -2387,7 +2406,7 @@ void parse_header(WebGpuApi& api, const std::string& header_content) {
                        return part;
                    }) |
                    std::views::join | std::ranges::to<std::string>();
-            std::println(log_file, "Found init macro: macro: {}, type: {}", macro, type);
+            std::println(*log_out, "Found init macro: macro: {}, type: {}", macro, type);
             api.init_macros.push_back(InitMacro{macro, type});
         }
     }
@@ -2408,9 +2427,9 @@ void parse_header(WebGpuApi& api, const std::string& header_content) {
             }
         }
         if (func_api.parent.has_value()) {
-            std::println(log_file, "Function {} is a method of {}", func_api.name, func_api.parent.value());
+            std::println(*log_out, "Function {} is a method of {}", func_api.name, func_api.parent.value());
         } else {
-            std::println(log_file, "Function {} is a non-member function", func_api.name);
+            std::println(*log_out, "Function {} is a non-member function", func_api.name);
         }
     }
 
@@ -2472,7 +2491,7 @@ std::vector<FuncParamApi> parse_params(const std::string& params_str) {
             func_param.type.replace(func_param.type.find("struct"), 6, "");  // remove struct keyword
         }
         func_param.type = strip(func_param.type);
-        std::println(log_file, "  Param: name: {}, type: {}, nullable: {}, is_pointer: {}, is_const: {}",
+        std::println(*log_out, "  Param: name: {}, type: {}, nullable: {}, is_pointer: {}, is_const: {}",
                      func_param.name, func_param.type, func_param.nullable, func_param.is_pointer, func_param.is_const);
         result.push_back(std::move(func_param));
     }
@@ -2489,7 +2508,7 @@ FuncApi parse_func(const std::string& name, const std::string& return_type, cons
         api.return_type = strip(api.return_type);
         api.nullable    = true;
     }
-    std::println(log_file, "  Return type: {}, nullable: {}", api.return_type, api.nullable);
+    std::println(*log_out, "  Return type: {}, nullable: {}", api.return_type, api.nullable);
     api.params = parse_params(params_str);
     return api;
 }
@@ -2511,7 +2530,7 @@ EnumApi parse_enum(const std::string& name, std::span<std::string>& lines) {
         }
     }
     for (const auto& entry : api.entries) {
-        std::println(log_file, "  Entry: name: {}, value: {}", entry.name, entry.value);
+        std::println(*log_out, "  Entry: name: {}, value: {}", entry.name, entry.value);
     }
 
     return api;
@@ -2570,7 +2589,7 @@ StructApi parse_struct(const std::string& name, std::span<std::string>& lines) {
     }
     for (auto& field : api.fields) {
         std::println(
-            log_file,
+            *log_out,
             "  Field: type: {}, name: {}, nullable: {}, counter: {}, is_counter: {}, is_pointer: {}, is_const: {}",
             field.type, field.name, field.nullable, field.counter.has_value() ? field.counter.value() : "none",
             field.is_counter, field.is_pointer, field.is_const);
@@ -2606,7 +2625,7 @@ TemplateMeta loadTemplate(const std::string& template_path) {
             }
         }
     }
-    std::println(log_file, "Loaded template:\ntext:\n{}\n-----------\ninjections:\n{}\n\n", meta.text,
+    std::println(*log_out, "Loaded template:\ntext:\n{}\n-----------\ninjections:\n{}\n\n", meta.text,
                  meta.injections.members);
     return meta;
 }

@@ -13,8 +13,8 @@ def strip_spaces(value: str) -> str:
 
 
 class Logger:
-	def __init__(self, path: Path) -> None:
-		self._file = path.open("w", encoding="utf-8")
+	def __init__(self, path: Optional[Path]) -> None:
+		self._file = path.open("w", encoding="utf-8") if path else None
 
 	def _fmt_value(self, value):
 		if isinstance(value, bool):
@@ -27,11 +27,13 @@ class Logger:
 			line = fmt.format(*formatted_args)
 		else:
 			line = fmt
+		if not self._file:
+			return
 		self._file.write(line + "\n")
 		self._file.flush()
 
 
-log = Logger(Path("parser.log"))
+log = Logger(None)
 
 
 @dataclass
@@ -1971,7 +1973,11 @@ def main() -> None:
 	parser.add_argument("-t", "--template", dest="template", default="webgpu.template.cppm", help="The template file to use for generation")
 	parser.add_argument("--use-raii", action="store_true", help="Generate RAII wrappers for handles, and make non raii handles use raw namespace")
 	parser.add_argument("--force-raii", action="store_true", help="while using RAII, also force structs to store raii handles")
+	parser.add_argument("--log-path", dest="log_path", default="", help="Path to write parser logs. Empty disables logging")
 	args = parser.parse_args()
+
+	global log
+	log = Logger(Path(args.log_path)) if args.log_path else Logger(None)
 
 	template_meta = load_template(Path(args.template))
 	api = WebGpuApi()
