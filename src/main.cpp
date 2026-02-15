@@ -41,6 +41,10 @@ void set_up_parser(ArgsParser& parser) {
     parser.add_arg_spec(ArgsParser::ArgSpec("--log-path", "Path to write parser logs. Empty disables logging")
                             .set_flag(false)
                             .add_default_value(""));
+    parser.add_arg_spec(
+        ArgsParser::ArgSpec("--indexed-handle",
+                            "Names of handle types that should be treated as indexed handles (use 'all' for all)")
+            .set_flag(false));
     parser.print_help();
 }
 
@@ -176,6 +180,7 @@ struct FuncParamApiCpp {
     bool is_const          = false;
     bool is_struct         = false;
     bool is_handle         = false;
+    bool is_indexed        = false;
     bool is_callback       = false;
     bool binary_compatible = false;  // whether the struct param is binary compatible, only valid when is_struct is true
     bool nullable          = false;  // whether this param is nullable, if true, will change reference to pointer
@@ -246,27 +251,122 @@ struct FuncParamApiCpp {
         return {assign, temp_data};
     }
 };
+struct CallbackParamApiCpp {
+    std::string type;
+    std::string name;
+    bool is_pointer        = false;
+    bool is_const          = false;
+    bool is_struct         = false;
+    bool is_handle         = false;
+    bool is_indexed        = false;
+    bool is_callback       = false;
+    bool binary_compatible = false;
+    bool nullable          = false;
+
+    std::string full_type() const {
+        std::string full_type_str = type;
+        if (is_pointer) {
+            if (is_const) full_type_str += " const";
+            std::string ns = std::string(parser.get_single("--namespace").value_or("wgpu"));
+            if (!is_const) {
+                full_type_str += "*";
+            } else {
+                full_type_str += nullable || !type.starts_with(ns + "::") ? "*" : "&";
+            }
+        }
+        return full_type_str;
+    }
+
+    std::pair<std::string, std::string> get_assign_from_native() const {
+        std::string assign;
+        std::string temp_data;
+        std::string ns                     = std::string(parser.get_single("--namespace").value_or("wgpu"));
+        std::string type_without_namespace = type;
+        if (type_without_namespace.starts_with(ns + "::")) {
+            type_without_namespace = type_without_namespace.substr(ns.size() + 2);
+        }
+        if (is_handle && !is_indexed) {
+            if (is_pointer && !is_const) {
+                throw std::runtime_error("Pointer to non-const handle is not supported in callback parameters yet");
+            } else if (is_const) {
+                assign = std::format("{}reinterpret_cast<{} const*>({}{})", nullable ? "" : "*", type,
+                                     is_pointer ? "" : "&", name);
+            } else {
+                assign = std::format("static_cast<{}>({})", type, name);
+            }
+        } else if (is_handle && is_indexed) {
+            if (is_pointer && !is_const) {
+                throw std::runtime_error(
+                    "Pointer to non-const indexed handle is not supported in callback parameters yet");
+            } else if (is_const && is_pointer) {
+                temp_data = std::format(
+                    "\n    struct {0}Temp {{\n        WGPU{0} raw;\n        {0}Id id{{}};\n    }} temp{{{1}}};\n",
+                    type_without_namespace, is_pointer ? "*" + name : name);
+                assign = nullable ? std::format("{} ? reinterpret_cast<{}*>(&temp) : nullptr", name, type)
+                                  : std::format("*reinterpret_cast<{}*>(&temp)", type);
+            } else {
+                assign = std::format("static_cast<{}>({})", type, name);
+            }
+        } else if (is_pointer && is_struct) {
+            if (!is_const) {
+                if (binary_compatible) {
+                    assign = std::format("reinterpret_cast<{}*>({})", type, name);
+                } else {
+                    temp_data = std::format(
+                        R"(
+    {1} {0}_temp;
+    if ({0}) {0}_temp = static_cast<{1}>(*{0});)",
+                        name, type);
+                    assign =
+                        nullable ? std::format("{}? &{}_temp : nullptr", name, name) : std::format("&{}_temp", name);
+                }
+            } else if (nullable) {
+                if (binary_compatible) {
+                    assign = std::format("reinterpret_cast<{} const*>({})", type, name);
+                } else {
+                    temp_data = std::format(
+                        R"(
+    {1} {0}_temp;
+    if ({0}) {0}_temp = static_cast<{1}>(*{0});)",
+                        name, type);
+                    assign = std::format("{}? &{}_temp : nullptr", name, name);
+                }
+            } else {
+                if (binary_compatible) {
+                    assign = std::format("*reinterpret_cast<{} const*>({})", type, name);
+                } else {
+                    temp_data = std::format("\t{1} {0}_temp = static_cast<{1}>(*{0});\n", name, type);
+                    assign    = std::format("{}_temp", name);
+                }
+            }
+        } else {
+            assign = std::format("static_cast<{}>({})", type, name);
+        }
+        return {assign, temp_data};
+    }
+};
 struct CallbackApiCpp {
     std::string name;
-    std::vector<FuncParamApiCpp> params;
+    std::vector<CallbackParamApiCpp> params;
     std::vector<std::string> userdatas;
 
     std::string gen_param_types() const {
-        return params | std::views::transform([](const FuncParamApiCpp& p) { return p.full_type(); }) |
+        return params | std::views::transform([](const CallbackParamApiCpp& p) { return p.full_type(); }) |
                std::views::join_with(std::string(", ")) | std::ranges::to<std::string>();
     }
     std::string gen_param_names() const {
-        return params | std::views::transform([](const FuncParamApiCpp& p) { return p.name; }) |
+        return params | std::views::transform([](const CallbackParamApiCpp& p) { return p.name; }) |
                std::views::join_with(std::string(", ")) | std::ranges::to<std::string>();
     }
     std::string gen_param_sig() const {
-        return params | std::views::transform([](const FuncParamApiCpp& p) { return p.full_type() + " " + p.name; }) |
+        return params |
+               std::views::transform([](const CallbackParamApiCpp& p) { return p.full_type() + " " + p.name; }) |
                std::views::join_with(std::string(", ")) | std::ranges::to<std::string>();
     }
     std::string gen_cparam_sig() const {
         std::string ns = std::string(parser.get_single("--namespace").value_or("wgpu"));
         ns += "::";
-        return params | std::views::transform([ns](const FuncParamApiCpp& p) {
+        return params | std::views::transform([ns](const CallbackParamApiCpp& p) {
                    std::string type = p.type;
                    if (type.starts_with(ns)) {
                        type = type.substr(ns.size());
@@ -372,9 +472,11 @@ void {0}::operator()({2}) const {{ if (data) data->invoke({1}); }}
 void {0}::operator()({3}) const {{ if (data) data->invoke_c({1}); }}
 )",
             name, gen_param_names(), gen_param_sig(), gen_cparam_sig(),
-            params | std::views::transform([](const FuncParamApiCpp& p) { return p.get_assign_from_native().second; }) |
+            params |
+                std::views::transform([](const CallbackParamApiCpp& p) { return p.get_assign_from_native().second; }) |
                 std::views::join_with(std::string("\n")) | std::ranges::to<std::string>(),
-            params | std::views::transform([](const FuncParamApiCpp& p) { return p.get_assign_from_native().first; }) |
+            params |
+                std::views::transform([](const CallbackParamApiCpp& p) { return p.get_assign_from_native().first; }) |
                 std::views::join_with(std::string(", ")) | std::ranges::to<std::string>(),
             userdatas | std::views::transform([](const std::string& s) { return "void* " + s; }) |
                 std::views::join_with(std::string(", ")) | std::ranges::to<std::string>(),
@@ -753,8 +855,22 @@ struct {0} {{
 };
 
 // handle info struct for webgpu cpp wrapper handle, will be raw handle if use raii
+std::pair<std::string, std::string> gen_atomic_id(const std::string& name) {
+    return {std::format(R"(
+struct {0}Id {{
+    static std::atomic<size_t> counter;
+    static {0}Id create() {{ return {0}Id{{counter++}}; }}
+
+    operator size_t() const {{ return value; }}
+    size_t value{{0}};
+}};
+)",
+                        name),
+            std::format("std::atomic<size_t> {}Id::counter{{1}};\n", name)};
+}
 struct HandleApiCpp {
     std::string name;
+    bool indexed = false;
     std::vector<std::string> methods_decl;
     std::vector<std::string> methods_template_impl;
     std::vector<std::string> methods_impl;
@@ -766,12 +882,13 @@ public:
     using base_type = raw::{0};
     using wgpu_type = WGPU{0};
     {0}() : base_type() {{}}
-    WEBGPU_RAII_FRIENDS
 private:
+    WEBGPU_RAII_FRIENDS
     {0}(wgpu_type raw) : base_type(raw) {{}}
     {0}(base_type raw) : base_type(raw) {{}}
     {0}& operator=(const base_type& raw) {{ if (*this) this->release(); base_type::operator=(raw); return *this; }}
 public:
+    WGPU{0} raw() const {{ return base_type::raw(); }}
     {0}& operator=(std::nullptr_t) {{ if (*this) this->release(); base_type::operator=(nullptr); return *this; }}
     {0}(const {0}& other) : base_type(other) {{ if (*this) this->addRef(); }}
     {0}({0}&& other) : base_type(other) {{ (base_type&)(other) = nullptr; }}
@@ -787,27 +904,43 @@ public:
     }
     std::string gen_definition() const {
         return std::format(R"(
+{2}
 class {0} {{
 public:
     using wgpu_type = WGPU{0};
     {0}() : m_raw(nullptr) {{}}
-    {0}(WGPU{0} raw) : m_raw(raw) {{}}
-    operator WGPU{0}() const {{ return m_raw; }}
+    {0}(std::nullptr_t) : m_raw(nullptr) {{}}
+    WGPU{0} const& raw() const {{ return m_raw; }}
+{3}
+    operator WGPU{0} const&() const {{ return m_raw; }}
+    operator WGPU{0}&() {{ return m_raw; }}
     operator bool() const {{ return m_raw != nullptr; }}
     bool operator==(const {0}& other) const {{ return m_raw == other.m_raw; }}
     bool operator!=(const {0}& other) const {{ return m_raw != other.m_raw; }}
     {0}& operator=(std::nullptr_t) {{ m_raw = nullptr; return *this; }}
 {1}
 private:
+    WEBGPU_HANDLE_FRIENDS
+    {0}(WGPU{0} raw) : m_raw(raw){4} {{}}
     WGPU{0} m_raw;
+{5}
 }};)",
                            name,
-                           methods_decl | std::views::join_with(std::string("\n")) | std::ranges::to<std::string>());
+                           methods_decl | std::views::join_with(std::string("\n")) | std::ranges::to<std::string>(),
+                           indexed ? gen_atomic_id(name).first : "",
+                           indexed ? std::format("    {0}Id id() const {{ return m_id; }}\n", name) : "",
+                           indexed ? std::format(", m_id(raw ? {0}Id::create() : 0)", name) : "",
+                           indexed ? std::format("    {0}Id m_id{{}};\n", name) : "");
     }
     std::string gen_template_impl() const {
         return methods_template_impl | std::views::join_with(std::string("\n")) | std::ranges::to<std::string>();
     }
     std::string gen_impl() const {
+        if (indexed) {
+            auto id_impl = gen_atomic_id(name).second;
+            auto methods = methods_impl | std::views::join_with(std::string("\n")) | std::ranges::to<std::string>();
+            return methods.empty() ? id_impl : methods + "\n" + id_impl;
+        }
         return methods_impl | std::views::join_with(std::string("\n")) | std::ranges::to<std::string>();
     }
 };
@@ -829,6 +962,18 @@ struct WebGpuApiCpp {
 };
 
 WebGpuApiCpp produce_webgpu_cpp(const WebGpuApi& api, const TemplateMeta& template_meta);
+const std::unordered_set<std::string> kIndexedHandleBlacklist = {
+    "Adapter",
+    "Instance",
+    "Device",
+    "Queue",
+    "CommandEncoder",
+    "RenderPassEncoder",
+    "ComputePassEncoder",
+    "RenderBundleEncoder",
+    "CommandBuffer",
+};
+// Blacklist of handle types that should not be indexed. Some need binary compatibility with raw handles.
 WebGpuApiCpp produce_webgpu_cpp(const WebGpuApi& api, const TemplateMeta& template_meta) {
     WebGpuApiCpp result;
     std::string ns = std::string(parser.get_single("--namespace").value_or("wgpu"));
@@ -862,9 +1007,18 @@ WebGpuApiCpp produce_webgpu_cpp(const WebGpuApi& api, const TemplateMeta& templa
         result.enum_to_string.push_back(ets);
     }
 
+    std::unordered_set<std::string> indexed_handles;
+    if (auto handles = parser.get_all("--indexed-handle")) {
+        for (const auto& handle : *handles) {
+            indexed_handles.insert(handle);
+        }
+    }
+
     // handles, function will be added later by api.functions
     for (const auto& handle_api : api.handles) {
-        result.handles.push_back(HandleApiCpp{.name = handle_api.name});
+        bool indexed = !kIndexedHandleBlacklist.contains(handle_api.name) &&
+                       (indexed_handles.contains(handle_api.name) || indexed_handles.contains("all"));
+        result.handles.push_back(HandleApiCpp{.name = handle_api.name, .indexed = indexed});
     }
 
     // helpers
@@ -892,9 +1046,53 @@ WebGpuApiCpp produce_webgpu_cpp(const WebGpuApi& api, const TemplateMeta& templa
         param_cpp.is_callback = is_callback;
 
         // param is handle
+        if (param.type.starts_with("WGPU")) {
+            for (const auto& handle_cpp : result.handles) {
+                if (handle_cpp.name == type_without_wgpu) {
+                    param_cpp.is_handle  = true;
+                    param_cpp.is_indexed = handle_cpp.indexed;
+                    break;
+                }
+            }
+        }
         if (param.type.starts_with("WGPU") &&
-            std::ranges::contains(api.handles, type_without_wgpu, [](const HandleApi& h) { return h.name; })) {
-            param_cpp.is_handle = true;
+            std::ranges::contains(api.structs, type_without_wgpu, [](const StructApi& s) { return s.name; })) {
+            param_cpp.is_struct = true;
+        }
+        return param_cpp;
+    };
+
+    auto get_callback_param_cpp_type = [&](const FuncParamApi& param) -> CallbackParamApiCpp {
+        CallbackParamApiCpp param_cpp;
+        param_cpp.name                = param.name;
+        std::string type_without_wgpu = param.type;
+        if (type_without_wgpu.starts_with("WGPU")) {
+            type_without_wgpu = type_without_wgpu.substr(4);
+        }
+        bool is_callback =
+            param.type.starts_with("WGPU") && std::ranges::any_of(api.callbacks, [&](const CallbackApi& cb) {
+                return type_without_wgpu == cb.name + "Callback";
+            });
+        if (is_callback) {
+            param_cpp.type = ns + "::" + type_without_wgpu;
+        } else if (param.type.starts_with("WGPU")) {
+            param_cpp.type = ns + "::" + param.type.substr(4);
+        } else {
+            param_cpp.type = param.type;
+        }
+        param_cpp.is_pointer  = param.is_pointer;
+        param_cpp.nullable    = param.nullable;
+        param_cpp.is_const    = param.is_const;
+        param_cpp.is_callback = is_callback;
+
+        if (param.type.starts_with("WGPU")) {
+            for (const auto& handle_cpp : result.handles) {
+                if (handle_cpp.name == type_without_wgpu) {
+                    param_cpp.is_handle  = true;
+                    param_cpp.is_indexed = handle_cpp.indexed;
+                    break;
+                }
+            }
         }
         if (param.type.starts_with("WGPU") &&
             std::ranges::contains(api.structs, type_without_wgpu, [](const StructApi& s) { return s.name; })) {
@@ -910,7 +1108,7 @@ WebGpuApiCpp produce_webgpu_cpp(const WebGpuApi& api, const TemplateMeta& templa
         for (const auto& param : callback_api.params | std::views::filter([](const FuncParamApi& p) {
                                      return !p.name.starts_with("userdata");
                                  })) {
-            callback_cpp.params.push_back(get_func_param_cpp_type(param));
+            callback_cpp.params.push_back(get_callback_param_cpp_type(param));
         }
         for (const auto& param : callback_api.params | std::views::filter([](const FuncParamApi& p) {
                                      return p.name.starts_with("userdata");
@@ -981,16 +1179,37 @@ WebGpuApiCpp produce_webgpu_cpp(const WebGpuApi& api, const TemplateMeta& templa
                 if (type_without_wgpu.starts_with("WGPU")) {
                     type_without_wgpu = type_without_wgpu.substr(4);
                 }
+                bool is_indexed_handle = std::ranges::any_of(
+                    result.handles, [&](const HandleApiCpp& h) { return h.name == type_without_wgpu && h.indexed; });
+                bool is_handle = std::ranges::any_of(
+                    result.handles, [&](const HandleApiCpp& h) { return h.name == type_without_wgpu; });
+                if (!struct_api.owning && is_handle && parser.contains("--force-raii")) {
+                    field_cpp.assign_from_native += std::format(
+                        R"(
+    for (auto& e : this->{0}) {{ e.addRef(); }})",
+                        field.name);
+                }
                 if (field_cpp.type == field.type ||
                     std::ranges::contains(api.enums, type_without_wgpu, [](const EnumApi& e) { return e.name; }) ||
-                    std::ranges::contains(api.handles, type_without_wgpu, [](const HandleApi& h) { return h.name; }) ||
-                    get_struct_api_cpp(field.type.substr(4), nullptr).binary_compatible) {
+                    (is_handle && !is_indexed_handle) ||
+                    (std::ranges::contains(api.structs, field.type.substr(4),
+                                           [](const StructApi& s) { return s.name; }) &&
+                     get_struct_api_cpp(field.type.substr(4), nullptr).binary_compatible)) {
                     // binary compatible, reinterpret cast
                     field_cpp.assign_to_cstruct =
                         std::format(R"(
     cstruct.{0} = reinterpret_cast<{1}>(this->{0}.data());
     cstruct.{2} = static_cast<{3}>(this->{0}.size());)",
                                     field.name, field.full_type(), field.counter.value(), counter_type);
+                } else if (is_indexed_handle) {
+                    struct_cpp.extra_cstruct_members.push_back(
+                        std::format("SmallVec<{}> {}_vec;", field.type, field.name));
+                    field_cpp.assign_to_cstruct =
+                        std::format(R"(
+    cstruct.{0}_vec = this->{0} | std::views::transform([](auto&& e) {{ return e.raw(); }}) | std::ranges::to<SmallVec<{1}>>();
+    cstruct.{0} = cstruct.{0}_vec.data();
+    cstruct.{2} = static_cast<{3}>(cstruct.{0}_vec.size());)",
+                                    field.name, field.type, field.counter.value(), counter_type);
                 } else if (get_struct_api_cpp(field.type.substr(4), nullptr).extra_cstruct_members.empty()) {
                     // no extra members, can direct cast to new vector
                     struct_cpp.extra_cstruct_members.push_back(
@@ -1467,11 +1686,17 @@ template <typename T>
         std::string free_members = has_free_members ? std::format("wgpu{}FreeMembers", type_without_wgpu) : "";
         if (param.is_handle) {
             if (param.is_pointer && !param.is_const) {
-                assign = std::format("reinterpret_cast<WGPU{}*>({})", type_without_wgpu, param.name);
+                if (param.is_indexed) {
+                    temp_data  = std::format("\n    WGPU{} {}_native;", type_without_wgpu, param.name);
+                    assign     = std::format("&{}_native", param.name);
+                    write_back = std::format("\n    *{0} = static_cast<{1}>({0}_native);", param.name, param.type);
+                } else {
+                    assign = std::format("reinterpret_cast<WGPU{}*>({})", type_without_wgpu, param.name);
+                }
             } else {
-                assign = std::format("{}reinterpret_cast<WGPU{}{}*>({}{})", param.is_pointer ? "" : "*",
-                                     type_without_wgpu, (param.is_const || !param.is_pointer) ? " const" : "",
-                                     param.nullable && param.is_pointer ? "" : "&", param.name);
+                std::string prefix        = param.is_pointer ? "&" : "";
+                std::string access_prefix = (param.nullable && param.is_pointer) ? "->" : ".";
+                assign                    = std::format("{}{}{}raw()", prefix, param.name, access_prefix);
             }
         } else if (param.is_pointer && param.is_struct) {
             if (param.nullable) {  // cpp full type is also pointer
@@ -1547,8 +1772,8 @@ template <typename T>
         }
         return {assign, temp_data, write_back};
     };
-    auto build_native_call_args =
-        [&](const std::vector<FuncParamApiCpp>& params_cpp) -> std::tuple<std::string, std::string, std::string> {
+    auto build_native_call_args = [&](const std::vector<FuncParamApiCpp>& params_cpp)
+        -> std::tuple<std::vector<std::string>, std::vector<std::string>, std::vector<std::string>> {
         std::vector<std::string> temp_parts;
         std::vector<std::string> write_parts;
         std::vector<std::string> arg_exprs;
@@ -1596,13 +1821,7 @@ template <typename T>
             if (!write_back.empty()) write_parts.push_back(write_back);
             arg_exprs.push_back(assign);
         }
-        auto join_lines = [](const std::vector<std::string>& items) {
-            return items | std::views::join_with(std::string("\n")) | std::ranges::to<std::string>();
-        };
-        auto join_args = [](const std::vector<std::string>& items) {
-            return items | std::views::join_with(std::string(", ")) | std::ranges::to<std::string>();
-        };
-        return {join_lines(temp_parts), join_args(arg_exprs), join_lines(write_parts)};
+        return {temp_parts, arg_exprs, write_parts};
     };
 
     auto find_array_pairs = [&](const std::vector<FuncParamApi>& params_api) {
@@ -1809,8 +2028,8 @@ template <typename T>
             func_cpp.name[0]                        = std::tolower(func_cpp.name[0]);  // make first letter lower case
             std::vector<FuncParamApiCpp> params_cpp = func_api.params | std::views::transform(get_func_param_cpp_type) |
                                                       std::ranges::to<std::vector<FuncParamApiCpp>>();
-            auto params_cpp_base    = params_cpp;
-            std::string return_type = func_api.return_type;
+            auto params_cpp_base                    = params_cpp;
+            std::string return_type                 = func_api.return_type;
             if (return_type.starts_with("WGPU")) {
                 return_type = ns + "::" + return_type.substr(4);
             }
@@ -1830,16 +2049,22 @@ template <typename T>
                 }
                 continue;
             }
-            bool nullable_overload = false;
-            if (!params_cpp.empty() && params_cpp.back().nullable && params_cpp.back().is_pointer) {
-                // the last param is a nullable pointer, need two overloads, one be ref, one be nullptr.
-                params_cpp.back().nullable = false;  // force as ref. later add overload.
-                nullable_overload          = true;
+            bool nullable_overload     = false;
+            std::size_t nullable_index = 0;
+            if (!params_cpp.empty()) {
+                for (std::size_t i = params_cpp.size(); i-- > 0;) {
+                    if (params_cpp[i].nullable && params_cpp[i].is_pointer && params_cpp[i].is_const) {
+                        params_cpp[i].nullable = false;
+                        nullable_overload      = true;
+                        nullable_index         = i;
+                        break;
+                    }
+                }
             }
             func_cpp.func_decl    = std::format("{} {}({});", return_type, func_cpp.name,
                                                 params_cpp | std::views::transform([](const FuncParamApiCpp& p) {
                                                  return p.full_type() + " " + p.name;
-                                             }) | std::views::join_with(std::string(", ")) |
+                                                }) | std::views::join_with(std::string(", ")) |
                                                     std::ranges::to<std::string>());
             std::string impl_str1 = R"(
 {2} {0}({3}) {{
@@ -1858,7 +2083,10 @@ template <typename T>
             auto arg3 = params_cpp |
                         std::views::transform([](const FuncParamApiCpp& p) { return p.full_type() + " " + p.name; }) |
                         std::views::join_with(std::string(", ")) | std::ranges::to<std::string>();
-            auto [arg4, arg5, arg6] = build_native_call_args(params_cpp);
+            auto [arg4_parts, arg5_parts, arg6_parts] = build_native_call_args(params_cpp);
+            auto arg4 = arg4_parts | std::views::join_with(std::string("\n")) | std::ranges::to<std::string>();
+            auto arg5 = arg5_parts | std::views::join_with(std::string(", ")) | std::ranges::to<std::string>();
+            auto arg6 = arg6_parts | std::views::join_with(std::string("\n")) | std::ranges::to<std::string>();
             func_cpp.func_impl =
                 std::vformat(return_type == "void" ? impl_str2 : impl_str1,
                              std::make_format_args(func_cpp.name, func_api.name, return_type, arg3, arg4, arg5, arg6));
@@ -1866,26 +2094,26 @@ template <typename T>
             result.functions.push_back(std::move(func_cpp));
 
             if (nullable_overload) {
-                params_cpp.pop_back();  // remove the last param
+                params_cpp.erase(params_cpp.begin() + static_cast<std::ptrdiff_t>(nullable_index));
                 FuncApiCpp func_cpp;
                 func_cpp.name         = func_api.name;
                 func_cpp.name[0]      = std::tolower(func_cpp.name[0]);  // make first letter lower case
                 func_cpp.func_decl    = std::format("{} {}({});", return_type, func_cpp.name,
                                                     params_cpp | std::views::transform([](const FuncParamApiCpp& p) {
                                                      return p.full_type() + " " + p.name;
-                                                 }) | std::views::join_with(std::string(", ")) |
+                                                    }) | std::views::join_with(std::string(", ")) |
                                                         std::ranges::to<std::string>());
                 std::string impl_str1 = R"(
 {2} {0}({3}) {{
 {4}
-    {2} res = static_cast<{2}>(wgpu{1}({5}{7}));
+    {2} res = static_cast<{2}>(wgpu{1}({5}));
 {6}
     return res;
 }})";
                 std::string impl_str2 = R"(
 {2} {0}({3}) {{
 {4}
-    wgpu{1}({5}{7});
+    wgpu{1}({5});
 {6}
 }})";
 
@@ -1893,11 +2121,14 @@ template <typename T>
                     params_cpp |
                     std::views::transform([](const FuncParamApiCpp& p) { return p.full_type() + " " + p.name; }) |
                     std::views::join_with(std::string(", ")) | std::ranges::to<std::string>();
-                auto [arg4, arg5, arg6] = build_native_call_args(params_cpp);
-                auto arg7               = params_cpp.empty() ? "nullptr" : ", nullptr";
-                func_cpp.func_impl      = std::vformat(
+                auto [arg4_parts, arg5_parts, arg6_parts] = build_native_call_args(params_cpp);
+                arg5_parts.insert(arg5_parts.begin() + static_cast<std::ptrdiff_t>(nullable_index), "nullptr");
+                auto arg4 = arg4_parts | std::views::join_with(std::string("\n")) | std::ranges::to<std::string>();
+                auto arg5 = arg5_parts | std::views::join_with(std::string(", ")) | std::ranges::to<std::string>();
+                auto arg6 = arg6_parts | std::views::join_with(std::string("\n")) | std::ranges::to<std::string>();
+                func_cpp.func_impl = std::vformat(
                     return_type == "void" ? impl_str2 : impl_str1,
-                    std::make_format_args(func_cpp.name, func_api.name, return_type, arg3, arg4, arg5, arg6, arg7));
+                    std::make_format_args(func_cpp.name, func_api.name, return_type, arg3, arg4, arg5, arg6));
 
                 result.functions.push_back(std::move(func_cpp));
             }
@@ -1909,8 +2140,8 @@ template <typename T>
             std::vector<FuncParamApiCpp> params_cpp = func_api.params | std::views::drop(1) |
                                                       std::views::transform(get_func_param_cpp_type) |
                                                       std::ranges::to<std::vector<FuncParamApiCpp>>();
-            auto params_cpp_base    = params_cpp;
-            std::string return_type = func_api.return_type;
+            auto params_cpp_base                    = params_cpp;
+            std::string return_type                 = func_api.return_type;
             if (return_type.starts_with("WGPU")) {
                 return_type = ns + "::" + return_type.substr(4);
             }
@@ -1927,11 +2158,17 @@ template <typename T>
                 }
                 continue;
             }
-            bool nullable_overload = false;
-            if (!params_cpp.empty() && params_cpp.back().nullable && params_cpp.back().is_pointer) {
-                // the last param is a nullable pointer, need two overloads, one be ref, one be nullptr.
-                params_cpp.back().nullable = false;  // force as ref. later add overload.
-                nullable_overload          = true;
+            bool nullable_overload     = false;
+            std::size_t nullable_index = 0;
+            if (!params_cpp.empty()) {
+                for (std::size_t i = params_cpp.size(); i-- > 0;) {
+                    if (params_cpp[i].nullable && params_cpp[i].is_pointer) {
+                        params_cpp[i].nullable = false;
+                        nullable_overload      = true;
+                        nullable_index         = i;
+                        break;
+                    }
+                }
             }
             handle_cpp.methods_decl.push_back(std::format(
                 R"(
@@ -1944,29 +2181,32 @@ template <typename T>
             std::string impl_str1 = R"(
 {2} {0}::{1}({3}) const {{
 {4}
-    {2} res = static_cast<{2}>(wgpu{5}({6}{7}));
-{8}
+    {2} res = static_cast<{2}>(wgpu{5}({6}));
+{7}
     return res;
 }})";
             std::string impl_str2 = R"(
 {2} {0}::{1}({3}) const {{
 {4}
-    wgpu{5}({6}{7});
-{8}
+    wgpu{5}({6});
+{7}
 }})";
 
             auto arg3 = params_cpp |
                         std::views::transform([](const FuncParamApiCpp& p) { return p.full_type() + " " + p.name; }) |
                         std::views::join_with(std::string(", ")) | std::ranges::to<std::string>();
-            auto arg5               = func_api.name;
-            auto arg6               = params_cpp.empty() ? "m_raw" : "m_raw, ";
-            auto [arg4, arg7, arg8] = build_native_call_args(params_cpp);
+            auto arg5 = func_api.name;
+            auto [arg4_parts, arg6_parts, arg7_parts] = build_native_call_args(params_cpp);
+            arg6_parts.insert(arg6_parts.begin(), "m_raw");
+            auto arg4 = arg4_parts | std::views::join_with(std::string("\n")) | std::ranges::to<std::string>();
+            auto arg6 = arg6_parts | std::views::join_with(std::string(", ")) | std::ranges::to<std::string>();
+            auto arg7 = arg7_parts | std::views::join_with(std::string("\n")) | std::ranges::to<std::string>();
             handle_cpp.methods_impl.push_back(std::vformat(
                 return_type == "void" ? impl_str2 : impl_str1,
-                std::make_format_args(handle_cpp.name, func_name, return_type, arg3, arg4, arg5, arg6, arg7, arg8)));
+                std::make_format_args(handle_cpp.name, func_name, return_type, arg3, arg4, arg5, arg6, arg7)));
 
             if (nullable_overload) {
-                params_cpp.pop_back();  // remove the last param
+                params_cpp.erase(params_cpp.begin() + static_cast<std::ptrdiff_t>(nullable_index));
                 handle_cpp.methods_decl.push_back(std::format(
                     R"(
     {} {}({}) const;)",
@@ -1978,28 +2218,31 @@ template <typename T>
                 std::string impl_str1 = R"(
 {2} {0}::{1}({3}) const {{
 {4}
-    {2} res = static_cast<{2}>(wgpu{5}({6}{7}, nullptr));
-{8}
+    {2} res = static_cast<{2}>(wgpu{5}({6}));
+{7}
     return res;
 }})";
                 std::string impl_str2 = R"(
 {2} {0}::{1}({3}) const {{
 {4}
-    wgpu{5}({6}{7}, nullptr);
-{8}
+    wgpu{5}({6});
+{7}
 }})";
 
                 auto arg3 =
                     params_cpp |
                     std::views::transform([](const FuncParamApiCpp& p) { return p.full_type() + " " + p.name; }) |
                     std::views::join_with(std::string(", ")) | std::ranges::to<std::string>();
-                auto arg5               = func_api.name;
-                auto arg6               = params_cpp.empty() ? "m_raw" : "m_raw, ";
-                auto [arg4, arg7, arg8] = build_native_call_args(params_cpp);
-                handle_cpp.methods_impl.push_back(
-                    std::vformat(return_type == "void" ? impl_str2 : impl_str1,
-                                 std::make_format_args(handle_cpp.name, func_name, return_type, arg3, arg4, arg5, arg6,
-                                                       arg7, arg8)));
+                auto arg5                                 = func_api.name;
+                auto [arg4_parts, arg6_parts, arg7_parts] = build_native_call_args(params_cpp);
+                arg6_parts.insert(arg6_parts.begin() + static_cast<std::ptrdiff_t>(nullable_index), "nullptr");
+                arg6_parts.insert(arg6_parts.begin(), "m_raw");
+                auto arg4 = arg4_parts | std::views::join_with(std::string("\n")) | std::ranges::to<std::string>();
+                auto arg6 = arg6_parts | std::views::join_with(std::string(", ")) | std::ranges::to<std::string>();
+                auto arg7 = arg7_parts | std::views::join_with(std::string("\n")) | std::ranges::to<std::string>();
+                handle_cpp.methods_impl.push_back(std::vformat(
+                    return_type == "void" ? impl_str2 : impl_str1,
+                    std::make_format_args(handle_cpp.name, func_name, return_type, arg3, arg4, arg5, arg6, arg7)));
             }
         }
     }
@@ -2178,25 +2421,33 @@ void generate_webgpu_cpp(const WebGpuApiCpp& api_cpp, const TemplateMeta& templa
         }
         handles_def_text += handle_cpp.gen_definition() + "\n\n";
     }
+    std::string handle_friends_text = "#define WEBGPU_HANDLE_FRIENDS";
+    std::string raii_friends_text   = "#define WEBGPU_RAII_FRIENDS";
+    for (const auto& handle_cpp : api_cpp.handles) {
+        handle_friends_text += std::format(" \\\n+    friend class {}::{};", namespace_name, handle_cpp.name);
+        raii_friends_text += std::format(" \\\n+    friend class raw::{};", handle_cpp.name);
+    }
+    for (const auto& struct_cpp : api.structs) {
+        handle_friends_text += std::format(" \\\n+    friend struct {}::{};", namespace_name, struct_cpp.name);
+        raii_friends_text += std::format(" \\\n+    friend struct {};", struct_cpp.name);
+    }
+    for (const auto& callback_api : api.callbacks) {
+        handle_friends_text +=
+            std::format(" \\\n+    friend struct {}::{}Callback;", namespace_name, callback_api.name);
+        raii_friends_text += std::format(" \\\n+    friend struct {}Callback;", callback_api.name);
+    }
+    for (const auto& func_cpp : api_cpp.functions) {
+        std::string decl = func_cpp.func_decl;
+        decl             = std::regex_replace(decl, std::regex("\n"), " ");
+        if (func_cpp.func_impl.find(namespace_name + "::") != std::string::npos) {
+            handle_friends_text += std::format(" \\\n+    friend {}", decl);
+            raii_friends_text += std::format(" \\\n+    friend {}", decl);
+        }
+    }
     if (parser.contains("--use-raii")) {
         handles_def_text = std::format("namespace {}::raw {{\n{}\n}}\n", namespace_name, handles_def_text);
         std::string raii_def_text;
-        std::string raii_friends_text = "#define WEBGPU_RAII_FRIENDS";
-        for (const auto& handle_cpp : api_cpp.handles) {
-            raii_friends_text += std::format(" \\\n    friend class raw::{};", handle_cpp.name);
-        }
-        for (const auto& struct_cpp : api.structs) {
-            if (struct_cpp.owning || parser.contains("--force-raii")) {
-                raii_friends_text += std::format(" \\\n    friend struct {};", struct_cpp.name);
-            }
-        }
-        for (const auto& func_cpp : api_cpp.functions) {
-            std::string decl = func_cpp.func_decl;
-            decl             = std::regex_replace(decl, std::regex("\n"), " ");
-            if (func_cpp.func_impl.find("wgpu") != std::string::npos) {
-                raii_friends_text += std::format(" \\\n    friend {}", decl);
-            }
-        }
+
         for (const auto& handle_cpp : api_cpp.handles) {
             raii_def_text += handle_cpp.gen_raii_definition() + "\n\n";
         }
@@ -2206,7 +2457,8 @@ void generate_webgpu_cpp(const WebGpuApiCpp& api_cpp, const TemplateMeta& templa
     } else {
         handles_def_text = std::format("namespace {} {{\n{}\n}}", namespace_name, handles_def_text);
     }
-    output = std::regex_replace(output, std::regex(R"(\{\{handles\}\})"), handles_def_text);
+    handles_def_text = handle_friends_text + "\n\n" + handles_def_text + "\n#undef WEBGPU_HANDLE_FRIENDS";
+    output           = std::regex_replace(output, std::regex(R"(\{\{handles\}\})"), handles_def_text);
 
     // {{handles_template_impl}}
     std::string handles_template_impl_text;
@@ -2270,7 +2522,7 @@ int main(int argc, char** argv) {
     set_up_parser(parser);
     parser.parse(argc, argv);
 
-    auto log_path = parser.get_single("--log-path").value_or("");
+    std::string log_path = (std::string)parser.get_single("--log-path").value_or("");
     if (!log_path.empty()) {
         log_file.open(log_path);
         if (log_file.is_open()) {

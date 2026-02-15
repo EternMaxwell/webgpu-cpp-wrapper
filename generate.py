@@ -35,6 +35,8 @@ class Logger:
 
 log = Logger(None)
 
+args : argparse.Namespace
+
 
 @dataclass
 class InjectedData:
@@ -156,40 +158,59 @@ class EnumToString:
 
 
 @dataclass
-class FuncParamApiCpp:
+class CallbackParamApiCpp:
 	type: str
 	name: str
 	is_pointer: bool = False
 	is_const: bool = False
 	is_struct: bool = False
 	is_handle: bool = False
+	is_indexed: bool = False
 	is_callback: bool = False
 	binary_compatible: bool = False
 	nullable: bool = False
 
-	def full_type(self, namespace: str) -> str:
+	def full_type(self) -> str:
 		full = self.type
-		if self.is_handle and not self.is_pointer:
-			full += " const&"
-		elif self.is_pointer:
+		if self.is_pointer:
 			if self.is_const:
 				full += " const"
 			if not self.is_const:
 				full += "*"
 			else:
-				full += "*" if self.nullable or not self.type.startswith(namespace + "::") else "&"
+				full += "*" if self.nullable or not self.type.startswith(args.namespace + "::") else "&"
 		return full
 
-	def get_assign_from_native(self, namespace: str) -> Tuple[str, str]:
+	def get_assign_from_native(self) -> Tuple[str, str]:
 		assign = ""
 		temp_data = ""
-		if self.is_handle:
+		type_without_namespace = self.type[len(args.namespace + "::"):] if self.type.startswith(args.namespace + "::") else self.type
+		if self.is_handle and not self.is_indexed:
 			if self.is_pointer and not self.is_const:
+				raise NotImplementedError("Pointer to non-const handle is not supported in callback parameters yet")
 				assign = f"reinterpret_cast<{self.type}*>({self.name})"
-			else:
+			elif self.is_const:
 				assign = (
 					f"{'*' if not self.nullable else ''}reinterpret_cast<{self.type}{'' if (self.is_pointer and not self.is_const) else ' const'}*>({'' if self.is_pointer else '&'}{self.name})"
 				)
+			else:
+				assign = f"static_cast<{self.type}>({self.name})"
+		elif self.is_handle and self.is_indexed: # indexed handle, not binary compatible, use a temp struct to reinterpret if non-owning, static_cast if owning
+			if self.is_pointer and not self.is_const:
+				raise NotImplementedError("Pointer to non-const indexed handle is not supported in callback parameters yet")
+			elif self.is_const and self.is_pointer: # we will have to make a temp struct with c handle and id underlying type, to reinterpret cast a c handle and a zero id to cpp wrapper type
+				temp_data = (
+					f"\n    struct {type_without_namespace}Temp {{\n"
+					f"        WGPU{type_without_namespace} raw;\n"
+					f"        {f'{type_without_namespace}Id id{{}};' if self.is_indexed else ''}\n"
+					f"    }} temp{{{f'*{self.name}' if self.is_pointer else self.name}}};\n"
+				)
+				if self.nullable:
+					assign = f"{self.name} ? reinterpret_cast<{self.type}*>(&temp) : nullptr"
+				else:
+					assign = f"*reinterpret_cast<{self.type}*>(&temp)"
+			else: # owning indexed handle, we can just static_cast the c handle to cpp wrapper type, as the constructor will create the id
+				assign = f"static_cast<{self.type}>({self.name})"
 		elif self.is_pointer and self.is_struct:
 			if not self.is_const:
 				if self.binary_compatible:
@@ -222,20 +243,20 @@ class FuncParamApiCpp:
 @dataclass
 class CallbackApiCpp:
 	name: str
-	params: List[FuncParamApiCpp] = field(default_factory=list)
+	params: List[CallbackParamApiCpp] = field(default_factory=list)
 	userdatas: List[str] = field(default_factory=list)
 
-	def gen_param_types(self, namespace: str) -> str:
-		return ", ".join(p.full_type(namespace) for p in self.params)
+	def gen_param_types(self) -> str:
+		return ", ".join(p.full_type() for p in self.params)
 
 	def gen_param_names(self) -> str:
 		return ", ".join(p.name for p in self.params)
 
-	def gen_param_sig(self, namespace: str) -> str:
-		return ", ".join(f"{p.full_type(namespace)} {p.name}" for p in self.params)
+	def gen_param_sig(self) -> str:
+		return ", ".join(f"{p.full_type()} {p.name}" for p in self.params)
 
-	def gen_cparam_sig(self, namespace: str) -> str:
-		ns = namespace + "::"
+	def gen_cparam_sig(self) -> str:
+		ns = args.namespace + "::"
 		items = []
 		for p in self.params:
 			type_name = p.type
@@ -249,22 +270,22 @@ class CallbackApiCpp:
 			items.append(f"{type_name} {p.name}")
 		return ", ".join(items)
 
-	def gen_definition(self, namespace: str) -> str:
+	def gen_definition(self) -> str:
 		userdatas = ", ".join(f"void* {s}" for s in self.userdatas)
 		return (
 			f"\nstruct {self.name} {{\n"
 			f"    struct Control {{\n"
 			f"        std::atomic<std::size_t> count{{1}};\n"
 			f"        virtual ~Control() = default;\n"
-			f"        virtual void invoke({self.gen_param_sig(namespace)}) const = 0;\n"
-			f"        virtual void invoke_c({self.gen_cparam_sig(namespace)}) const;\n"
+			f"        virtual void invoke({self.gen_param_sig()}) const = 0;\n"
+			f"        virtual void invoke_c({self.gen_cparam_sig()}) const;\n"
 			f"    }};\n"
 			f"private:\n"
 			f"    template <typename F>\n"
 			f"    struct ControlImpl : Control {{\n"
 			f"        F func;\n"
 			f"        ControlImpl(const F& f) : func(f) {{}}\n"
-			f"        void invoke({self.gen_param_sig(namespace)}) const override;\n"
+			f"        void invoke({self.gen_param_sig()}) const override;\n"
 			f"    }};\n"
 			f"    Control* data;\n"
 			f"public:\n"
@@ -276,30 +297,30 @@ class CallbackApiCpp:
 			f"    {self.name}& operator=({self.name}&& other);\n"
 			f"    {self.name}& operator=(std::nullptr_t) {{ reset(); return *this; }}\n"
 			f"    ~{self.name}() {{ if (data && --data->count == 0) {{ delete data; }} }}\n"
-			f"    template <std::invocable<{self.gen_param_types(namespace)}> F>\n"
+			f"    template <std::invocable<{self.gen_param_types()}> F>\n"
 			f"    {self.name}(const F& f);\n"
-			f"    void operator()({self.gen_param_sig(namespace)}) const;\n"
-			f"    void operator()({self.gen_cparam_sig(namespace)}) const;\n"
+			f"    void operator()({self.gen_param_sig()}) const;\n"
+			f"    void operator()({self.gen_cparam_sig()}) const;\n"
 			f"    void reset() {{ if (data && --data->count == 0) {{ delete data; }} data = nullptr; }}\n"
 			f"    operator bool() const {{ return data != nullptr; }}\n"
 			f"}};"
 		)
 
-	def gen_template_impl(self, namespace: str) -> str:
+	def gen_template_impl(self) -> str:
 		return (
-			f"template <std::invocable<{self.gen_param_types(namespace)}> F>\n"
+			f"template <std::invocable<{self.gen_param_types()}> F>\n"
 			f"{self.name}::{self.name}(const F& f) {{\n"
 			f"    data = new ControlImpl<F>(f);\n"
 			f"}}\n"
 			f"template <typename F>\n"
-			f"void {self.name}::ControlImpl<F>::invoke({self.gen_param_sig(namespace)}) const {{\n"
+			f"void {self.name}::ControlImpl<F>::invoke({self.gen_param_sig()}) const {{\n"
 			f"    func({self.gen_param_names()});\n"
 			f"}}"
 		)
 
-	def gen_impl(self, namespace: str) -> str:
-		temp_data = "\n".join(p.get_assign_from_native(namespace)[1] for p in self.params)
-		assign = ", ".join(p.get_assign_from_native(namespace)[0] for p in self.params)
+	def gen_impl(self) -> str:
+		temp_data = "\n".join(p.get_assign_from_native()[1] for p in self.params)
+		assign = ", ".join(p.get_assign_from_native()[0] for p in self.params)
 		userdata_sig = ", ".join(f"void* {s}" for s in self.userdatas)
 		userdata_pass = ", ".join(self.userdatas)
 		userdata_members = "\n".join(f"    void* {s};" for s in self.userdatas)
@@ -309,10 +330,10 @@ class CallbackApiCpp:
 			f"    WGPU{self.name} native;\n"
 			f"{userdata_members}\n"
 			f"    {self.name}ControlNative(WGPU{self.name} n, {userdata_sig}) : native(n), {userdata_init} {{}}\n"
-			f"    void invoke({self.gen_param_sig(namespace)}) const override {{}}\n"
-			f"    void invoke_c({self.gen_cparam_sig(namespace)}) const override;\n"
+			f"    void invoke({self.gen_param_sig()}) const override {{}}\n"
+			f"    void invoke_c({self.gen_cparam_sig()}) const override;\n"
 			f"}};\n"
-			f"void {self.name}ControlNative::invoke_c({self.gen_cparam_sig(namespace)}) const {{\n"
+			f"void {self.name}ControlNative::invoke_c({self.gen_cparam_sig()}) const {{\n"
 			f"    native({self.gen_param_names()}, {userdata_pass});\n"
 			f"}}\n"
 			f"{self.name}::{self.name}(WGPU{self.name} native, {userdata_sig}) {{\n"
@@ -322,7 +343,7 @@ class CallbackApiCpp:
 			f"        data = nullptr;\n"
 			f"    }}\n"
 			f"}}\n"
-			f"void {self.name}::Control::invoke_c({self.gen_cparam_sig(namespace)}) const {{\n"
+			f"void {self.name}::Control::invoke_c({self.gen_cparam_sig()}) const {{\n"
 			f"{temp_data}\n"
 			f"    invoke({assign});\n"
 			f"}}\n"
@@ -342,8 +363,8 @@ class CallbackApiCpp:
 			f"    }}\n"
 			f"    return *this;\n"
 			f"}}\n"
-			f"void {self.name}::operator()({self.gen_param_sig(namespace)}) const {{ if (data) data->invoke({self.gen_param_names()}); }}\n"
-			f"void {self.name}::operator()({self.gen_cparam_sig(namespace)}) const {{ if (data) data->invoke_c({self.gen_param_names()}); }}\n"
+			f"void {self.name}::operator()({self.gen_param_sig()}) const {{ if (data) data->invoke({self.gen_param_names()}); }}\n"
+			f"void {self.name}::operator()({self.gen_cparam_sig()}) const {{ if (data) data->invoke_c({self.gen_param_names()}); }}\n"
 		)
 
 
@@ -701,10 +722,24 @@ class StructApiCpp:
 			f"\n{methods}"
 		)
 
+def gen_atomic_id(name: str) -> Tuple[str, str]:
+    return (
+		f"""
+struct {name}Id {{
+    static std::atomic<size_t> counter;
+    static {name}Id create() {{ return {name}Id{{counter++}}; }}
+    
+    operator size_t() const {{ return value; }}
+    size_t value{{0}};
+}};
+""",
+		f"std::atomic<size_t> {name}Id::counter{{1}};\n"
+	)
 
 @dataclass
 class HandleApiCpp:
 	name: str
+	indexed: bool
 	methods_decl: List[str] = field(default_factory=list)
 	methods_template_impl: List[str] = field(default_factory=list)
 	methods_impl: List[str] = field(default_factory=list)
@@ -716,8 +751,8 @@ class HandleApiCpp:
 			f"    using base_type = raw::{self.name};\n"
 			f"    using wgpu_type = WGPU{self.name};\n"
 			f"    {self.name}() : base_type() {{}}\n"
-			f"    WEBGPU_RAII_FRIENDS\n"
 			f"private:\n"
+			f"    WEBGPU_RAII_FRIENDS\n"
 			f"    {self.name}(wgpu_type raw) : base_type(raw) {{}}\n"
 			f"    {self.name}(base_type raw) : base_type(raw) {{}}\n"
 			f"    {self.name}& operator=(const base_type& raw) {{ if (*this) this->release(); base_type::operator=(raw); return *this; }}\n"
@@ -738,19 +773,26 @@ class HandleApiCpp:
 	def gen_definition(self) -> str:
 		methods_decl = "\n".join(self.methods_decl)
 		return (
+			f"\n{gen_atomic_id(self.name)[0] if self.indexed else ''}"
 			f"\nclass {self.name} {{\n"
 			f"public:\n"
 			f"    using wgpu_type = WGPU{self.name};\n"
 			f"    {self.name}() : m_raw(nullptr) {{}}\n"
-			f"    {self.name}(WGPU{self.name} raw) : m_raw(raw) {{}}\n"
-			f"    operator WGPU{self.name}() const {{ return m_raw; }}\n"
+			f"    {self.name}(std::nullptr_t) : m_raw(nullptr) {{}}\n"
+			f"    WGPU{self.name} const& raw() const {{ return m_raw; }}\n"
+			f"{f'    {self.name}Id id() const {{ return m_id; }}' if self.indexed else ''}\n"
+			f"    operator WGPU{self.name} const&() const {{ return m_raw; }}\n"
+			f"    operator WGPU{self.name}&() {{ return m_raw; }}\n"
 			f"    operator bool() const {{ return m_raw != nullptr; }}\n"
 			f"    bool operator==(const {self.name}& other) const {{ return m_raw == other.m_raw; }}\n"
 			f"    bool operator!=(const {self.name}& other) const {{ return m_raw != other.m_raw; }}\n"
 			f"    {self.name}& operator=(std::nullptr_t) {{ m_raw = nullptr; return *this; }}\n"
 			f"{methods_decl}\n"
 			f"private:\n"
+			f"    WEBGPU_HANDLE_FRIENDS\n"
+			f"    {self.name}(WGPU{self.name} raw) : m_raw(raw){f', m_id(raw ? {self.name}Id::create() : 0)' if self.indexed else ''} {{}}\n"
 			f"    WGPU{self.name} m_raw;\n"
+			f"{f'    {self.name}Id m_id{{}};' if self.indexed else ''}\n"
 			f"}};"
 		)
 
@@ -758,8 +800,33 @@ class HandleApiCpp:
 		return "\n".join(self.methods_template_impl)
 
 	def gen_impl(self) -> str:
-		return "\n".join(self.methods_impl)
+		return "\n".join(self.methods_impl + ([gen_atomic_id(self.name)[1]] if self.indexed else []))
 
+@dataclass
+class FuncParamApiCpp:
+	type: str
+	name: str
+	is_pointer: bool = False
+	is_const: bool = False
+	is_struct: bool = False
+	is_handle: bool = False
+	is_indexed: bool = False
+	is_callback: bool = False
+	binary_compatible: bool = False
+	nullable: bool = False
+
+	def full_type(self) -> str:
+		full = self.type
+		if self.is_handle and not self.is_pointer:
+			full += " const&"
+		elif self.is_pointer:
+			if self.is_const:
+				full += " const"
+			if not self.is_const:
+				full += "*"
+			else:
+				full += "*" if self.nullable or not self.type.startswith(args.namespace + "::") else "&"
+		return full
 
 @dataclass
 class FuncApiCpp:
@@ -1069,8 +1136,25 @@ def load_template(template_path: Path) -> TemplateMeta:
 	log.println("Loaded template:\ntext:\n{}\n-----------\ninjections:\n{}\n\n", meta.text, meta.injections.members)
 	return meta
 
+INDEXED_HANDLE_BLACKLIST = {
+	"Adapter",
+	"Instance",
+	"Device",
+	"Queue",
+	"CommandEncoder",
+	"RenderPassEncoder",
+	"ComputePassEncoder",
+	"RenderBundleEncoder",
+	"CommandBuffer",
+}
+"""
+Blacklist of handle types that should not be indexed,
+some of them is because they are unecessary to be indexed,
+some are needing binary compatibility with the raw handles, like `Adapter`.
+Indexed handles are usually handles to resource objects.
+"""
 
-def produce_webgpu_cpp(api: WebGpuApi, template_meta: TemplateMeta, args: argparse.Namespace) -> WebGpuApiCpp:
+def produce_webgpu_cpp(api: WebGpuApi) -> WebGpuApiCpp:
 	result = WebGpuApiCpp()
 	namespace = args.namespace
 	use_raii = args.use_raii
@@ -1093,7 +1177,8 @@ def produce_webgpu_cpp(api: WebGpuApi, template_meta: TemplateMeta, args: argpar
 		result.enum_to_string.append(EnumToString(enum_name=enum_api.name, func_decl=func_decl, func_impl="".join(impl_lines)))
 
 	for handle_api in api.handles:
-		result.handles.append(HandleApiCpp(name=handle_api.name))
+		indexed = handle_api.name not in INDEXED_HANDLE_BLACKLIST and (handle_api.name in args.indexed_handles or "all" in args.indexed_handles)
+		result.handles.append(HandleApiCpp(name=handle_api.name, indexed=indexed))
 
 	callback_types = {f"WGPU{cb.name}Callback" for cb in api.callbacks}
 
@@ -1116,13 +1201,46 @@ def produce_webgpu_cpp(api: WebGpuApi, template_meta: TemplateMeta, args: argpar
 			is_const=param.is_const,
 			is_callback=is_callback,
 		)
-		if param.type.startswith("WGPU") and any(h.name == type_without_wgpu for h in api.handles):
-			param_cpp.is_handle = True
+		if param.type.startswith("WGPU"):
+			for handle_api in result.handles:
+				if handle_api.name == type_without_wgpu:
+					param_cpp.is_handle = True
+					param_cpp.is_indexed = handle_api.indexed
+					break
 		if param.type.startswith("WGPU") and any(s.name == type_without_wgpu for s in api.structs):
 			param_cpp.is_struct = True
 		return param_cpp
 
-	def build_native_call_args(params_cpp: List[FuncParamApiCpp]) -> Tuple[str, str, str]:
+	def get_callback_param_cpp_type(param: FuncParamApi) -> CallbackParamApiCpp:
+		type_without_wgpu = param.type
+		if type_without_wgpu.startswith("WGPU"):
+			type_without_wgpu = type_without_wgpu[4:]
+		is_callback = param.type in callback_types
+		if is_callback:
+			cpp_type = namespace + "::" + type_without_wgpu
+		elif param.type.startswith("WGPU"):
+			cpp_type = namespace + "::" + param.type[4:]
+		else:
+			cpp_type = param.type
+		param_cpp = CallbackParamApiCpp(
+			type=cpp_type,
+			name=param.name,
+			is_pointer=param.is_pointer,
+			nullable=param.nullable,
+			is_const=param.is_const,
+			is_callback=is_callback,
+		)
+		if param.type.startswith("WGPU"):
+			for handle_api in result.handles:
+				if handle_api.name == type_without_wgpu:
+					param_cpp.is_handle = True
+					param_cpp.is_indexed = handle_api.indexed
+					break
+		if param.type.startswith("WGPU") and any(s.name == type_without_wgpu for s in api.structs):
+			param_cpp.is_struct = True
+		return param_cpp
+
+	def build_native_call_args(params_cpp: List[FuncParamApiCpp]) -> Tuple[List[str], List[str], List[str]]:
 		temp_parts: List[str] = []
 		write_parts: List[str] = []
 		arg_exprs: List[str] = []
@@ -1152,12 +1270,12 @@ def produce_webgpu_cpp(api: WebGpuApi, template_meta: TemplateMeta, args: argpar
 			if write:
 				write_parts.append(write)
 			arg_exprs.append(assign)
-		return "\n".join(temp_parts), ", ".join(arg_exprs), "\n".join(write_parts)
+		return temp_parts, arg_exprs, write_parts
 
 	for callback_api in api.callbacks:
 		callback_cpp = CallbackApiCpp(name=callback_api.name + "Callback")
 		for param in [p for p in callback_api.params if not p.name.startswith("userdata")]:
-			callback_cpp.params.append(get_func_param_cpp_type(param))
+			callback_cpp.params.append(get_callback_param_cpp_type(param))
 		for param in [p for p in callback_api.params if p.name.startswith("userdata")]:
 			callback_cpp.userdatas.append(param.name)
 		result.callbacks.append(callback_cpp)
@@ -1192,6 +1310,9 @@ def produce_webgpu_cpp(api: WebGpuApi, template_meta: TemplateMeta, args: argpar
 				struct_cpp.binary_compatible = False
 				counter_type = next(f.type for f in struct_api.fields if f.name == field.counter)
 				cpp_type = get_cpp_field_type(field.type, struct_api.owning)
+				type_without_wgpu = field.type
+				if type_without_wgpu.startswith("WGPU"):
+					type_without_wgpu = type_without_wgpu[4:]
 				field_cpp = StructFieldCpp(
 					type=f"{'' if field.is_const else 'mutable '}SmallVec<{cpp_type}>",
 					name=field.name,
@@ -1200,18 +1321,27 @@ def produce_webgpu_cpp(api: WebGpuApi, template_meta: TemplateMeta, args: argpar
 					),
 					assign_to_cstruct="",
 				)
-				type_without_wgpu = field.type
-				if type_without_wgpu.startswith("WGPU"):
-					type_without_wgpu = type_without_wgpu[4:]
+				if not struct_api.owning and any(h.name == type_without_wgpu for h in result.handles) and args.force_raii:
+					# in this case, we are make non-owning handle fields to be owning handles
+					field_cpp.assign_from_native += (
+						f"\n    for (auto& e : this->{field.name}) {{ e.addRef(); }}"
+      				)
 				if (
 					field_cpp.type == field.type
 					or any(e.name == type_without_wgpu for e in api.enums)
-					or any(h.name == type_without_wgpu for h in api.handles)
-					or get_struct_api_cpp(field.type[4:]).binary_compatible
+					or any(h.name == type_without_wgpu and not h.indexed for h in result.handles)
+					or (any(s.name == field.type[4:] for s in api.structs) and get_struct_api_cpp(field.type[4:]).binary_compatible)
 				):
 					field_cpp.assign_to_cstruct = (
 						f"\n    cstruct.{field.name} = reinterpret_cast<{field.full_type()}>(this->{field.name}.data());\n"
 						f"    cstruct.{field.counter} = static_cast<{counter_type}>(this->{field.name}.size());"
+					)
+				elif any(h.name == type_without_wgpu and h.indexed for h in result.handles): # indexed handle, not binary compatible
+					struct_cpp.extra_cstruct_members.append(f"SmallVec<{field.type}> {field.name}_vec;")
+					field_cpp.assign_to_cstruct = (
+						f"\n    cstruct.{field.name}_vec = this->{field.name} | std::views::transform([](auto&& e) {{ return e.raw(); }}) | std::ranges::to<SmallVec<{field.type}>>();\n"
+						f"    cstruct.{field.name} = cstruct.{field.name}_vec.data();\n"
+						f"    cstruct.{field.counter} = static_cast<{counter_type}>(cstruct.{field.name}_vec.size());"
 					)
 				elif not get_struct_api_cpp(field.type[4:]).extra_cstruct_members:
 					struct_cpp.extra_cstruct_members.append(f"SmallVec<{field.type}> {field.name}_vec;")
@@ -1354,8 +1484,7 @@ def produce_webgpu_cpp(api: WebGpuApi, template_meta: TemplateMeta, args: argpar
 			)
 			if field.type.startswith("WGPU") and any(h.name == field.type[4:] for h in api.handles) and args.force_raii and not struct_api.owning:
 				field_cpp.assign_from_native += f"\n    if (this->{field.name}) this->{field.name}.addRef();"
-
-			if field.type.startswith("WGPU") and any(s.name == field.type[4:] for s in api.structs):
+			elif field.type.startswith("WGPU") and any(s.name == field.type[4:] for s in api.structs):
 				if field.is_pointer:
 					raise RuntimeError(
 						f"Unhandled pointer field {field.name} of wgpu struct in struct {struct_cpp.name}"
@@ -1454,13 +1583,18 @@ def produce_webgpu_cpp(api: WebGpuApi, template_meta: TemplateMeta, args: argpar
 		has_free_members = any(f.name == type_without_wgpu + "FreeMembers" for f in api.functions)
 		free_members = f"wgpu{type_without_wgpu}FreeMembers" if has_free_members else ""
 		if param.is_handle:
+			is_indexed = any(h.name == type_without_wgpu and h.indexed for h in result.handles)
 			if param.is_pointer and not param.is_const:
-				assign = f"reinterpret_cast<WGPU{type_without_wgpu}*>({param.name})"
+				if is_indexed:
+					temp_data = f"\n    WGPU{type_without_wgpu} {param.name}_native;"
+					assign = f"&{param.name}_native"
+					write_back = f"\n    *{param.name} = static_cast<{param.type}>({param.name}_native);"
+				else:
+					assign = f"reinterpret_cast<WGPU{type_without_wgpu}*>({param.name})"
 			else:
-				prefix = "" if param.is_pointer else "*"
-				const_suffix = " const" if (param.is_const or not param.is_pointer) else ""
-				addr_prefix = "" if (param.nullable and param.is_pointer) else "&"
-				assign = f"{prefix}reinterpret_cast<WGPU{type_without_wgpu}{const_suffix}*>({addr_prefix}{param.name})"
+				prefix = "&" if param.is_pointer else ""
+				access_prefix = "->" if (param.nullable and param.is_pointer) else "."
+				assign = f"{prefix}{param.name}{access_prefix}raw()"
 		elif param.is_pointer and param.is_struct:
 			if param.nullable:
 				if param.binary_compatible:
@@ -1581,7 +1715,7 @@ def produce_webgpu_cpp(api: WebGpuApi, template_meta: TemplateMeta, args: argpar
 				elem_type = param.type + (" const" if param.is_const else "")
 				span_param_parts.append(f"std::span<{elem_type}> {param.name}")
 				continue
-			span_param_parts.append(f"{param.full_type(namespace)} {param.name}")
+			span_param_parts.append(f"{param.full_type()} {param.name}")
 		sig = ", ".join(span_param_parts)
 		temp_data_parts: List[str] = []
 		write_back_parts: List[str] = []
@@ -1631,7 +1765,6 @@ def produce_webgpu_cpp(api: WebGpuApi, template_meta: TemplateMeta, args: argpar
 		params_api: List[FuncParamApi],
 		params_cpp: List[FuncParamApiCpp],
 		return_type: str,
-		is_member: bool,
 		member_class: Optional[str],
 	) -> Optional[Tuple[str, str]]:
 		pairs = find_array_pairs(params_api)
@@ -1649,7 +1782,7 @@ def produce_webgpu_cpp(api: WebGpuApi, template_meta: TemplateMeta, args: argpar
 				span_param_parts.append(f"const {elem_type}& {param.name}")
 				call_args.append(f"std::span<const {elem_type}>(&{param.name}, 1)")
 				continue
-			span_param_parts.append(f"{param.full_type(namespace)} {param.name}")
+			span_param_parts.append(f"{param.full_type()} {param.name}")
 			call_args.append(param.name)
 		sig = ", ".join(span_param_parts)
 		qualifier = f"{member_class}::" if member_class else ""
@@ -1699,7 +1832,6 @@ def produce_webgpu_cpp(api: WebGpuApi, template_meta: TemplateMeta, args: argpar
 					func_api.params,
 					params_cpp_base,
 					return_type,
-					False,
 					None,
 				)
 				if single_overload:
@@ -1709,12 +1841,20 @@ def produce_webgpu_cpp(api: WebGpuApi, template_meta: TemplateMeta, args: argpar
 					)
 				continue
 			nullable_overload = False
-			if params_cpp and params_cpp[-1].nullable and params_cpp[-1].is_pointer:
-				params_cpp[-1].nullable = False
-				nullable_overload = True
-			func_decl = f"{return_type} {func_name}({', '.join(p.full_type(namespace) + ' ' + p.name for p in params_cpp)});"
-			arg3 = ", ".join(p.full_type(namespace) + " " + p.name for p in params_cpp)
+			nullable_index = 0
+			if params_cpp:
+				for i in range(len(params_cpp) - 1, -1, -1):
+					if params_cpp[i].nullable and params_cpp[i].is_pointer and params_cpp[i].is_const:
+						params_cpp[i].nullable = False
+						nullable_overload = True
+						nullable_index = i
+						break
+			func_decl = f"{return_type} {func_name}({', '.join(p.full_type() + ' ' + p.name for p in params_cpp)});"
+			arg3 = ", ".join(p.full_type() + " " + p.name for p in params_cpp)
 			arg4, arg5, arg6 = build_native_call_args(params_cpp)
+			arg4 = '\n'.join(arg4)
+			arg5 = ', '.join(arg5)
+			arg6 = '\n'.join(arg6)
 			if return_type == "void":
 				func_impl = (
 					f"\n{return_type} {func_name}({arg3}) {{\n{arg4}\n    wgpu{func_api.name}({arg5});\n{arg6}\n}}"
@@ -1726,18 +1866,21 @@ def produce_webgpu_cpp(api: WebGpuApi, template_meta: TemplateMeta, args: argpar
 			result.functions.append(FuncApiCpp(name=func_name, func_decl=func_decl, func_template_impl="", func_impl=func_impl))
 
 			if nullable_overload:
-				params_cpp.pop()
-				func_decl = f"{return_type} {func_name}({', '.join(p.full_type(namespace) + ' ' + p.name for p in params_cpp)});"
-				arg3 = ", ".join(p.full_type(namespace) + " " + p.name for p in params_cpp)
+				params_cpp.pop(nullable_index)
+				func_decl = f"{return_type} {func_name}({', '.join(p.full_type() + ' ' + p.name for p in params_cpp)});"
+				arg3 = ", ".join(p.full_type() + " " + p.name for p in params_cpp)
 				arg4, arg5, arg6 = build_native_call_args(params_cpp)
-				arg7 = "nullptr" if not params_cpp else ", nullptr"
+				arg5.insert(nullable_index, "nullptr")
+				arg4 = '\n'.join(arg4)
+				arg5 = ', '.join(arg5)
+				arg6 = '\n'.join(arg6)
 				if return_type == "void":
 					func_impl = (
-						f"\n{return_type} {func_name}({arg3}) {{\n{arg4}\n    wgpu{func_api.name}({arg5}{arg7});\n{arg6}\n}}"
+						f"\n{return_type} {func_name}({arg3}) {{\n{arg4}\n    wgpu{func_api.name}({arg5});\n{arg6}\n}}"
 					)
 				else:
 					func_impl = (
-						f"\n{return_type} {func_name}({arg3}) {{\n{arg4}\n    {return_type} res = static_cast<{return_type}>(wgpu{func_api.name}({arg5}{arg7}));\n{arg6}\n    return res;\n}}"
+						f"\n{return_type} {func_name}({arg3}) {{\n{arg4}\n    {return_type} res = static_cast<{return_type}>(wgpu{func_api.name}({arg5}));\n{arg6}\n    return res;\n}}"
 					)
 				result.functions.append(FuncApiCpp(name=func_name, func_decl=func_decl, func_template_impl="", func_impl=func_impl))
 		else:
@@ -1768,7 +1911,6 @@ def produce_webgpu_cpp(api: WebGpuApi, template_meta: TemplateMeta, args: argpar
 					func_api.params[1:],
 					params_cpp_base,
 					return_type,
-					True,
 					handle_cpp.name,
 				)
 				if single_overload:
@@ -1777,46 +1919,58 @@ def produce_webgpu_cpp(api: WebGpuApi, template_meta: TemplateMeta, args: argpar
 					handle_cpp.methods_impl.append(single_impl)
 				continue
 			nullable_overload = False
-			if params_cpp and params_cpp[-1].nullable and params_cpp[-1].is_pointer:
-				params_cpp[-1].nullable = False
-				nullable_overload = True
+			nullable_index = 0
+			if params_cpp:
+				for i in range(len(params_cpp) - 1, -1, -1):
+					if params_cpp[i].nullable and params_cpp[i].is_pointer:
+						params_cpp[i].nullable = False
+						nullable_overload = True
+						nullable_index = i
+						break
 			handle_cpp.methods_decl.append(
-				f"\n    {return_type} {func_name}({', '.join(p.full_type(namespace) + ' ' + p.name for p in params_cpp)}) const;"
+				f"\n    {return_type} {func_name}({', '.join(p.full_type() + ' ' + p.name for p in params_cpp)}) const;"
 			)
-			arg3 = ", ".join(p.full_type(namespace) + " " + p.name for p in params_cpp)
-			arg4, arg7, arg8 = build_native_call_args(params_cpp)
+			arg3 = ", ".join(p.full_type() + " " + p.name for p in params_cpp)
+			arg4, arg6, arg7 = build_native_call_args(params_cpp)
 			arg5 = func_api.name
-			arg6 = "m_raw" if not params_cpp else "m_raw, "
+			arg6.insert(0, "m_raw")
+			arg4 = '\n'.join(arg4)
+			arg6 = ', '.join(arg6)
+			arg7 = '\n'.join(arg7)
 			if return_type == "void":
 				handle_cpp.methods_impl.append(
-					f"\n{return_type} {handle_cpp.name}::{func_name}({arg3}) const {{\n{arg4}\n    wgpu{arg5}({arg6}{arg7});\n{arg8}\n}}"
+					f"\n{return_type} {handle_cpp.name}::{func_name}({arg3}) const {{\n{arg4}\n    wgpu{arg5}({arg6});\n{arg7}\n}}"
 				)
 			else:
 				handle_cpp.methods_impl.append(
-					f"\n{return_type} {handle_cpp.name}::{func_name}({arg3}) const {{\n{arg4}\n    {return_type} res = static_cast<{return_type}>(wgpu{arg5}({arg6}{arg7}));\n{arg8}\n    return res;\n}}"
+					f"\n{return_type} {handle_cpp.name}::{func_name}({arg3}) const {{\n{arg4}\n    {return_type} res = static_cast<{return_type}>(wgpu{arg5}({arg6}));\n{arg7}\n    return res;\n}}"
 				)
 			if nullable_overload:
-				params_cpp.pop()
+				params_cpp.pop(nullable_index)
 				handle_cpp.methods_decl.append(
-					f"\n    {return_type} {func_name}({', '.join(p.full_type(namespace) + ' ' + p.name for p in params_cpp)}) const;"
+					f"\n    {return_type} {func_name}({', '.join(p.full_type() + ' ' + p.name for p in params_cpp)}) const;"
 				)
-				arg3 = ", ".join(p.full_type(namespace) + " " + p.name for p in params_cpp)
-				arg4, arg7, arg8 = build_native_call_args(params_cpp)
-				arg6 = "m_raw" if not params_cpp else "m_raw, "
+				arg3 = ", ".join(p.full_type() + " " + p.name for p in params_cpp)
+				arg4, arg6, arg7 = build_native_call_args(params_cpp)
+				arg6.insert(nullable_index, "nullptr")
+				arg6.insert(0, "m_raw")
+				arg4 = '\n'.join(arg4)
+				arg6 = ', '.join(arg6)
+				arg7 = '\n'.join(arg7)
 				if return_type == "void":
 					handle_cpp.methods_impl.append(
-						f"\n{return_type} {handle_cpp.name}::{func_name}({arg3}) const {{\n{arg4}\n    wgpu{arg5}({arg6}{arg7}, nullptr);\n{arg8}\n}}"
+						f"\n{return_type} {handle_cpp.name}::{func_name}({arg3}) const {{\n{arg4}\n    wgpu{arg5}({arg6});\n{arg7}\n}}"
 					)
 				else:
 					handle_cpp.methods_impl.append(
-						f"\n{return_type} {handle_cpp.name}::{func_name}({arg3}) const {{\n{arg4}\n    {return_type} res = static_cast<{return_type}>(wgpu{arg5}({arg6}{arg7}, nullptr));\n{arg8}\n    return res;\n}}"
+						f"\n{return_type} {handle_cpp.name}::{func_name}({arg3}) const {{\n{arg4}\n    {return_type} res = static_cast<{return_type}>(wgpu{arg5}({arg6}));\n{arg7}\n    return res;\n}}"
 					)
 
 
 	return result
 
 
-def generate_webgpu_cpp(api: WebGpuApi, api_cpp: WebGpuApiCpp, template_meta: TemplateMeta, args: argparse.Namespace) -> None:
+def generate_webgpu_cpp(api: WebGpuApi, api_cpp: WebGpuApiCpp, template_meta: TemplateMeta) -> None:
 	namespace = args.namespace
 	use_raii = args.use_raii
 	headers = args.headers
@@ -1872,13 +2026,13 @@ def generate_webgpu_cpp(api: WebGpuApi, api_cpp: WebGpuApiCpp, template_meta: Te
 	callbacks_decl_text = "".join(f"struct {c.name};\n" for c in api_cpp.callbacks)
 	output = re.sub(r"\{\{callbacks_decl\}\}", f"namespace {namespace} {{\n{callbacks_decl_text}\n}}", output)
 
-	callbacks_def_text = "\n\n".join(c.gen_definition(namespace) for c in api_cpp.callbacks) + "\n\n"
+	callbacks_def_text = "\n\n".join(c.gen_definition() for c in api_cpp.callbacks) + "\n\n"
 	output = re.sub(r"\{\{callbacks\}\}", f"namespace {namespace} {{\n{callbacks_def_text}\n}}", output)
 
-	callbacks_template_impl_text = "\n\n".join(c.gen_template_impl(namespace) for c in api_cpp.callbacks) + "\n\n"
+	callbacks_template_impl_text = "\n\n".join(c.gen_template_impl() for c in api_cpp.callbacks) + "\n\n"
 	output = re.sub(r"\{\{callbacks_template_impl\}\}", f"namespace {namespace} {{\n{callbacks_template_impl_text}\n}}", output)
 
-	callbacks_impl_text = "\n\n".join(c.gen_impl(namespace) for c in api_cpp.callbacks) + "\n\n"
+	callbacks_impl_text = "\n\n".join(c.gen_impl() for c in api_cpp.callbacks) + "\n\n"
 	output = re.sub(r"\{\{callbacks_impl\}\}", f"namespace {namespace} {{\n{callbacks_impl_text}\n}}", output)
 
 	structs_decl_text = "".join(f"struct {s.name};\n" for s in api_cpp.structs)
@@ -1911,26 +2065,33 @@ def generate_webgpu_cpp(api: WebGpuApi, api_cpp: WebGpuApiCpp, template_meta: Te
 			if name == handle_cpp.name:
 				handle_cpp.methods_decl.append("\n" + "\n".join(injects))
 		handles_def_text += handle_cpp.gen_definition() + "\n\n"
+	handle_friends_text = "#define WEBGPU_HANDLE_FRIENDS"
+	raii_friends_text = "#define WEBGPU_RAII_FRIENDS"
+	for handle_cpp in api_cpp.handles:
+		handle_friends_text += f" \\\n    friend class {namespace}::{handle_cpp.name};"
+		raii_friends_text += f" \\\n    friend class raw::{handle_cpp.name};"
+	for struct_cpp in api.structs:
+		handle_friends_text += f" \\\n    friend struct {namespace}::{struct_cpp.name};"
+		raii_friends_text += f" \\\n    friend struct {struct_cpp.name};"
+	for callback_cpp in api.callbacks:
+		handle_friends_text += f" \\\n    friend struct {namespace}::{callback_cpp.name}Callback;"
+		raii_friends_text += f" \\\n    friend struct {callback_cpp.name}Callback;"
+	for func_cpp in api_cpp.functions:
+		decl = re.sub(r"\n", " ", func_cpp.func_decl)
+		if namespace in func_cpp.func_impl:
+			handle_friends_text += f" \\\n    friend {decl}"
+			raii_friends_text += f" \\\n    friend {decl}"
 	if use_raii:
 		handles_def_text = f"namespace {namespace}::raw {{\n{handles_def_text}\n}}\n"
 		raii_def_text = ""
-		raii_friends_text = "#define WEBGPU_RAII_FRIENDS"
-		for handle_cpp in api_cpp.handles:
-			raii_friends_text += f" \\\n    friend class raw::{handle_cpp.name};"
-		for struct_cpp in api.structs:
-			if struct_cpp.owning or args.force_raii:
-				raii_friends_text += f" \\\n    friend struct {struct_cpp.name};"
-		for func_cpp in api_cpp.functions:
-			decl = re.sub(r"\n", " ", func_cpp.func_decl)
-			if "wgpu" in func_cpp.func_impl:
-				raii_friends_text += f" \\\n    friend {decl}"
 		for handle_cpp in api_cpp.handles:
 			raii_def_text += handle_cpp.gen_raii_definition() + "\n\n"
 		handles_def_text += (
 			raii_friends_text + "\n" + f"namespace {namespace} {{\n{raii_def_text}\n}}" + "\n#undef WEBGPU_RAII_FRIENDS\n"
 		)
 	else:
-		handles_def_text = f"namespace {namespace} {{\n{handles_def_text}\n}}"
+		handles_def_text = f"namespace {namespace} {{\n{handles_def_text}\n}}\n"
+	handles_def_text = handle_friends_text + "\n\n" + handles_def_text + "\n#undef WEBGPU_HANDLE_FRIENDS"
 	output = re.sub(r"\{\{handles\}\}", handles_def_text, output)
 
 	handles_template_impl_text = "\n\n".join(h.gen_template_impl() for h in api_cpp.handles) + "\n\n"
@@ -1974,6 +2135,8 @@ def main() -> None:
 	parser.add_argument("--use-raii", action="store_true", help="Generate RAII wrappers for handles, and make non raii handles use raw namespace")
 	parser.add_argument("--force-raii", action="store_true", help="while using RAII, also force structs to store raii handles")
 	parser.add_argument("--log-path", dest="log_path", default="", help="Path to write parser logs. Empty disables logging")
+	parser.add_argument("--indexed-handle", action="append", dest="indexed_handles", default=[], help="Names of handle types that should be treated as indexed handles (i.e. also contain an unique id when created)")
+	global args
 	args = parser.parse_args()
 
 	global log
@@ -1987,8 +2150,8 @@ def main() -> None:
 			print(f"Failed to open header file: {header}")
 			continue
 		parse_header(api, header_path.read_text(encoding="utf-8"))
-	api_cpp = produce_webgpu_cpp(api, template_meta, args)
-	generate_webgpu_cpp(api, api_cpp, template_meta, args)
+	api_cpp = produce_webgpu_cpp(api)
+	generate_webgpu_cpp(api, api_cpp, template_meta)
 
 
 if __name__ == "__main__":

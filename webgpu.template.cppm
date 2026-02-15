@@ -77,80 +77,72 @@ namespace raw
 #endif
 {
 WEBGPU_CPP_NAMESPACE::Adapter Instance::requestAdapter(const RequestAdapterOptions& options) const {
-	struct Context {
-		Adapter adapter = nullptr;
-		bool requestEnded = false;
-	};
-	Context context;
+    struct Context {
+        WEBGPU_CPP_NAMESPACE::Adapter adapter = nullptr;
+        bool requestEnded = false;
+    };
+    Context context;
 
-	WGPURequestAdapterCallbackInfo callbackInfo;
-	callbackInfo.nextInChain = nullptr;
-	callbackInfo.userdata1 = &context;
-	callbackInfo.callback = [](
-		WGPURequestAdapterStatus status,
-		WGPUAdapter adapter,
-		WGPUStringView message,
-		void* userdata1,
-		[[maybe_unused]] void* userdata2
-	) {
-		Context& context = *reinterpret_cast<Context*>(userdata1);
-		if (status == WGPURequestAdapterStatus_Success) {
-			context.adapter = adapter;
-		}
-		else {
-			std::cout << "Could not get WebGPU adapter: " << std::string_view(StringView(message)) << std::endl;
-		}
-		context.requestEnded = true;
-	};
-	callbackInfo.mode = WGPUCallbackMode_AllowSpontaneous;
-	wgpuInstanceRequestAdapter(*this, reinterpret_cast<const WGPURequestAdapterOptions*>(&options), callbackInfo);
+    RequestAdapterCallbackInfo callbackInfo;
+    callbackInfo.callback = [&](
+        RequestAdapterStatus status,
+        WEBGPU_CPP_NAMESPACE::Adapter adapter,
+        StringView message
+    ) {
+        if (status == RequestAdapterStatus::eSuccess) {
+            context.adapter = std::move(adapter);
+        }
+        else {
+            std::cout << "Could not get WebGPU adapter: " << std::string_view(StringView(message)) << std::endl;
+        }
+        context.requestEnded = true;
+    };
+    callbackInfo.mode = CallbackMode::eAllowSpontaneous;
+	auto options_c = options.to_cstruct();
+    wgpuInstanceRequestAdapter(*this, &options_c, callbackInfo.to_cstruct());
 
 #if __EMSCRIPTEN__
-	while (!context.requestEnded) {
-		emscripten_sleep(50);
-	}
+    while (!context.requestEnded) {
+        emscripten_sleep(50);
+    }
 #endif
 
-	assert(context.requestEnded);
-	return context.adapter;
+    assert(context.requestEnded);
+    return context.adapter;
 }
 WEBGPU_CPP_NAMESPACE::Device Adapter::requestDevice(const DeviceDescriptor& descriptor) const {
-	struct Context {
-		Device device = nullptr;
-		bool requestEnded = false;
-	};
-	Context context;
+    struct Context {
+        WEBGPU_CPP_NAMESPACE::Device device = nullptr;
+        bool requestEnded = false;
+    };
+    Context context;
 
-	WGPURequestDeviceCallbackInfo callbackInfo;
-	callbackInfo.nextInChain = nullptr;
-	callbackInfo.userdata1 = &context;
-	callbackInfo.callback = [](
-		WGPURequestDeviceStatus status,
-		WGPUDevice device,
-		WGPUStringView message,
-		void* userdata1,
-		[[maybe_unused]] void* userdata2
-	) {
-		Context& context = *reinterpret_cast<Context*>(userdata1);
-		if (status == WGPURequestDeviceStatus_Success) {
-			context.device = device;
-		}
-		else {
-			std::cout << "Could not get WebGPU device: " << std::string_view(StringView(message)) << std::endl;
-		}
-		context.requestEnded = true;
-	};
-	callbackInfo.mode = WGPUCallbackMode_AllowSpontaneous;
-	wgpuAdapterRequestDevice(*this, reinterpret_cast<const WGPUDeviceDescriptor*>(&descriptor), callbackInfo);
+    RequestDeviceCallbackInfo callbackInfo;
+    callbackInfo.callback = [&](
+        RequestDeviceStatus status,
+        WEBGPU_CPP_NAMESPACE::Device device,
+        StringView message
+    ) {
+        if (status == RequestDeviceStatus::eSuccess) {
+            context.device = std::move(device);
+        }
+        else {
+            std::cout << "Could not get WebGPU device: " << std::string_view(StringView(message)) << std::endl;
+        }
+        context.requestEnded = true;
+    };
+    callbackInfo.mode = CallbackMode::eAllowSpontaneous;
+	auto descriptor_c = descriptor.to_cstruct();
+    wgpuAdapterRequestDevice(*this, &descriptor_c, callbackInfo.to_cstruct());
 
 #if __EMSCRIPTEN__
-	while (!context.requestEnded) {
-		emscripten_sleep(50);
-	}
+    while (!context.requestEnded) {
+        emscripten_sleep(50);
+    }
 #endif
 
-	assert(context.requestEnded);
-	return context.device;
+    assert(context.requestEnded);
+    return context.device;
 }
 }
 }

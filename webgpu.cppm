@@ -931,13 +931,157 @@ struct RequestDeviceCallback;
 struct UncapturedErrorCallback;
 struct LogCallback;
 }
+#define WEBGPU_HANDLE_FRIENDS \
+    friend class wgpu::Adapter; \
+    friend class wgpu::BindGroup; \
+    friend class wgpu::BindGroupLayout; \
+    friend class wgpu::Buffer; \
+    friend class wgpu::CommandBuffer; \
+    friend class wgpu::CommandEncoder; \
+    friend class wgpu::ComputePassEncoder; \
+    friend class wgpu::ComputePipeline; \
+    friend class wgpu::Device; \
+    friend class wgpu::Instance; \
+    friend class wgpu::PipelineLayout; \
+    friend class wgpu::QuerySet; \
+    friend class wgpu::Queue; \
+    friend class wgpu::RenderBundle; \
+    friend class wgpu::RenderBundleEncoder; \
+    friend class wgpu::RenderPassEncoder; \
+    friend class wgpu::RenderPipeline; \
+    friend class wgpu::Sampler; \
+    friend class wgpu::ShaderModule; \
+    friend class wgpu::Surface; \
+    friend class wgpu::Texture; \
+    friend class wgpu::TextureView; \
+    friend struct wgpu::StringView; \
+    friend struct wgpu::ChainedStruct; \
+    friend struct wgpu::ChainedStructOut; \
+    friend struct wgpu::BufferMapCallbackInfo; \
+    friend struct wgpu::CompilationInfoCallbackInfo; \
+    friend struct wgpu::CreateComputePipelineAsyncCallbackInfo; \
+    friend struct wgpu::CreateRenderPipelineAsyncCallbackInfo; \
+    friend struct wgpu::DeviceLostCallbackInfo; \
+    friend struct wgpu::PopErrorScopeCallbackInfo; \
+    friend struct wgpu::QueueWorkDoneCallbackInfo; \
+    friend struct wgpu::RequestAdapterCallbackInfo; \
+    friend struct wgpu::RequestDeviceCallbackInfo; \
+    friend struct wgpu::UncapturedErrorCallbackInfo; \
+    friend struct wgpu::AdapterInfo; \
+    friend struct wgpu::BindGroupEntry; \
+    friend struct wgpu::BlendComponent; \
+    friend struct wgpu::BufferBindingLayout; \
+    friend struct wgpu::BufferDescriptor; \
+    friend struct wgpu::Color; \
+    friend struct wgpu::CommandBufferDescriptor; \
+    friend struct wgpu::CommandEncoderDescriptor; \
+    friend struct wgpu::CompilationMessage; \
+    friend struct wgpu::ComputePassTimestampWrites; \
+    friend struct wgpu::ConstantEntry; \
+    friend struct wgpu::Extent3D; \
+    friend struct wgpu::Future; \
+    friend struct wgpu::InstanceCapabilities; \
+    friend struct wgpu::Limits; \
+    friend struct wgpu::MultisampleState; \
+    friend struct wgpu::Origin3D; \
+    friend struct wgpu::PipelineLayoutDescriptor; \
+    friend struct wgpu::PrimitiveState; \
+    friend struct wgpu::QuerySetDescriptor; \
+    friend struct wgpu::QueueDescriptor; \
+    friend struct wgpu::RenderBundleDescriptor; \
+    friend struct wgpu::RenderBundleEncoderDescriptor; \
+    friend struct wgpu::RenderPassDepthStencilAttachment; \
+    friend struct wgpu::RenderPassMaxDrawCount; \
+    friend struct wgpu::RenderPassTimestampWrites; \
+    friend struct wgpu::RequestAdapterOptions; \
+    friend struct wgpu::SamplerBindingLayout; \
+    friend struct wgpu::SamplerDescriptor; \
+    friend struct wgpu::ShaderModuleDescriptor; \
+    friend struct wgpu::ShaderSourceSPIRV; \
+    friend struct wgpu::ShaderSourceWGSL; \
+    friend struct wgpu::StencilFaceState; \
+    friend struct wgpu::StorageTextureBindingLayout; \
+    friend struct wgpu::SupportedFeatures; \
+    friend struct wgpu::SupportedWGSLLanguageFeatures; \
+    friend struct wgpu::SurfaceCapabilities; \
+    friend struct wgpu::SurfaceConfiguration; \
+    friend struct wgpu::SurfaceDescriptor; \
+    friend struct wgpu::SurfaceSourceAndroidNativeWindow; \
+    friend struct wgpu::SurfaceSourceMetalLayer; \
+    friend struct wgpu::SurfaceSourceWaylandSurface; \
+    friend struct wgpu::SurfaceSourceWindowsHWND; \
+    friend struct wgpu::SurfaceSourceXCBWindow; \
+    friend struct wgpu::SurfaceSourceXlibWindow; \
+    friend struct wgpu::SurfaceTexture; \
+    friend struct wgpu::TexelCopyBufferLayout; \
+    friend struct wgpu::TextureBindingLayout; \
+    friend struct wgpu::TextureViewDescriptor; \
+    friend struct wgpu::VertexAttribute; \
+    friend struct wgpu::BindGroupDescriptor; \
+    friend struct wgpu::BindGroupLayoutEntry; \
+    friend struct wgpu::BlendState; \
+    friend struct wgpu::CompilationInfo; \
+    friend struct wgpu::ComputePassDescriptor; \
+    friend struct wgpu::DepthStencilState; \
+    friend struct wgpu::DeviceDescriptor; \
+    friend struct wgpu::FutureWaitInfo; \
+    friend struct wgpu::InstanceDescriptor; \
+    friend struct wgpu::ProgrammableStageDescriptor; \
+    friend struct wgpu::RenderPassColorAttachment; \
+    friend struct wgpu::TexelCopyBufferInfo; \
+    friend struct wgpu::TexelCopyTextureInfo; \
+    friend struct wgpu::TextureDescriptor; \
+    friend struct wgpu::VertexBufferLayout; \
+    friend struct wgpu::BindGroupLayoutDescriptor; \
+    friend struct wgpu::ColorTargetState; \
+    friend struct wgpu::ComputePipelineDescriptor; \
+    friend struct wgpu::RenderPassDescriptor; \
+    friend struct wgpu::VertexState; \
+    friend struct wgpu::FragmentState; \
+    friend struct wgpu::RenderPipelineDescriptor; \
+    friend struct wgpu::InstanceExtras; \
+    friend struct wgpu::DeviceExtras; \
+    friend struct wgpu::NativeLimits; \
+    friend struct wgpu::PushConstantRange; \
+    friend struct wgpu::PipelineLayoutExtras; \
+    friend struct wgpu::ShaderDefine; \
+    friend struct wgpu::ShaderModuleGLSLDescriptor; \
+    friend struct wgpu::ShaderModuleDescriptorSpirV; \
+    friend struct wgpu::RegistryReport; \
+    friend struct wgpu::HubReport; \
+    friend struct wgpu::GlobalReport; \
+    friend struct wgpu::InstanceEnumerateAdapterOptions; \
+    friend struct wgpu::BindGroupEntryExtras; \
+    friend struct wgpu::BindGroupLayoutEntryExtras; \
+    friend struct wgpu::QuerySetDescriptorExtras; \
+    friend struct wgpu::SurfaceConfigurationExtras; \
+    friend struct wgpu::BufferMapCallback; \
+    friend struct wgpu::CompilationInfoCallback; \
+    friend struct wgpu::CreateComputePipelineAsyncCallback; \
+    friend struct wgpu::CreateRenderPipelineAsyncCallback; \
+    friend struct wgpu::DeviceLostCallback; \
+    friend struct wgpu::PopErrorScopeCallback; \
+    friend struct wgpu::QueueWorkDoneCallback; \
+    friend struct wgpu::RequestAdapterCallback; \
+    friend struct wgpu::RequestDeviceCallback; \
+    friend struct wgpu::UncapturedErrorCallback; \
+    friend struct wgpu::LogCallback; \
+    friend wgpu::Instance createInstance(wgpu::InstanceDescriptor const& descriptor); \
+    friend wgpu::Instance createInstance(); \
+    friend wgpu::Status getInstanceCapabilities(wgpu::InstanceCapabilities* capabilities); \
+    friend void generateReport(wgpu::Instance const& instance, wgpu::GlobalReport* report); \
+    friend void setLogCallback(wgpu::LogCallback callback, void* userdata); \
+    friend void setLogLevel(wgpu::LogLevel level); \
+    friend uint32_t getVersion();
 namespace wgpu::raw {
 class Adapter {
 public:
     using wgpu_type = WGPUAdapter;
     Adapter() : m_raw(nullptr) {}
-    Adapter(WGPUAdapter raw) : m_raw(raw) {}
-    operator WGPUAdapter() const { return m_raw; }
+    Adapter(std::nullptr_t) : m_raw(nullptr) {}
+    WGPUAdapter const& raw() const { return m_raw; }
+    operator WGPUAdapter const&() const { return m_raw; }
+    operator WGPUAdapter&() { return m_raw; }
     operator bool() const { return m_raw != nullptr; }
     bool operator==(const Adapter& other) const { return m_raw == other.m_raw; }
     bool operator!=(const Adapter& other) const { return m_raw != other.m_raw; }
@@ -946,19 +1090,31 @@ public:
     wgpu::Status getInfo(wgpu::AdapterInfo* info) const;
     wgpu::Status getLimits(wgpu::Limits* limits) const;
     wgpu::Bool hasFeature(wgpu::FeatureName feature) const;
-    wgpu::Future requestDevice(wgpu::DeviceDescriptor const* descriptor, wgpu::RequestDeviceCallbackInfo callbackInfo) const;
+    wgpu::Future requestDevice(wgpu::DeviceDescriptor const& descriptor, wgpu::RequestDeviceCallbackInfo callbackInfo) const;
+    wgpu::Future requestDevice(wgpu::RequestDeviceCallbackInfo callbackInfo) const;
     void addRef() const;
     void release() const;
     WEBGPU_CPP_NAMESPACE::Device requestDevice(const DeviceDescriptor& descriptor) const;
 private:
+    WEBGPU_HANDLE_FRIENDS
+    Adapter(WGPUAdapter raw) : m_raw(raw) {}
     WGPUAdapter m_raw;
+};
+struct BindGroupId {
+    static std::atomic<size_t> counter;
+    static BindGroupId create() { return BindGroupId{counter++}; }
+    operator size_t() const { return value; }
+    size_t value{0};
 };
 class BindGroup {
 public:
     using wgpu_type = WGPUBindGroup;
     BindGroup() : m_raw(nullptr) {}
-    BindGroup(WGPUBindGroup raw) : m_raw(raw) {}
-    operator WGPUBindGroup() const { return m_raw; }
+    BindGroup(std::nullptr_t) : m_raw(nullptr) {}
+    WGPUBindGroup const& raw() const { return m_raw; }
+    BindGroupId id() const { return m_id; }
+    operator WGPUBindGroup const&() const { return m_raw; }
+    operator WGPUBindGroup&() { return m_raw; }
     operator bool() const { return m_raw != nullptr; }
     bool operator==(const BindGroup& other) const { return m_raw == other.m_raw; }
     bool operator!=(const BindGroup& other) const { return m_raw != other.m_raw; }
@@ -967,14 +1123,26 @@ public:
     void addRef() const;
     void release() const;
 private:
+    WEBGPU_HANDLE_FRIENDS
+    BindGroup(WGPUBindGroup raw) : m_raw(raw), m_id(raw ? BindGroupId::create() : 0) {}
     WGPUBindGroup m_raw;
+    BindGroupId m_id{};
+};
+struct BindGroupLayoutId {
+    static std::atomic<size_t> counter;
+    static BindGroupLayoutId create() { return BindGroupLayoutId{counter++}; }
+    operator size_t() const { return value; }
+    size_t value{0};
 };
 class BindGroupLayout {
 public:
     using wgpu_type = WGPUBindGroupLayout;
     BindGroupLayout() : m_raw(nullptr) {}
-    BindGroupLayout(WGPUBindGroupLayout raw) : m_raw(raw) {}
-    operator WGPUBindGroupLayout() const { return m_raw; }
+    BindGroupLayout(std::nullptr_t) : m_raw(nullptr) {}
+    WGPUBindGroupLayout const& raw() const { return m_raw; }
+    BindGroupLayoutId id() const { return m_id; }
+    operator WGPUBindGroupLayout const&() const { return m_raw; }
+    operator WGPUBindGroupLayout&() { return m_raw; }
     operator bool() const { return m_raw != nullptr; }
     bool operator==(const BindGroupLayout& other) const { return m_raw == other.m_raw; }
     bool operator!=(const BindGroupLayout& other) const { return m_raw != other.m_raw; }
@@ -983,14 +1151,26 @@ public:
     void addRef() const;
     void release() const;
 private:
+    WEBGPU_HANDLE_FRIENDS
+    BindGroupLayout(WGPUBindGroupLayout raw) : m_raw(raw), m_id(raw ? BindGroupLayoutId::create() : 0) {}
     WGPUBindGroupLayout m_raw;
+    BindGroupLayoutId m_id{};
+};
+struct BufferId {
+    static std::atomic<size_t> counter;
+    static BufferId create() { return BufferId{counter++}; }
+    operator size_t() const { return value; }
+    size_t value{0};
 };
 class Buffer {
 public:
     using wgpu_type = WGPUBuffer;
     Buffer() : m_raw(nullptr) {}
-    Buffer(WGPUBuffer raw) : m_raw(raw) {}
-    operator WGPUBuffer() const { return m_raw; }
+    Buffer(std::nullptr_t) : m_raw(nullptr) {}
+    WGPUBuffer const& raw() const { return m_raw; }
+    BufferId id() const { return m_id; }
+    operator WGPUBuffer const&() const { return m_raw; }
+    operator WGPUBuffer&() { return m_raw; }
     operator bool() const { return m_raw != nullptr; }
     bool operator==(const Buffer& other) const { return m_raw == other.m_raw; }
     bool operator!=(const Buffer& other) const { return m_raw != other.m_raw; }
@@ -1007,14 +1187,19 @@ public:
     void addRef() const;
     void release() const;
 private:
+    WEBGPU_HANDLE_FRIENDS
+    Buffer(WGPUBuffer raw) : m_raw(raw), m_id(raw ? BufferId::create() : 0) {}
     WGPUBuffer m_raw;
+    BufferId m_id{};
 };
 class CommandBuffer {
 public:
     using wgpu_type = WGPUCommandBuffer;
     CommandBuffer() : m_raw(nullptr) {}
-    CommandBuffer(WGPUCommandBuffer raw) : m_raw(raw) {}
-    operator WGPUCommandBuffer() const { return m_raw; }
+    CommandBuffer(std::nullptr_t) : m_raw(nullptr) {}
+    WGPUCommandBuffer const& raw() const { return m_raw; }
+    operator WGPUCommandBuffer const&() const { return m_raw; }
+    operator WGPUCommandBuffer&() { return m_raw; }
     operator bool() const { return m_raw != nullptr; }
     bool operator==(const CommandBuffer& other) const { return m_raw == other.m_raw; }
     bool operator!=(const CommandBuffer& other) const { return m_raw != other.m_raw; }
@@ -1023,14 +1208,18 @@ public:
     void addRef() const;
     void release() const;
 private:
+    WEBGPU_HANDLE_FRIENDS
+    CommandBuffer(WGPUCommandBuffer raw) : m_raw(raw) {}
     WGPUCommandBuffer m_raw;
 };
 class CommandEncoder {
 public:
     using wgpu_type = WGPUCommandEncoder;
     CommandEncoder() : m_raw(nullptr) {}
-    CommandEncoder(WGPUCommandEncoder raw) : m_raw(raw) {}
-    operator WGPUCommandEncoder() const { return m_raw; }
+    CommandEncoder(std::nullptr_t) : m_raw(nullptr) {}
+    WGPUCommandEncoder const& raw() const { return m_raw; }
+    operator WGPUCommandEncoder const&() const { return m_raw; }
+    operator WGPUCommandEncoder&() { return m_raw; }
     operator bool() const { return m_raw != nullptr; }
     bool operator==(const CommandEncoder& other) const { return m_raw == other.m_raw; }
     bool operator!=(const CommandEncoder& other) const { return m_raw != other.m_raw; }
@@ -1054,14 +1243,18 @@ public:
     void addRef() const;
     void release() const;
 private:
+    WEBGPU_HANDLE_FRIENDS
+    CommandEncoder(WGPUCommandEncoder raw) : m_raw(raw) {}
     WGPUCommandEncoder m_raw;
 };
 class ComputePassEncoder {
 public:
     using wgpu_type = WGPUComputePassEncoder;
     ComputePassEncoder() : m_raw(nullptr) {}
-    ComputePassEncoder(WGPUComputePassEncoder raw) : m_raw(raw) {}
-    operator WGPUComputePassEncoder() const { return m_raw; }
+    ComputePassEncoder(std::nullptr_t) : m_raw(nullptr) {}
+    WGPUComputePassEncoder const& raw() const { return m_raw; }
+    operator WGPUComputePassEncoder const&() const { return m_raw; }
+    operator WGPUComputePassEncoder&() { return m_raw; }
     operator bool() const { return m_raw != nullptr; }
     bool operator==(const ComputePassEncoder& other) const { return m_raw == other.m_raw; }
     bool operator!=(const ComputePassEncoder& other) const { return m_raw != other.m_raw; }
@@ -1083,14 +1276,25 @@ public:
     void endPipelineStatisticsQuery() const;
     void writeTimestamp(wgpu::QuerySet const& querySet, uint32_t queryIndex) const;
 private:
+    WEBGPU_HANDLE_FRIENDS
+    ComputePassEncoder(WGPUComputePassEncoder raw) : m_raw(raw) {}
     WGPUComputePassEncoder m_raw;
+};
+struct ComputePipelineId {
+    static std::atomic<size_t> counter;
+    static ComputePipelineId create() { return ComputePipelineId{counter++}; }
+    operator size_t() const { return value; }
+    size_t value{0};
 };
 class ComputePipeline {
 public:
     using wgpu_type = WGPUComputePipeline;
     ComputePipeline() : m_raw(nullptr) {}
-    ComputePipeline(WGPUComputePipeline raw) : m_raw(raw) {}
-    operator WGPUComputePipeline() const { return m_raw; }
+    ComputePipeline(std::nullptr_t) : m_raw(nullptr) {}
+    WGPUComputePipeline const& raw() const { return m_raw; }
+    ComputePipelineId id() const { return m_id; }
+    operator WGPUComputePipeline const&() const { return m_raw; }
+    operator WGPUComputePipeline&() { return m_raw; }
     operator bool() const { return m_raw != nullptr; }
     bool operator==(const ComputePipeline& other) const { return m_raw == other.m_raw; }
     bool operator!=(const ComputePipeline& other) const { return m_raw != other.m_raw; }
@@ -1100,14 +1304,19 @@ public:
     void addRef() const;
     void release() const;
 private:
+    WEBGPU_HANDLE_FRIENDS
+    ComputePipeline(WGPUComputePipeline raw) : m_raw(raw), m_id(raw ? ComputePipelineId::create() : 0) {}
     WGPUComputePipeline m_raw;
+    ComputePipelineId m_id{};
 };
 class Device {
 public:
     using wgpu_type = WGPUDevice;
     Device() : m_raw(nullptr) {}
-    Device(WGPUDevice raw) : m_raw(raw) {}
-    operator WGPUDevice() const { return m_raw; }
+    Device(std::nullptr_t) : m_raw(nullptr) {}
+    WGPUDevice const& raw() const { return m_raw; }
+    operator WGPUDevice const&() const { return m_raw; }
+    operator WGPUDevice&() { return m_raw; }
     operator bool() const { return m_raw != nullptr; }
     bool operator==(const Device& other) const { return m_raw == other.m_raw; }
     bool operator!=(const Device& other) const { return m_raw != other.m_raw; }
@@ -1144,14 +1353,18 @@ public:
     wgpu::Bool poll(wgpu::Bool wait) const;
     wgpu::ShaderModule createShaderModuleSpirV(wgpu::ShaderModuleDescriptorSpirV const& descriptor) const;
 private:
+    WEBGPU_HANDLE_FRIENDS
+    Device(WGPUDevice raw) : m_raw(raw) {}
     WGPUDevice m_raw;
 };
 class Instance {
 public:
     using wgpu_type = WGPUInstance;
     Instance() : m_raw(nullptr) {}
-    Instance(WGPUInstance raw) : m_raw(raw) {}
-    operator WGPUInstance() const { return m_raw; }
+    Instance(std::nullptr_t) : m_raw(nullptr) {}
+    WGPUInstance const& raw() const { return m_raw; }
+    operator WGPUInstance const&() const { return m_raw; }
+    operator WGPUInstance&() { return m_raw; }
     operator bool() const { return m_raw != nullptr; }
     bool operator==(const Instance& other) const { return m_raw == other.m_raw; }
     bool operator!=(const Instance& other) const { return m_raw != other.m_raw; }
@@ -1160,21 +1373,35 @@ public:
     wgpu::Status getWGSLLanguageFeatures(wgpu::SupportedWGSLLanguageFeatures* features) const;
     wgpu::Bool hasWGSLLanguageFeature(wgpu::WGSLLanguageFeatureName feature) const;
     void processEvents() const;
-    wgpu::Future requestAdapter(wgpu::RequestAdapterOptions const* options, wgpu::RequestAdapterCallbackInfo callbackInfo) const;
+    wgpu::Future requestAdapter(wgpu::RequestAdapterOptions const& options, wgpu::RequestAdapterCallbackInfo callbackInfo) const;
+    wgpu::Future requestAdapter(wgpu::RequestAdapterCallbackInfo callbackInfo) const;
     wgpu::WaitStatus waitAny(size_t futureCount, wgpu::FutureWaitInfo* futures, uint64_t timeoutNS) const;
+    wgpu::WaitStatus waitAny(size_t futureCount, uint64_t timeoutNS) const;
     void addRef() const;
     void release() const;
-    size_t enumerateAdapters(wgpu::InstanceEnumerateAdapterOptions const* options, wgpu::Adapter* adapters) const;
+    size_t enumerateAdapters(wgpu::InstanceEnumerateAdapterOptions const& options, wgpu::Adapter* adapters) const;
+    size_t enumerateAdapters(wgpu::Adapter* adapters) const;
     WEBGPU_CPP_NAMESPACE::Adapter requestAdapter(const RequestAdapterOptions& options) const;
 private:
+    WEBGPU_HANDLE_FRIENDS
+    Instance(WGPUInstance raw) : m_raw(raw) {}
     WGPUInstance m_raw;
+};
+struct PipelineLayoutId {
+    static std::atomic<size_t> counter;
+    static PipelineLayoutId create() { return PipelineLayoutId{counter++}; }
+    operator size_t() const { return value; }
+    size_t value{0};
 };
 class PipelineLayout {
 public:
     using wgpu_type = WGPUPipelineLayout;
     PipelineLayout() : m_raw(nullptr) {}
-    PipelineLayout(WGPUPipelineLayout raw) : m_raw(raw) {}
-    operator WGPUPipelineLayout() const { return m_raw; }
+    PipelineLayout(std::nullptr_t) : m_raw(nullptr) {}
+    WGPUPipelineLayout const& raw() const { return m_raw; }
+    PipelineLayoutId id() const { return m_id; }
+    operator WGPUPipelineLayout const&() const { return m_raw; }
+    operator WGPUPipelineLayout&() { return m_raw; }
     operator bool() const { return m_raw != nullptr; }
     bool operator==(const PipelineLayout& other) const { return m_raw == other.m_raw; }
     bool operator!=(const PipelineLayout& other) const { return m_raw != other.m_raw; }
@@ -1183,14 +1410,26 @@ public:
     void addRef() const;
     void release() const;
 private:
+    WEBGPU_HANDLE_FRIENDS
+    PipelineLayout(WGPUPipelineLayout raw) : m_raw(raw), m_id(raw ? PipelineLayoutId::create() : 0) {}
     WGPUPipelineLayout m_raw;
+    PipelineLayoutId m_id{};
+};
+struct QuerySetId {
+    static std::atomic<size_t> counter;
+    static QuerySetId create() { return QuerySetId{counter++}; }
+    operator size_t() const { return value; }
+    size_t value{0};
 };
 class QuerySet {
 public:
     using wgpu_type = WGPUQuerySet;
     QuerySet() : m_raw(nullptr) {}
-    QuerySet(WGPUQuerySet raw) : m_raw(raw) {}
-    operator WGPUQuerySet() const { return m_raw; }
+    QuerySet(std::nullptr_t) : m_raw(nullptr) {}
+    WGPUQuerySet const& raw() const { return m_raw; }
+    QuerySetId id() const { return m_id; }
+    operator WGPUQuerySet const&() const { return m_raw; }
+    operator WGPUQuerySet&() { return m_raw; }
     operator bool() const { return m_raw != nullptr; }
     bool operator==(const QuerySet& other) const { return m_raw == other.m_raw; }
     bool operator!=(const QuerySet& other) const { return m_raw != other.m_raw; }
@@ -1202,14 +1441,19 @@ public:
     void addRef() const;
     void release() const;
 private:
+    WEBGPU_HANDLE_FRIENDS
+    QuerySet(WGPUQuerySet raw) : m_raw(raw), m_id(raw ? QuerySetId::create() : 0) {}
     WGPUQuerySet m_raw;
+    QuerySetId m_id{};
 };
 class Queue {
 public:
     using wgpu_type = WGPUQueue;
     Queue() : m_raw(nullptr) {}
-    Queue(WGPUQueue raw) : m_raw(raw) {}
-    operator WGPUQueue() const { return m_raw; }
+    Queue(std::nullptr_t) : m_raw(nullptr) {}
+    WGPUQueue const& raw() const { return m_raw; }
+    operator WGPUQueue const&() const { return m_raw; }
+    operator WGPUQueue&() { return m_raw; }
     operator bool() const { return m_raw != nullptr; }
     bool operator==(const Queue& other) const { return m_raw == other.m_raw; }
     bool operator!=(const Queue& other) const { return m_raw != other.m_raw; }
@@ -1225,14 +1469,25 @@ public:
     wgpu::SubmissionIndex submitForIndex(std::span<wgpu::CommandBuffer const> commands) const;
     wgpu::SubmissionIndex submitForIndex(const wgpu::CommandBuffer& commands) const;
 private:
+    WEBGPU_HANDLE_FRIENDS
+    Queue(WGPUQueue raw) : m_raw(raw) {}
     WGPUQueue m_raw;
+};
+struct RenderBundleId {
+    static std::atomic<size_t> counter;
+    static RenderBundleId create() { return RenderBundleId{counter++}; }
+    operator size_t() const { return value; }
+    size_t value{0};
 };
 class RenderBundle {
 public:
     using wgpu_type = WGPURenderBundle;
     RenderBundle() : m_raw(nullptr) {}
-    RenderBundle(WGPURenderBundle raw) : m_raw(raw) {}
-    operator WGPURenderBundle() const { return m_raw; }
+    RenderBundle(std::nullptr_t) : m_raw(nullptr) {}
+    WGPURenderBundle const& raw() const { return m_raw; }
+    RenderBundleId id() const { return m_id; }
+    operator WGPURenderBundle const&() const { return m_raw; }
+    operator WGPURenderBundle&() { return m_raw; }
     operator bool() const { return m_raw != nullptr; }
     bool operator==(const RenderBundle& other) const { return m_raw == other.m_raw; }
     bool operator!=(const RenderBundle& other) const { return m_raw != other.m_raw; }
@@ -1241,14 +1496,19 @@ public:
     void addRef() const;
     void release() const;
 private:
+    WEBGPU_HANDLE_FRIENDS
+    RenderBundle(WGPURenderBundle raw) : m_raw(raw), m_id(raw ? RenderBundleId::create() : 0) {}
     WGPURenderBundle m_raw;
+    RenderBundleId m_id{};
 };
 class RenderBundleEncoder {
 public:
     using wgpu_type = WGPURenderBundleEncoder;
     RenderBundleEncoder() : m_raw(nullptr) {}
-    RenderBundleEncoder(WGPURenderBundleEncoder raw) : m_raw(raw) {}
-    operator WGPURenderBundleEncoder() const { return m_raw; }
+    RenderBundleEncoder(std::nullptr_t) : m_raw(nullptr) {}
+    WGPURenderBundleEncoder const& raw() const { return m_raw; }
+    operator WGPURenderBundleEncoder const&() const { return m_raw; }
+    operator WGPURenderBundleEncoder&() { return m_raw; }
     operator bool() const { return m_raw != nullptr; }
     bool operator==(const RenderBundleEncoder& other) const { return m_raw == other.m_raw; }
     bool operator!=(const RenderBundleEncoder& other) const { return m_raw != other.m_raw; }
@@ -1272,14 +1532,18 @@ public:
     void release() const;
     void setPushConstants(wgpu::ShaderStage stages, uint32_t offset, uint32_t sizeBytes, void const* data) const;
 private:
+    WEBGPU_HANDLE_FRIENDS
+    RenderBundleEncoder(WGPURenderBundleEncoder raw) : m_raw(raw) {}
     WGPURenderBundleEncoder m_raw;
 };
 class RenderPassEncoder {
 public:
     using wgpu_type = WGPURenderPassEncoder;
     RenderPassEncoder() : m_raw(nullptr) {}
-    RenderPassEncoder(WGPURenderPassEncoder raw) : m_raw(raw) {}
-    operator WGPURenderPassEncoder() const { return m_raw; }
+    RenderPassEncoder(std::nullptr_t) : m_raw(nullptr) {}
+    WGPURenderPassEncoder const& raw() const { return m_raw; }
+    operator WGPURenderPassEncoder const&() const { return m_raw; }
+    operator WGPURenderPassEncoder&() { return m_raw; }
     operator bool() const { return m_raw != nullptr; }
     bool operator==(const RenderPassEncoder& other) const { return m_raw == other.m_raw; }
     bool operator!=(const RenderPassEncoder& other) const { return m_raw != other.m_raw; }
@@ -1317,14 +1581,25 @@ public:
     void endPipelineStatisticsQuery() const;
     void writeTimestamp(wgpu::QuerySet const& querySet, uint32_t queryIndex) const;
 private:
+    WEBGPU_HANDLE_FRIENDS
+    RenderPassEncoder(WGPURenderPassEncoder raw) : m_raw(raw) {}
     WGPURenderPassEncoder m_raw;
+};
+struct RenderPipelineId {
+    static std::atomic<size_t> counter;
+    static RenderPipelineId create() { return RenderPipelineId{counter++}; }
+    operator size_t() const { return value; }
+    size_t value{0};
 };
 class RenderPipeline {
 public:
     using wgpu_type = WGPURenderPipeline;
     RenderPipeline() : m_raw(nullptr) {}
-    RenderPipeline(WGPURenderPipeline raw) : m_raw(raw) {}
-    operator WGPURenderPipeline() const { return m_raw; }
+    RenderPipeline(std::nullptr_t) : m_raw(nullptr) {}
+    WGPURenderPipeline const& raw() const { return m_raw; }
+    RenderPipelineId id() const { return m_id; }
+    operator WGPURenderPipeline const&() const { return m_raw; }
+    operator WGPURenderPipeline&() { return m_raw; }
     operator bool() const { return m_raw != nullptr; }
     bool operator==(const RenderPipeline& other) const { return m_raw == other.m_raw; }
     bool operator!=(const RenderPipeline& other) const { return m_raw != other.m_raw; }
@@ -1334,14 +1609,26 @@ public:
     void addRef() const;
     void release() const;
 private:
+    WEBGPU_HANDLE_FRIENDS
+    RenderPipeline(WGPURenderPipeline raw) : m_raw(raw), m_id(raw ? RenderPipelineId::create() : 0) {}
     WGPURenderPipeline m_raw;
+    RenderPipelineId m_id{};
+};
+struct SamplerId {
+    static std::atomic<size_t> counter;
+    static SamplerId create() { return SamplerId{counter++}; }
+    operator size_t() const { return value; }
+    size_t value{0};
 };
 class Sampler {
 public:
     using wgpu_type = WGPUSampler;
     Sampler() : m_raw(nullptr) {}
-    Sampler(WGPUSampler raw) : m_raw(raw) {}
-    operator WGPUSampler() const { return m_raw; }
+    Sampler(std::nullptr_t) : m_raw(nullptr) {}
+    WGPUSampler const& raw() const { return m_raw; }
+    SamplerId id() const { return m_id; }
+    operator WGPUSampler const&() const { return m_raw; }
+    operator WGPUSampler&() { return m_raw; }
     operator bool() const { return m_raw != nullptr; }
     bool operator==(const Sampler& other) const { return m_raw == other.m_raw; }
     bool operator!=(const Sampler& other) const { return m_raw != other.m_raw; }
@@ -1350,14 +1637,26 @@ public:
     void addRef() const;
     void release() const;
 private:
+    WEBGPU_HANDLE_FRIENDS
+    Sampler(WGPUSampler raw) : m_raw(raw), m_id(raw ? SamplerId::create() : 0) {}
     WGPUSampler m_raw;
+    SamplerId m_id{};
+};
+struct ShaderModuleId {
+    static std::atomic<size_t> counter;
+    static ShaderModuleId create() { return ShaderModuleId{counter++}; }
+    operator size_t() const { return value; }
+    size_t value{0};
 };
 class ShaderModule {
 public:
     using wgpu_type = WGPUShaderModule;
     ShaderModule() : m_raw(nullptr) {}
-    ShaderModule(WGPUShaderModule raw) : m_raw(raw) {}
-    operator WGPUShaderModule() const { return m_raw; }
+    ShaderModule(std::nullptr_t) : m_raw(nullptr) {}
+    WGPUShaderModule const& raw() const { return m_raw; }
+    ShaderModuleId id() const { return m_id; }
+    operator WGPUShaderModule const&() const { return m_raw; }
+    operator WGPUShaderModule&() { return m_raw; }
     operator bool() const { return m_raw != nullptr; }
     bool operator==(const ShaderModule& other) const { return m_raw == other.m_raw; }
     bool operator!=(const ShaderModule& other) const { return m_raw != other.m_raw; }
@@ -1367,14 +1666,26 @@ public:
     void addRef() const;
     void release() const;
 private:
+    WEBGPU_HANDLE_FRIENDS
+    ShaderModule(WGPUShaderModule raw) : m_raw(raw), m_id(raw ? ShaderModuleId::create() : 0) {}
     WGPUShaderModule m_raw;
+    ShaderModuleId m_id{};
+};
+struct SurfaceId {
+    static std::atomic<size_t> counter;
+    static SurfaceId create() { return SurfaceId{counter++}; }
+    operator size_t() const { return value; }
+    size_t value{0};
 };
 class Surface {
 public:
     using wgpu_type = WGPUSurface;
     Surface() : m_raw(nullptr) {}
-    Surface(WGPUSurface raw) : m_raw(raw) {}
-    operator WGPUSurface() const { return m_raw; }
+    Surface(std::nullptr_t) : m_raw(nullptr) {}
+    WGPUSurface const& raw() const { return m_raw; }
+    SurfaceId id() const { return m_id; }
+    operator WGPUSurface const&() const { return m_raw; }
+    operator WGPUSurface&() { return m_raw; }
     operator bool() const { return m_raw != nullptr; }
     bool operator==(const Surface& other) const { return m_raw == other.m_raw; }
     bool operator!=(const Surface& other) const { return m_raw != other.m_raw; }
@@ -1388,14 +1699,26 @@ public:
     void addRef() const;
     void release() const;
 private:
+    WEBGPU_HANDLE_FRIENDS
+    Surface(WGPUSurface raw) : m_raw(raw), m_id(raw ? SurfaceId::create() : 0) {}
     WGPUSurface m_raw;
+    SurfaceId m_id{};
+};
+struct TextureId {
+    static std::atomic<size_t> counter;
+    static TextureId create() { return TextureId{counter++}; }
+    operator size_t() const { return value; }
+    size_t value{0};
 };
 class Texture {
 public:
     using wgpu_type = WGPUTexture;
     Texture() : m_raw(nullptr) {}
-    Texture(WGPUTexture raw) : m_raw(raw) {}
-    operator WGPUTexture() const { return m_raw; }
+    Texture(std::nullptr_t) : m_raw(nullptr) {}
+    WGPUTexture const& raw() const { return m_raw; }
+    TextureId id() const { return m_id; }
+    operator WGPUTexture const&() const { return m_raw; }
+    operator WGPUTexture&() { return m_raw; }
     operator bool() const { return m_raw != nullptr; }
     bool operator==(const Texture& other) const { return m_raw == other.m_raw; }
     bool operator!=(const Texture& other) const { return m_raw != other.m_raw; }
@@ -1415,14 +1738,26 @@ public:
     void addRef() const;
     void release() const;
 private:
+    WEBGPU_HANDLE_FRIENDS
+    Texture(WGPUTexture raw) : m_raw(raw), m_id(raw ? TextureId::create() : 0) {}
     WGPUTexture m_raw;
+    TextureId m_id{};
+};
+struct TextureViewId {
+    static std::atomic<size_t> counter;
+    static TextureViewId create() { return TextureViewId{counter++}; }
+    operator size_t() const { return value; }
+    size_t value{0};
 };
 class TextureView {
 public:
     using wgpu_type = WGPUTextureView;
     TextureView() : m_raw(nullptr) {}
-    TextureView(WGPUTextureView raw) : m_raw(raw) {}
-    operator WGPUTextureView() const { return m_raw; }
+    TextureView(std::nullptr_t) : m_raw(nullptr) {}
+    WGPUTextureView const& raw() const { return m_raw; }
+    TextureViewId id() const { return m_id; }
+    operator WGPUTextureView const&() const { return m_raw; }
+    operator WGPUTextureView&() { return m_raw; }
     operator bool() const { return m_raw != nullptr; }
     bool operator==(const TextureView& other) const { return m_raw == other.m_raw; }
     bool operator!=(const TextureView& other) const { return m_raw != other.m_raw; }
@@ -1431,7 +1766,10 @@ public:
     void addRef() const;
     void release() const;
 private:
+    WEBGPU_HANDLE_FRIENDS
+    TextureView(WGPUTextureView raw) : m_raw(raw), m_id(raw ? TextureViewId::create() : 0) {}
     WGPUTextureView m_raw;
+    TextureViewId m_id{};
 };
 }
 #define WEBGPU_RAII_FRIENDS \
@@ -1558,6 +1896,17 @@ private:
     friend struct BindGroupLayoutEntryExtras; \
     friend struct QuerySetDescriptorExtras; \
     friend struct SurfaceConfigurationExtras; \
+    friend struct BufferMapCallback; \
+    friend struct CompilationInfoCallback; \
+    friend struct CreateComputePipelineAsyncCallback; \
+    friend struct CreateRenderPipelineAsyncCallback; \
+    friend struct DeviceLostCallback; \
+    friend struct PopErrorScopeCallback; \
+    friend struct QueueWorkDoneCallback; \
+    friend struct RequestAdapterCallback; \
+    friend struct RequestDeviceCallback; \
+    friend struct UncapturedErrorCallback; \
+    friend struct LogCallback; \
     friend wgpu::Instance createInstance(wgpu::InstanceDescriptor const& descriptor); \
     friend wgpu::Instance createInstance(); \
     friend wgpu::Status getInstanceCapabilities(wgpu::InstanceCapabilities* capabilities); \
@@ -1571,8 +1920,8 @@ public:
     using base_type = raw::Adapter;
     using wgpu_type = WGPUAdapter;
     Adapter() : base_type() {}
-    WEBGPU_RAII_FRIENDS
 private:
+    WEBGPU_RAII_FRIENDS
     Adapter(wgpu_type raw) : base_type(raw) {}
     Adapter(base_type raw) : base_type(raw) {}
     Adapter& operator=(const base_type& raw) { if (*this) this->release(); base_type::operator=(raw); return *this; }
@@ -1593,8 +1942,8 @@ public:
     using base_type = raw::BindGroup;
     using wgpu_type = WGPUBindGroup;
     BindGroup() : base_type() {}
-    WEBGPU_RAII_FRIENDS
 private:
+    WEBGPU_RAII_FRIENDS
     BindGroup(wgpu_type raw) : base_type(raw) {}
     BindGroup(base_type raw) : base_type(raw) {}
     BindGroup& operator=(const base_type& raw) { if (*this) this->release(); base_type::operator=(raw); return *this; }
@@ -1615,8 +1964,8 @@ public:
     using base_type = raw::BindGroupLayout;
     using wgpu_type = WGPUBindGroupLayout;
     BindGroupLayout() : base_type() {}
-    WEBGPU_RAII_FRIENDS
 private:
+    WEBGPU_RAII_FRIENDS
     BindGroupLayout(wgpu_type raw) : base_type(raw) {}
     BindGroupLayout(base_type raw) : base_type(raw) {}
     BindGroupLayout& operator=(const base_type& raw) { if (*this) this->release(); base_type::operator=(raw); return *this; }
@@ -1637,8 +1986,8 @@ public:
     using base_type = raw::Buffer;
     using wgpu_type = WGPUBuffer;
     Buffer() : base_type() {}
-    WEBGPU_RAII_FRIENDS
 private:
+    WEBGPU_RAII_FRIENDS
     Buffer(wgpu_type raw) : base_type(raw) {}
     Buffer(base_type raw) : base_type(raw) {}
     Buffer& operator=(const base_type& raw) { if (*this) this->release(); base_type::operator=(raw); return *this; }
@@ -1659,8 +2008,8 @@ public:
     using base_type = raw::CommandBuffer;
     using wgpu_type = WGPUCommandBuffer;
     CommandBuffer() : base_type() {}
-    WEBGPU_RAII_FRIENDS
 private:
+    WEBGPU_RAII_FRIENDS
     CommandBuffer(wgpu_type raw) : base_type(raw) {}
     CommandBuffer(base_type raw) : base_type(raw) {}
     CommandBuffer& operator=(const base_type& raw) { if (*this) this->release(); base_type::operator=(raw); return *this; }
@@ -1681,8 +2030,8 @@ public:
     using base_type = raw::CommandEncoder;
     using wgpu_type = WGPUCommandEncoder;
     CommandEncoder() : base_type() {}
-    WEBGPU_RAII_FRIENDS
 private:
+    WEBGPU_RAII_FRIENDS
     CommandEncoder(wgpu_type raw) : base_type(raw) {}
     CommandEncoder(base_type raw) : base_type(raw) {}
     CommandEncoder& operator=(const base_type& raw) { if (*this) this->release(); base_type::operator=(raw); return *this; }
@@ -1703,8 +2052,8 @@ public:
     using base_type = raw::ComputePassEncoder;
     using wgpu_type = WGPUComputePassEncoder;
     ComputePassEncoder() : base_type() {}
-    WEBGPU_RAII_FRIENDS
 private:
+    WEBGPU_RAII_FRIENDS
     ComputePassEncoder(wgpu_type raw) : base_type(raw) {}
     ComputePassEncoder(base_type raw) : base_type(raw) {}
     ComputePassEncoder& operator=(const base_type& raw) { if (*this) this->release(); base_type::operator=(raw); return *this; }
@@ -1725,8 +2074,8 @@ public:
     using base_type = raw::ComputePipeline;
     using wgpu_type = WGPUComputePipeline;
     ComputePipeline() : base_type() {}
-    WEBGPU_RAII_FRIENDS
 private:
+    WEBGPU_RAII_FRIENDS
     ComputePipeline(wgpu_type raw) : base_type(raw) {}
     ComputePipeline(base_type raw) : base_type(raw) {}
     ComputePipeline& operator=(const base_type& raw) { if (*this) this->release(); base_type::operator=(raw); return *this; }
@@ -1747,8 +2096,8 @@ public:
     using base_type = raw::Device;
     using wgpu_type = WGPUDevice;
     Device() : base_type() {}
-    WEBGPU_RAII_FRIENDS
 private:
+    WEBGPU_RAII_FRIENDS
     Device(wgpu_type raw) : base_type(raw) {}
     Device(base_type raw) : base_type(raw) {}
     Device& operator=(const base_type& raw) { if (*this) this->release(); base_type::operator=(raw); return *this; }
@@ -1769,8 +2118,8 @@ public:
     using base_type = raw::Instance;
     using wgpu_type = WGPUInstance;
     Instance() : base_type() {}
-    WEBGPU_RAII_FRIENDS
 private:
+    WEBGPU_RAII_FRIENDS
     Instance(wgpu_type raw) : base_type(raw) {}
     Instance(base_type raw) : base_type(raw) {}
     Instance& operator=(const base_type& raw) { if (*this) this->release(); base_type::operator=(raw); return *this; }
@@ -1791,8 +2140,8 @@ public:
     using base_type = raw::PipelineLayout;
     using wgpu_type = WGPUPipelineLayout;
     PipelineLayout() : base_type() {}
-    WEBGPU_RAII_FRIENDS
 private:
+    WEBGPU_RAII_FRIENDS
     PipelineLayout(wgpu_type raw) : base_type(raw) {}
     PipelineLayout(base_type raw) : base_type(raw) {}
     PipelineLayout& operator=(const base_type& raw) { if (*this) this->release(); base_type::operator=(raw); return *this; }
@@ -1813,8 +2162,8 @@ public:
     using base_type = raw::QuerySet;
     using wgpu_type = WGPUQuerySet;
     QuerySet() : base_type() {}
-    WEBGPU_RAII_FRIENDS
 private:
+    WEBGPU_RAII_FRIENDS
     QuerySet(wgpu_type raw) : base_type(raw) {}
     QuerySet(base_type raw) : base_type(raw) {}
     QuerySet& operator=(const base_type& raw) { if (*this) this->release(); base_type::operator=(raw); return *this; }
@@ -1835,8 +2184,8 @@ public:
     using base_type = raw::Queue;
     using wgpu_type = WGPUQueue;
     Queue() : base_type() {}
-    WEBGPU_RAII_FRIENDS
 private:
+    WEBGPU_RAII_FRIENDS
     Queue(wgpu_type raw) : base_type(raw) {}
     Queue(base_type raw) : base_type(raw) {}
     Queue& operator=(const base_type& raw) { if (*this) this->release(); base_type::operator=(raw); return *this; }
@@ -1857,8 +2206,8 @@ public:
     using base_type = raw::RenderBundle;
     using wgpu_type = WGPURenderBundle;
     RenderBundle() : base_type() {}
-    WEBGPU_RAII_FRIENDS
 private:
+    WEBGPU_RAII_FRIENDS
     RenderBundle(wgpu_type raw) : base_type(raw) {}
     RenderBundle(base_type raw) : base_type(raw) {}
     RenderBundle& operator=(const base_type& raw) { if (*this) this->release(); base_type::operator=(raw); return *this; }
@@ -1879,8 +2228,8 @@ public:
     using base_type = raw::RenderBundleEncoder;
     using wgpu_type = WGPURenderBundleEncoder;
     RenderBundleEncoder() : base_type() {}
-    WEBGPU_RAII_FRIENDS
 private:
+    WEBGPU_RAII_FRIENDS
     RenderBundleEncoder(wgpu_type raw) : base_type(raw) {}
     RenderBundleEncoder(base_type raw) : base_type(raw) {}
     RenderBundleEncoder& operator=(const base_type& raw) { if (*this) this->release(); base_type::operator=(raw); return *this; }
@@ -1901,8 +2250,8 @@ public:
     using base_type = raw::RenderPassEncoder;
     using wgpu_type = WGPURenderPassEncoder;
     RenderPassEncoder() : base_type() {}
-    WEBGPU_RAII_FRIENDS
 private:
+    WEBGPU_RAII_FRIENDS
     RenderPassEncoder(wgpu_type raw) : base_type(raw) {}
     RenderPassEncoder(base_type raw) : base_type(raw) {}
     RenderPassEncoder& operator=(const base_type& raw) { if (*this) this->release(); base_type::operator=(raw); return *this; }
@@ -1923,8 +2272,8 @@ public:
     using base_type = raw::RenderPipeline;
     using wgpu_type = WGPURenderPipeline;
     RenderPipeline() : base_type() {}
-    WEBGPU_RAII_FRIENDS
 private:
+    WEBGPU_RAII_FRIENDS
     RenderPipeline(wgpu_type raw) : base_type(raw) {}
     RenderPipeline(base_type raw) : base_type(raw) {}
     RenderPipeline& operator=(const base_type& raw) { if (*this) this->release(); base_type::operator=(raw); return *this; }
@@ -1945,8 +2294,8 @@ public:
     using base_type = raw::Sampler;
     using wgpu_type = WGPUSampler;
     Sampler() : base_type() {}
-    WEBGPU_RAII_FRIENDS
 private:
+    WEBGPU_RAII_FRIENDS
     Sampler(wgpu_type raw) : base_type(raw) {}
     Sampler(base_type raw) : base_type(raw) {}
     Sampler& operator=(const base_type& raw) { if (*this) this->release(); base_type::operator=(raw); return *this; }
@@ -1967,8 +2316,8 @@ public:
     using base_type = raw::ShaderModule;
     using wgpu_type = WGPUShaderModule;
     ShaderModule() : base_type() {}
-    WEBGPU_RAII_FRIENDS
 private:
+    WEBGPU_RAII_FRIENDS
     ShaderModule(wgpu_type raw) : base_type(raw) {}
     ShaderModule(base_type raw) : base_type(raw) {}
     ShaderModule& operator=(const base_type& raw) { if (*this) this->release(); base_type::operator=(raw); return *this; }
@@ -1989,8 +2338,8 @@ public:
     using base_type = raw::Surface;
     using wgpu_type = WGPUSurface;
     Surface() : base_type() {}
-    WEBGPU_RAII_FRIENDS
 private:
+    WEBGPU_RAII_FRIENDS
     Surface(wgpu_type raw) : base_type(raw) {}
     Surface(base_type raw) : base_type(raw) {}
     Surface& operator=(const base_type& raw) { if (*this) this->release(); base_type::operator=(raw); return *this; }
@@ -2011,8 +2360,8 @@ public:
     using base_type = raw::Texture;
     using wgpu_type = WGPUTexture;
     Texture() : base_type() {}
-    WEBGPU_RAII_FRIENDS
 private:
+    WEBGPU_RAII_FRIENDS
     Texture(wgpu_type raw) : base_type(raw) {}
     Texture(base_type raw) : base_type(raw) {}
     Texture& operator=(const base_type& raw) { if (*this) this->release(); base_type::operator=(raw); return *this; }
@@ -2033,8 +2382,8 @@ public:
     using base_type = raw::TextureView;
     using wgpu_type = WGPUTextureView;
     TextureView() : base_type() {}
-    WEBGPU_RAII_FRIENDS
 private:
+    WEBGPU_RAII_FRIENDS
     TextureView(wgpu_type raw) : base_type(raw) {}
     TextureView(base_type raw) : base_type(raw) {}
     TextureView& operator=(const base_type& raw) { if (*this) this->release(); base_type::operator=(raw); return *this; }
@@ -2052,6 +2401,7 @@ public:
 };
 }
 #undef WEBGPU_RAII_FRIENDS
+#undef WEBGPU_HANDLE_FRIENDS
 namespace wgpu {
 struct BufferMapCallback {
     struct Control {
@@ -2119,7 +2469,7 @@ struct CreateComputePipelineAsyncCallback {
     struct Control {
         std::atomic<std::size_t> count{1};
         virtual ~Control() = default;
-        virtual void invoke(wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline const& pipeline, wgpu::StringView message) const = 0;
+        virtual void invoke(wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline pipeline, wgpu::StringView message) const = 0;
         virtual void invoke_c(WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline pipeline, WGPUStringView message) const;
     };
 private:
@@ -2127,7 +2477,7 @@ private:
     struct ControlImpl : Control {
         F func;
         ControlImpl(const F& f) : func(f) {}
-        void invoke(wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline const& pipeline, wgpu::StringView message) const override;
+        void invoke(wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline pipeline, wgpu::StringView message) const override;
     };
     Control* data;
 public:
@@ -2139,9 +2489,9 @@ public:
     CreateComputePipelineAsyncCallback& operator=(CreateComputePipelineAsyncCallback&& other);
     CreateComputePipelineAsyncCallback& operator=(std::nullptr_t) { reset(); return *this; }
     ~CreateComputePipelineAsyncCallback() { if (data && --data->count == 0) { delete data; } }
-    template <std::invocable<wgpu::CreatePipelineAsyncStatus, wgpu::ComputePipeline const&, wgpu::StringView> F>
+    template <std::invocable<wgpu::CreatePipelineAsyncStatus, wgpu::ComputePipeline, wgpu::StringView> F>
     CreateComputePipelineAsyncCallback(const F& f);
-    void operator()(wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline const& pipeline, wgpu::StringView message) const;
+    void operator()(wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline pipeline, wgpu::StringView message) const;
     void operator()(WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline pipeline, WGPUStringView message) const;
     void reset() { if (data && --data->count == 0) { delete data; } data = nullptr; }
     operator bool() const { return data != nullptr; }
@@ -2150,7 +2500,7 @@ struct CreateRenderPipelineAsyncCallback {
     struct Control {
         std::atomic<std::size_t> count{1};
         virtual ~Control() = default;
-        virtual void invoke(wgpu::CreatePipelineAsyncStatus status, wgpu::RenderPipeline const& pipeline, wgpu::StringView message) const = 0;
+        virtual void invoke(wgpu::CreatePipelineAsyncStatus status, wgpu::RenderPipeline pipeline, wgpu::StringView message) const = 0;
         virtual void invoke_c(WGPUCreatePipelineAsyncStatus status, WGPURenderPipeline pipeline, WGPUStringView message) const;
     };
 private:
@@ -2158,7 +2508,7 @@ private:
     struct ControlImpl : Control {
         F func;
         ControlImpl(const F& f) : func(f) {}
-        void invoke(wgpu::CreatePipelineAsyncStatus status, wgpu::RenderPipeline const& pipeline, wgpu::StringView message) const override;
+        void invoke(wgpu::CreatePipelineAsyncStatus status, wgpu::RenderPipeline pipeline, wgpu::StringView message) const override;
     };
     Control* data;
 public:
@@ -2170,9 +2520,9 @@ public:
     CreateRenderPipelineAsyncCallback& operator=(CreateRenderPipelineAsyncCallback&& other);
     CreateRenderPipelineAsyncCallback& operator=(std::nullptr_t) { reset(); return *this; }
     ~CreateRenderPipelineAsyncCallback() { if (data && --data->count == 0) { delete data; } }
-    template <std::invocable<wgpu::CreatePipelineAsyncStatus, wgpu::RenderPipeline const&, wgpu::StringView> F>
+    template <std::invocable<wgpu::CreatePipelineAsyncStatus, wgpu::RenderPipeline, wgpu::StringView> F>
     CreateRenderPipelineAsyncCallback(const F& f);
-    void operator()(wgpu::CreatePipelineAsyncStatus status, wgpu::RenderPipeline const& pipeline, wgpu::StringView message) const;
+    void operator()(wgpu::CreatePipelineAsyncStatus status, wgpu::RenderPipeline pipeline, wgpu::StringView message) const;
     void operator()(WGPUCreatePipelineAsyncStatus status, WGPURenderPipeline pipeline, WGPUStringView message) const;
     void reset() { if (data && --data->count == 0) { delete data; } data = nullptr; }
     operator bool() const { return data != nullptr; }
@@ -2274,7 +2624,7 @@ struct RequestAdapterCallback {
     struct Control {
         std::atomic<std::size_t> count{1};
         virtual ~Control() = default;
-        virtual void invoke(wgpu::RequestAdapterStatus status, wgpu::Adapter const& adapter, wgpu::StringView message) const = 0;
+        virtual void invoke(wgpu::RequestAdapterStatus status, wgpu::Adapter adapter, wgpu::StringView message) const = 0;
         virtual void invoke_c(WGPURequestAdapterStatus status, WGPUAdapter adapter, WGPUStringView message) const;
     };
 private:
@@ -2282,7 +2632,7 @@ private:
     struct ControlImpl : Control {
         F func;
         ControlImpl(const F& f) : func(f) {}
-        void invoke(wgpu::RequestAdapterStatus status, wgpu::Adapter const& adapter, wgpu::StringView message) const override;
+        void invoke(wgpu::RequestAdapterStatus status, wgpu::Adapter adapter, wgpu::StringView message) const override;
     };
     Control* data;
 public:
@@ -2294,9 +2644,9 @@ public:
     RequestAdapterCallback& operator=(RequestAdapterCallback&& other);
     RequestAdapterCallback& operator=(std::nullptr_t) { reset(); return *this; }
     ~RequestAdapterCallback() { if (data && --data->count == 0) { delete data; } }
-    template <std::invocable<wgpu::RequestAdapterStatus, wgpu::Adapter const&, wgpu::StringView> F>
+    template <std::invocable<wgpu::RequestAdapterStatus, wgpu::Adapter, wgpu::StringView> F>
     RequestAdapterCallback(const F& f);
-    void operator()(wgpu::RequestAdapterStatus status, wgpu::Adapter const& adapter, wgpu::StringView message) const;
+    void operator()(wgpu::RequestAdapterStatus status, wgpu::Adapter adapter, wgpu::StringView message) const;
     void operator()(WGPURequestAdapterStatus status, WGPUAdapter adapter, WGPUStringView message) const;
     void reset() { if (data && --data->count == 0) { delete data; } data = nullptr; }
     operator bool() const { return data != nullptr; }
@@ -2305,7 +2655,7 @@ struct RequestDeviceCallback {
     struct Control {
         std::atomic<std::size_t> count{1};
         virtual ~Control() = default;
-        virtual void invoke(wgpu::RequestDeviceStatus status, wgpu::Device const& device, wgpu::StringView message) const = 0;
+        virtual void invoke(wgpu::RequestDeviceStatus status, wgpu::Device device, wgpu::StringView message) const = 0;
         virtual void invoke_c(WGPURequestDeviceStatus status, WGPUDevice device, WGPUStringView message) const;
     };
 private:
@@ -2313,7 +2663,7 @@ private:
     struct ControlImpl : Control {
         F func;
         ControlImpl(const F& f) : func(f) {}
-        void invoke(wgpu::RequestDeviceStatus status, wgpu::Device const& device, wgpu::StringView message) const override;
+        void invoke(wgpu::RequestDeviceStatus status, wgpu::Device device, wgpu::StringView message) const override;
     };
     Control* data;
 public:
@@ -2325,9 +2675,9 @@ public:
     RequestDeviceCallback& operator=(RequestDeviceCallback&& other);
     RequestDeviceCallback& operator=(std::nullptr_t) { reset(); return *this; }
     ~RequestDeviceCallback() { if (data && --data->count == 0) { delete data; } }
-    template <std::invocable<wgpu::RequestDeviceStatus, wgpu::Device const&, wgpu::StringView> F>
+    template <std::invocable<wgpu::RequestDeviceStatus, wgpu::Device, wgpu::StringView> F>
     RequestDeviceCallback(const F& f);
-    void operator()(wgpu::RequestDeviceStatus status, wgpu::Device const& device, wgpu::StringView message) const;
+    void operator()(wgpu::RequestDeviceStatus status, wgpu::Device device, wgpu::StringView message) const;
     void operator()(WGPURequestDeviceStatus status, WGPUDevice device, WGPUStringView message) const;
     void reset() { if (data && --data->count == 0) { delete data; } data = nullptr; }
     operator bool() const { return data != nullptr; }
@@ -3334,6 +3684,7 @@ struct Origin3D {
 };
 struct PipelineLayoutDescriptor {
     struct CStruct : public WGPUPipelineLayoutDescriptor {
+        SmallVec<WGPUBindGroupLayout> bindGroupLayouts_vec;
     };
     PipelineLayoutDescriptor(const WGPUPipelineLayoutDescriptor& native);
     PipelineLayoutDescriptor() {};
@@ -4964,6 +5315,9 @@ struct InstanceEnumerateAdapterOptions {
 };
 struct BindGroupEntryExtras {
     struct CStruct : public WGPUBindGroupEntryExtras {
+        SmallVec<WGPUBuffer> buffers_vec;
+        SmallVec<WGPUSampler> samplers_vec;
+        SmallVec<WGPUTextureView> textureViews_vec;
     };
     BindGroupEntryExtras(const WGPUBindGroupEntryExtras& native);
     BindGroupEntryExtras() {};
@@ -6079,20 +6433,20 @@ template <typename F>
 void CompilationInfoCallback::ControlImpl<F>::invoke(wgpu::CompilationInfoRequestStatus status, wgpu::CompilationInfo const& compilationInfo) const {
     func(status, compilationInfo);
 }
-template <std::invocable<wgpu::CreatePipelineAsyncStatus, wgpu::ComputePipeline const&, wgpu::StringView> F>
+template <std::invocable<wgpu::CreatePipelineAsyncStatus, wgpu::ComputePipeline, wgpu::StringView> F>
 CreateComputePipelineAsyncCallback::CreateComputePipelineAsyncCallback(const F& f) {
     data = new ControlImpl<F>(f);
 }
 template <typename F>
-void CreateComputePipelineAsyncCallback::ControlImpl<F>::invoke(wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline const& pipeline, wgpu::StringView message) const {
+void CreateComputePipelineAsyncCallback::ControlImpl<F>::invoke(wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline pipeline, wgpu::StringView message) const {
     func(status, pipeline, message);
 }
-template <std::invocable<wgpu::CreatePipelineAsyncStatus, wgpu::RenderPipeline const&, wgpu::StringView> F>
+template <std::invocable<wgpu::CreatePipelineAsyncStatus, wgpu::RenderPipeline, wgpu::StringView> F>
 CreateRenderPipelineAsyncCallback::CreateRenderPipelineAsyncCallback(const F& f) {
     data = new ControlImpl<F>(f);
 }
 template <typename F>
-void CreateRenderPipelineAsyncCallback::ControlImpl<F>::invoke(wgpu::CreatePipelineAsyncStatus status, wgpu::RenderPipeline const& pipeline, wgpu::StringView message) const {
+void CreateRenderPipelineAsyncCallback::ControlImpl<F>::invoke(wgpu::CreatePipelineAsyncStatus status, wgpu::RenderPipeline pipeline, wgpu::StringView message) const {
     func(status, pipeline, message);
 }
 template <std::invocable<wgpu::Device const&, wgpu::DeviceLostReason, wgpu::StringView> F>
@@ -6119,20 +6473,20 @@ template <typename F>
 void QueueWorkDoneCallback::ControlImpl<F>::invoke(wgpu::QueueWorkDoneStatus status) const {
     func(status);
 }
-template <std::invocable<wgpu::RequestAdapterStatus, wgpu::Adapter const&, wgpu::StringView> F>
+template <std::invocable<wgpu::RequestAdapterStatus, wgpu::Adapter, wgpu::StringView> F>
 RequestAdapterCallback::RequestAdapterCallback(const F& f) {
     data = new ControlImpl<F>(f);
 }
 template <typename F>
-void RequestAdapterCallback::ControlImpl<F>::invoke(wgpu::RequestAdapterStatus status, wgpu::Adapter const& adapter, wgpu::StringView message) const {
+void RequestAdapterCallback::ControlImpl<F>::invoke(wgpu::RequestAdapterStatus status, wgpu::Adapter adapter, wgpu::StringView message) const {
     func(status, adapter, message);
 }
-template <std::invocable<wgpu::RequestDeviceStatus, wgpu::Device const&, wgpu::StringView> F>
+template <std::invocable<wgpu::RequestDeviceStatus, wgpu::Device, wgpu::StringView> F>
 RequestDeviceCallback::RequestDeviceCallback(const F& f) {
     data = new ControlImpl<F>(f);
 }
 template <typename F>
-void RequestDeviceCallback::ControlImpl<F>::invoke(wgpu::RequestDeviceStatus status, wgpu::Device const& device, wgpu::StringView message) const {
+void RequestDeviceCallback::ControlImpl<F>::invoke(wgpu::RequestDeviceStatus status, wgpu::Device device, wgpu::StringView message) const {
     func(status, device, message);
 }
 template <std::invocable<wgpu::Device const&, wgpu::ErrorType, wgpu::StringView> F>
@@ -8520,13 +8874,15 @@ PipelineLayoutDescriptor::PipelineLayoutDescriptor(const WGPUPipelineLayoutDescr
     this->nextInChain.setNext(native.nextInChain);
     this->label = static_cast<wgpu::StringView>(native.label);
     this->bindGroupLayouts = std::span(native.bindGroupLayouts, native.bindGroupLayoutCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::BindGroupLayout>(e); }) | std::ranges::to<SmallVec<wgpu::BindGroupLayout>>();
+    for (auto& e : this->bindGroupLayouts) { e.addRef(); }
 }
 PipelineLayoutDescriptor::CStruct PipelineLayoutDescriptor::to_cstruct() const {
     CStruct cstruct;
     cstruct.nextInChain = this->nextInChain.getNext();
     cstruct.label = static_cast<WGPUStringView>(this->label.to_cstruct());
-    cstruct.bindGroupLayouts = reinterpret_cast<const WGPUBindGroupLayout*>(this->bindGroupLayouts.data());
-    cstruct.bindGroupLayoutCount = static_cast<size_t>(this->bindGroupLayouts.size());
+    cstruct.bindGroupLayouts_vec = this->bindGroupLayouts | std::views::transform([](auto&& e) { return e.raw(); }) | std::ranges::to<SmallVec<WGPUBindGroupLayout>>();
+    cstruct.bindGroupLayouts = cstruct.bindGroupLayouts_vec.data();
+    cstruct.bindGroupLayoutCount = static_cast<size_t>(cstruct.bindGroupLayouts_vec.size());
     return cstruct;
 }
 PipelineLayoutDescriptor& PipelineLayoutDescriptor::setLabel(const wgpu::StringView& value) & {
@@ -11926,18 +12282,24 @@ InstanceEnumerateAdapterOptions&& InstanceEnumerateAdapterOptions::setBackends(w
 BindGroupEntryExtras::BindGroupEntryExtras(const WGPUBindGroupEntryExtras& native) {
     this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
     this->buffers = std::span(native.buffers, native.bufferCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::Buffer>(e); }) | std::ranges::to<SmallVec<wgpu::Buffer>>();
+    for (auto& e : this->buffers) { e.addRef(); }
     this->samplers = std::span(native.samplers, native.samplerCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::Sampler>(e); }) | std::ranges::to<SmallVec<wgpu::Sampler>>();
+    for (auto& e : this->samplers) { e.addRef(); }
     this->textureViews = std::span(native.textureViews, native.textureViewCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureView>(e); }) | std::ranges::to<SmallVec<wgpu::TextureView>>();
+    for (auto& e : this->textureViews) { e.addRef(); }
 }
 BindGroupEntryExtras::CStruct BindGroupEntryExtras::to_cstruct() const {
     CStruct cstruct;
     cstruct.chain = static_cast<WGPUChainedStruct>(this->chain.to_cstruct());
-    cstruct.buffers = reinterpret_cast<const WGPUBuffer*>(this->buffers.data());
-    cstruct.bufferCount = static_cast<size_t>(this->buffers.size());
-    cstruct.samplers = reinterpret_cast<const WGPUSampler*>(this->samplers.data());
-    cstruct.samplerCount = static_cast<size_t>(this->samplers.size());
-    cstruct.textureViews = reinterpret_cast<const WGPUTextureView*>(this->textureViews.data());
-    cstruct.textureViewCount = static_cast<size_t>(this->textureViews.size());
+    cstruct.buffers_vec = this->buffers | std::views::transform([](auto&& e) { return e.raw(); }) | std::ranges::to<SmallVec<WGPUBuffer>>();
+    cstruct.buffers = cstruct.buffers_vec.data();
+    cstruct.bufferCount = static_cast<size_t>(cstruct.buffers_vec.size());
+    cstruct.samplers_vec = this->samplers | std::views::transform([](auto&& e) { return e.raw(); }) | std::ranges::to<SmallVec<WGPUSampler>>();
+    cstruct.samplers = cstruct.samplers_vec.data();
+    cstruct.samplerCount = static_cast<size_t>(cstruct.samplers_vec.size());
+    cstruct.textureViews_vec = this->textureViews | std::views::transform([](auto&& e) { return e.raw(); }) | std::ranges::to<SmallVec<WGPUTextureView>>();
+    cstruct.textureViews = cstruct.textureViews_vec.data();
+    cstruct.textureViewCount = static_cast<size_t>(cstruct.textureViews_vec.size());
     return cstruct;
 }
 BindGroupLayoutEntryExtras::BindGroupLayoutEntryExtras(const WGPUBindGroupLayoutEntryExtras& native) {
@@ -12012,11 +12374,15 @@ wgpu::Bool Adapter::hasFeature(wgpu::FeatureName feature) const {
     wgpu::Bool res = static_cast<wgpu::Bool>(wgpuAdapterHasFeature(m_raw, static_cast<WGPUFeatureName>(feature)));
     return res;
 }
-wgpu::Future Adapter::requestDevice(wgpu::DeviceDescriptor const* descriptor, wgpu::RequestDeviceCallbackInfo callbackInfo) const {
-    wgpu::DeviceDescriptor::CStruct descriptor_cstruct;
-    if (descriptor) descriptor_cstruct = descriptor->to_cstruct();
+wgpu::Future Adapter::requestDevice(wgpu::DeviceDescriptor const& descriptor, wgpu::RequestDeviceCallbackInfo callbackInfo) const {
+    wgpu::DeviceDescriptor::CStruct descriptor_cstruct = descriptor.to_cstruct();
     wgpu::RequestDeviceCallbackInfo::CStruct callbackInfo_cstruct = callbackInfo.to_cstruct();
-    wgpu::Future res = static_cast<wgpu::Future>(wgpuAdapterRequestDevice(m_raw, descriptor? &descriptor_cstruct : nullptr, callbackInfo_cstruct));
+    wgpu::Future res = static_cast<wgpu::Future>(wgpuAdapterRequestDevice(m_raw, &descriptor_cstruct, callbackInfo_cstruct));
+    return res;
+}
+wgpu::Future Adapter::requestDevice(wgpu::RequestDeviceCallbackInfo callbackInfo) const {
+    wgpu::RequestDeviceCallbackInfo::CStruct callbackInfo_cstruct = callbackInfo.to_cstruct();
+    wgpu::Future res = static_cast<wgpu::Future>(wgpuAdapterRequestDevice(m_raw, nullptr, callbackInfo_cstruct));
     return res;
 }
 void Adapter::addRef() const {
@@ -12035,6 +12401,7 @@ void BindGroup::addRef() const {
 void BindGroup::release() const {
     wgpuBindGroupRelease(m_raw);
 }
+std::atomic<size_t> BindGroupId::counter{1};
 void BindGroupLayout::setLabel(wgpu::StringView label) const {
     wgpu::StringView::CStruct label_cstruct = label.to_cstruct();
     wgpuBindGroupLayoutSetLabel(m_raw, label_cstruct);
@@ -12045,6 +12412,7 @@ void BindGroupLayout::addRef() const {
 void BindGroupLayout::release() const {
     wgpuBindGroupLayoutRelease(m_raw);
 }
+std::atomic<size_t> BindGroupLayoutId::counter{1};
 void Buffer::destroy() const {
     wgpuBufferDestroy(m_raw);
 }
@@ -12086,6 +12454,7 @@ void Buffer::addRef() const {
 void Buffer::release() const {
     wgpuBufferRelease(m_raw);
 }
+std::atomic<size_t> BufferId::counter{1};
 void CommandBuffer::setLabel(wgpu::StringView label) const {
     wgpu::StringView::CStruct label_cstruct = label.to_cstruct();
     wgpuCommandBufferSetLabel(m_raw, label_cstruct);
@@ -12111,10 +12480,10 @@ wgpu::RenderPassEncoder CommandEncoder::beginRenderPass(wgpu::RenderPassDescript
     return res;
 }
 void CommandEncoder::clearBuffer(wgpu::Buffer const& buffer, uint64_t offset, uint64_t size) const {
-    wgpuCommandEncoderClearBuffer(m_raw, *reinterpret_cast<WGPUBuffer const*>(&buffer), offset, size);
+    wgpuCommandEncoderClearBuffer(m_raw, buffer.raw(), offset, size);
 }
 void CommandEncoder::copyBufferToBuffer(wgpu::Buffer const& source, uint64_t sourceOffset, wgpu::Buffer const& destination, uint64_t destinationOffset, uint64_t size) const {
-    wgpuCommandEncoderCopyBufferToBuffer(m_raw, *reinterpret_cast<WGPUBuffer const*>(&source), sourceOffset, *reinterpret_cast<WGPUBuffer const*>(&destination), destinationOffset, size);
+    wgpuCommandEncoderCopyBufferToBuffer(m_raw, source.raw(), sourceOffset, destination.raw(), destinationOffset, size);
 }
 void CommandEncoder::copyBufferToTexture(wgpu::TexelCopyBufferInfo const& source, wgpu::TexelCopyTextureInfo const& destination, wgpu::Extent3D const& copySize) const {
     wgpu::TexelCopyBufferInfo::CStruct source_cstruct = source.to_cstruct();
@@ -12155,14 +12524,14 @@ void CommandEncoder::pushDebugGroup(wgpu::StringView groupLabel) const {
     wgpuCommandEncoderPushDebugGroup(m_raw, groupLabel_cstruct);
 }
 void CommandEncoder::resolveQuerySet(wgpu::QuerySet const& querySet, uint32_t firstQuery, uint32_t queryCount, wgpu::Buffer const& destination, uint64_t destinationOffset) const {
-    wgpuCommandEncoderResolveQuerySet(m_raw, *reinterpret_cast<WGPUQuerySet const*>(&querySet), firstQuery, queryCount, *reinterpret_cast<WGPUBuffer const*>(&destination), destinationOffset);
+    wgpuCommandEncoderResolveQuerySet(m_raw, querySet.raw(), firstQuery, queryCount, destination.raw(), destinationOffset);
 }
 void CommandEncoder::setLabel(wgpu::StringView label) const {
     wgpu::StringView::CStruct label_cstruct = label.to_cstruct();
     wgpuCommandEncoderSetLabel(m_raw, label_cstruct);
 }
 void CommandEncoder::writeTimestamp(wgpu::QuerySet const& querySet, uint32_t queryIndex) const {
-    wgpuCommandEncoderWriteTimestamp(m_raw, *reinterpret_cast<WGPUQuerySet const*>(&querySet), queryIndex);
+    wgpuCommandEncoderWriteTimestamp(m_raw, querySet.raw(), queryIndex);
 }
 void CommandEncoder::addRef() const {
     wgpuCommandEncoderAddRef(m_raw);
@@ -12174,7 +12543,7 @@ void ComputePassEncoder::dispatchWorkgroups(uint32_t workgroupCountX, uint32_t w
     wgpuComputePassEncoderDispatchWorkgroups(m_raw, workgroupCountX, workgroupCountY, workgroupCountZ);
 }
 void ComputePassEncoder::dispatchWorkgroupsIndirect(wgpu::Buffer const& indirectBuffer, uint64_t indirectOffset) const {
-    wgpuComputePassEncoderDispatchWorkgroupsIndirect(m_raw, *reinterpret_cast<WGPUBuffer const*>(&indirectBuffer), indirectOffset);
+    wgpuComputePassEncoderDispatchWorkgroupsIndirect(m_raw, indirectBuffer.raw(), indirectOffset);
 }
 void ComputePassEncoder::end() const {
     wgpuComputePassEncoderEnd(m_raw);
@@ -12191,7 +12560,7 @@ void ComputePassEncoder::pushDebugGroup(wgpu::StringView groupLabel) const {
     wgpuComputePassEncoderPushDebugGroup(m_raw, groupLabel_cstruct);
 }
 void ComputePassEncoder::setBindGroup(uint32_t groupIndex, wgpu::BindGroup const& group, std::span<uint32_t const> dynamicOffsets) const {
-    wgpuComputePassEncoderSetBindGroup(m_raw, groupIndex, *reinterpret_cast<WGPUBindGroup const*>(&group), static_cast<size_t>(dynamicOffsets.size()), dynamicOffsets.data());
+    wgpuComputePassEncoderSetBindGroup(m_raw, groupIndex, group.raw(), static_cast<size_t>(dynamicOffsets.size()), dynamicOffsets.data());
 }
 void ComputePassEncoder::setBindGroup(uint32_t groupIndex, wgpu::BindGroup const& group, const uint32_t& dynamicOffsets) const {
     setBindGroup(groupIndex, group, std::span<const uint32_t>(&dynamicOffsets, 1));
@@ -12201,7 +12570,7 @@ void ComputePassEncoder::setLabel(wgpu::StringView label) const {
     wgpuComputePassEncoderSetLabel(m_raw, label_cstruct);
 }
 void ComputePassEncoder::setPipeline(wgpu::ComputePipeline const& pipeline) const {
-    wgpuComputePassEncoderSetPipeline(m_raw, *reinterpret_cast<WGPUComputePipeline const*>(&pipeline));
+    wgpuComputePassEncoderSetPipeline(m_raw, pipeline.raw());
 }
 void ComputePassEncoder::addRef() const {
     wgpuComputePassEncoderAddRef(m_raw);
@@ -12213,13 +12582,13 @@ void ComputePassEncoder::setPushConstants(uint32_t offset, uint32_t sizeBytes, v
     wgpuComputePassEncoderSetPushConstants(m_raw, offset, sizeBytes, data);
 }
 void ComputePassEncoder::beginPipelineStatisticsQuery(wgpu::QuerySet const& querySet, uint32_t queryIndex) const {
-    wgpuComputePassEncoderBeginPipelineStatisticsQuery(m_raw, *reinterpret_cast<WGPUQuerySet const*>(&querySet), queryIndex);
+    wgpuComputePassEncoderBeginPipelineStatisticsQuery(m_raw, querySet.raw(), queryIndex);
 }
 void ComputePassEncoder::endPipelineStatisticsQuery() const {
     wgpuComputePassEncoderEndPipelineStatisticsQuery(m_raw);
 }
 void ComputePassEncoder::writeTimestamp(wgpu::QuerySet const& querySet, uint32_t queryIndex) const {
-    wgpuComputePassEncoderWriteTimestamp(m_raw, *reinterpret_cast<WGPUQuerySet const*>(&querySet), queryIndex);
+    wgpuComputePassEncoderWriteTimestamp(m_raw, querySet.raw(), queryIndex);
 }
 wgpu::BindGroupLayout ComputePipeline::getBindGroupLayout(uint32_t groupIndex) const {
     wgpu::BindGroupLayout res = static_cast<wgpu::BindGroupLayout>(wgpuComputePipelineGetBindGroupLayout(m_raw, groupIndex));
@@ -12235,6 +12604,7 @@ void ComputePipeline::addRef() const {
 void ComputePipeline::release() const {
     wgpuComputePipelineRelease(m_raw);
 }
+std::atomic<size_t> ComputePipelineId::counter{1};
 wgpu::BindGroup Device::createBindGroup(wgpu::BindGroupDescriptor const& descriptor) const {
     wgpu::BindGroupDescriptor::CStruct descriptor_cstruct = descriptor.to_cstruct();
     wgpu::BindGroup res = static_cast<wgpu::BindGroup>(wgpuDeviceCreateBindGroup(m_raw, &descriptor_cstruct));
@@ -12396,17 +12766,25 @@ wgpu::Bool Instance::hasWGSLLanguageFeature(wgpu::WGSLLanguageFeatureName featur
 void Instance::processEvents() const {
     wgpuInstanceProcessEvents(m_raw);
 }
-wgpu::Future Instance::requestAdapter(wgpu::RequestAdapterOptions const* options, wgpu::RequestAdapterCallbackInfo callbackInfo) const {
-    wgpu::RequestAdapterOptions::CStruct options_cstruct;
-    if (options) options_cstruct = options->to_cstruct();
+wgpu::Future Instance::requestAdapter(wgpu::RequestAdapterOptions const& options, wgpu::RequestAdapterCallbackInfo callbackInfo) const {
+    wgpu::RequestAdapterOptions::CStruct options_cstruct = options.to_cstruct();
     wgpu::RequestAdapterCallbackInfo::CStruct callbackInfo_cstruct = callbackInfo.to_cstruct();
-    wgpu::Future res = static_cast<wgpu::Future>(wgpuInstanceRequestAdapter(m_raw, options? &options_cstruct : nullptr, callbackInfo_cstruct));
+    wgpu::Future res = static_cast<wgpu::Future>(wgpuInstanceRequestAdapter(m_raw, &options_cstruct, callbackInfo_cstruct));
+    return res;
+}
+wgpu::Future Instance::requestAdapter(wgpu::RequestAdapterCallbackInfo callbackInfo) const {
+    wgpu::RequestAdapterCallbackInfo::CStruct callbackInfo_cstruct = callbackInfo.to_cstruct();
+    wgpu::Future res = static_cast<wgpu::Future>(wgpuInstanceRequestAdapter(m_raw, nullptr, callbackInfo_cstruct));
     return res;
 }
 wgpu::WaitStatus Instance::waitAny(size_t futureCount, wgpu::FutureWaitInfo* futures, uint64_t timeoutNS) const {
     WGPUFutureWaitInfo futures_native;
-    wgpu::WaitStatus res = static_cast<wgpu::WaitStatus>(wgpuInstanceWaitAny(m_raw, futureCount, futures? &futures_native : nullptr, timeoutNS));
-    if (futures) *futures = static_cast<wgpu::FutureWaitInfo>(futures_native);
+    wgpu::WaitStatus res = static_cast<wgpu::WaitStatus>(wgpuInstanceWaitAny(m_raw, futureCount, &futures_native, timeoutNS));
+    *futures = static_cast<wgpu::FutureWaitInfo>(futures_native);
+    return res;
+}
+wgpu::WaitStatus Instance::waitAny(size_t futureCount, uint64_t timeoutNS) const {
+    wgpu::WaitStatus res = static_cast<wgpu::WaitStatus>(wgpuInstanceWaitAny(m_raw, futureCount, nullptr, timeoutNS));
     return res;
 }
 void Instance::addRef() const {
@@ -12415,10 +12793,13 @@ void Instance::addRef() const {
 void Instance::release() const {
     wgpuInstanceRelease(m_raw);
 }
-size_t Instance::enumerateAdapters(wgpu::InstanceEnumerateAdapterOptions const* options, wgpu::Adapter* adapters) const {
-    wgpu::InstanceEnumerateAdapterOptions::CStruct options_cstruct;
-    if (options) options_cstruct = options->to_cstruct();
-    size_t res = static_cast<size_t>(wgpuInstanceEnumerateAdapters(m_raw, options? &options_cstruct : nullptr, reinterpret_cast<WGPUAdapter*>(adapters)));
+size_t Instance::enumerateAdapters(wgpu::InstanceEnumerateAdapterOptions const& options, wgpu::Adapter* adapters) const {
+    wgpu::InstanceEnumerateAdapterOptions::CStruct options_cstruct = options.to_cstruct();
+    size_t res = static_cast<size_t>(wgpuInstanceEnumerateAdapters(m_raw, &options_cstruct, reinterpret_cast<WGPUAdapter*>(adapters)));
+    return res;
+}
+size_t Instance::enumerateAdapters(wgpu::Adapter* adapters) const {
+    size_t res = static_cast<size_t>(wgpuInstanceEnumerateAdapters(m_raw, nullptr, reinterpret_cast<WGPUAdapter*>(adapters)));
     return res;
 }
 void PipelineLayout::setLabel(wgpu::StringView label) const {
@@ -12431,6 +12812,7 @@ void PipelineLayout::addRef() const {
 void PipelineLayout::release() const {
     wgpuPipelineLayoutRelease(m_raw);
 }
+std::atomic<size_t> PipelineLayoutId::counter{1};
 void QuerySet::destroy() const {
     wgpuQuerySetDestroy(m_raw);
 }
@@ -12452,6 +12834,7 @@ void QuerySet::addRef() const {
 void QuerySet::release() const {
     wgpuQuerySetRelease(m_raw);
 }
+std::atomic<size_t> QuerySetId::counter{1};
 wgpu::Future Queue::onSubmittedWorkDone(wgpu::QueueWorkDoneCallbackInfo callbackInfo) const {
     wgpu::QueueWorkDoneCallbackInfo::CStruct callbackInfo_cstruct = callbackInfo.to_cstruct();
     wgpu::Future res = static_cast<wgpu::Future>(wgpuQueueOnSubmittedWorkDone(m_raw, callbackInfo_cstruct));
@@ -12468,7 +12851,7 @@ void Queue::submit(const wgpu::CommandBuffer& commands) const {
     submit(std::span<const wgpu::CommandBuffer>(&commands, 1));
 }
 void Queue::writeBuffer(wgpu::Buffer const& buffer, uint64_t bufferOffset, void const* data, size_t size) const {
-    wgpuQueueWriteBuffer(m_raw, *reinterpret_cast<WGPUBuffer const*>(&buffer), bufferOffset, data, size);
+    wgpuQueueWriteBuffer(m_raw, buffer.raw(), bufferOffset, data, size);
 }
 void Queue::writeTexture(wgpu::TexelCopyTextureInfo const& destination, void const* data, size_t dataSize, wgpu::TexelCopyBufferLayout const& dataLayout, wgpu::Extent3D const& writeSize) const {
     wgpu::TexelCopyTextureInfo::CStruct destination_cstruct = destination.to_cstruct();
@@ -12499,6 +12882,7 @@ void RenderBundle::addRef() const {
 void RenderBundle::release() const {
     wgpuRenderBundleRelease(m_raw);
 }
+std::atomic<size_t> RenderBundleId::counter{1};
 void RenderBundleEncoder::draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) const {
     wgpuRenderBundleEncoderDraw(m_raw, vertexCount, instanceCount, firstVertex, firstInstance);
 }
@@ -12506,10 +12890,10 @@ void RenderBundleEncoder::drawIndexed(uint32_t indexCount, uint32_t instanceCoun
     wgpuRenderBundleEncoderDrawIndexed(m_raw, indexCount, instanceCount, firstIndex, baseVertex, firstInstance);
 }
 void RenderBundleEncoder::drawIndexedIndirect(wgpu::Buffer const& indirectBuffer, uint64_t indirectOffset) const {
-    wgpuRenderBundleEncoderDrawIndexedIndirect(m_raw, *reinterpret_cast<WGPUBuffer const*>(&indirectBuffer), indirectOffset);
+    wgpuRenderBundleEncoderDrawIndexedIndirect(m_raw, indirectBuffer.raw(), indirectOffset);
 }
 void RenderBundleEncoder::drawIndirect(wgpu::Buffer const& indirectBuffer, uint64_t indirectOffset) const {
-    wgpuRenderBundleEncoderDrawIndirect(m_raw, *reinterpret_cast<WGPUBuffer const*>(&indirectBuffer), indirectOffset);
+    wgpuRenderBundleEncoderDrawIndirect(m_raw, indirectBuffer.raw(), indirectOffset);
 }
 wgpu::RenderBundle RenderBundleEncoder::finish(wgpu::RenderBundleDescriptor const& descriptor) const {
     wgpu::RenderBundleDescriptor::CStruct descriptor_cstruct = descriptor.to_cstruct();
@@ -12532,23 +12916,23 @@ void RenderBundleEncoder::pushDebugGroup(wgpu::StringView groupLabel) const {
     wgpuRenderBundleEncoderPushDebugGroup(m_raw, groupLabel_cstruct);
 }
 void RenderBundleEncoder::setBindGroup(uint32_t groupIndex, wgpu::BindGroup const& group, std::span<uint32_t const> dynamicOffsets) const {
-    wgpuRenderBundleEncoderSetBindGroup(m_raw, groupIndex, *reinterpret_cast<WGPUBindGroup const*>(&group), static_cast<size_t>(dynamicOffsets.size()), dynamicOffsets.data());
+    wgpuRenderBundleEncoderSetBindGroup(m_raw, groupIndex, group.raw(), static_cast<size_t>(dynamicOffsets.size()), dynamicOffsets.data());
 }
 void RenderBundleEncoder::setBindGroup(uint32_t groupIndex, wgpu::BindGroup const& group, const uint32_t& dynamicOffsets) const {
     setBindGroup(groupIndex, group, std::span<const uint32_t>(&dynamicOffsets, 1));
 }
 void RenderBundleEncoder::setIndexBuffer(wgpu::Buffer const& buffer, wgpu::IndexFormat format, uint64_t offset, uint64_t size) const {
-    wgpuRenderBundleEncoderSetIndexBuffer(m_raw, *reinterpret_cast<WGPUBuffer const*>(&buffer), static_cast<WGPUIndexFormat>(format), offset, size);
+    wgpuRenderBundleEncoderSetIndexBuffer(m_raw, buffer.raw(), static_cast<WGPUIndexFormat>(format), offset, size);
 }
 void RenderBundleEncoder::setLabel(wgpu::StringView label) const {
     wgpu::StringView::CStruct label_cstruct = label.to_cstruct();
     wgpuRenderBundleEncoderSetLabel(m_raw, label_cstruct);
 }
 void RenderBundleEncoder::setPipeline(wgpu::RenderPipeline const& pipeline) const {
-    wgpuRenderBundleEncoderSetPipeline(m_raw, *reinterpret_cast<WGPURenderPipeline const*>(&pipeline));
+    wgpuRenderBundleEncoderSetPipeline(m_raw, pipeline.raw());
 }
 void RenderBundleEncoder::setVertexBuffer(uint32_t slot, wgpu::Buffer const& buffer, uint64_t offset, uint64_t size) const {
-    wgpuRenderBundleEncoderSetVertexBuffer(m_raw, slot, *reinterpret_cast<WGPUBuffer const*>(&buffer), offset, size);
+    wgpuRenderBundleEncoderSetVertexBuffer(m_raw, slot, buffer.raw(), offset, size);
 }
 void RenderBundleEncoder::addRef() const {
     wgpuRenderBundleEncoderAddRef(m_raw);
@@ -12569,10 +12953,10 @@ void RenderPassEncoder::drawIndexed(uint32_t indexCount, uint32_t instanceCount,
     wgpuRenderPassEncoderDrawIndexed(m_raw, indexCount, instanceCount, firstIndex, baseVertex, firstInstance);
 }
 void RenderPassEncoder::drawIndexedIndirect(wgpu::Buffer const& indirectBuffer, uint64_t indirectOffset) const {
-    wgpuRenderPassEncoderDrawIndexedIndirect(m_raw, *reinterpret_cast<WGPUBuffer const*>(&indirectBuffer), indirectOffset);
+    wgpuRenderPassEncoderDrawIndexedIndirect(m_raw, indirectBuffer.raw(), indirectOffset);
 }
 void RenderPassEncoder::drawIndirect(wgpu::Buffer const& indirectBuffer, uint64_t indirectOffset) const {
-    wgpuRenderPassEncoderDrawIndirect(m_raw, *reinterpret_cast<WGPUBuffer const*>(&indirectBuffer), indirectOffset);
+    wgpuRenderPassEncoderDrawIndirect(m_raw, indirectBuffer.raw(), indirectOffset);
 }
 void RenderPassEncoder::end() const {
     wgpuRenderPassEncoderEnd(m_raw);
@@ -12598,7 +12982,7 @@ void RenderPassEncoder::pushDebugGroup(wgpu::StringView groupLabel) const {
     wgpuRenderPassEncoderPushDebugGroup(m_raw, groupLabel_cstruct);
 }
 void RenderPassEncoder::setBindGroup(uint32_t groupIndex, wgpu::BindGroup const& group, std::span<uint32_t const> dynamicOffsets) const {
-    wgpuRenderPassEncoderSetBindGroup(m_raw, groupIndex, *reinterpret_cast<WGPUBindGroup const*>(&group), static_cast<size_t>(dynamicOffsets.size()), dynamicOffsets.data());
+    wgpuRenderPassEncoderSetBindGroup(m_raw, groupIndex, group.raw(), static_cast<size_t>(dynamicOffsets.size()), dynamicOffsets.data());
 }
 void RenderPassEncoder::setBindGroup(uint32_t groupIndex, wgpu::BindGroup const& group, const uint32_t& dynamicOffsets) const {
     setBindGroup(groupIndex, group, std::span<const uint32_t>(&dynamicOffsets, 1));
@@ -12608,14 +12992,14 @@ void RenderPassEncoder::setBlendConstant(wgpu::Color const& color) const {
     wgpuRenderPassEncoderSetBlendConstant(m_raw, &color_cstruct);
 }
 void RenderPassEncoder::setIndexBuffer(wgpu::Buffer const& buffer, wgpu::IndexFormat format, uint64_t offset, uint64_t size) const {
-    wgpuRenderPassEncoderSetIndexBuffer(m_raw, *reinterpret_cast<WGPUBuffer const*>(&buffer), static_cast<WGPUIndexFormat>(format), offset, size);
+    wgpuRenderPassEncoderSetIndexBuffer(m_raw, buffer.raw(), static_cast<WGPUIndexFormat>(format), offset, size);
 }
 void RenderPassEncoder::setLabel(wgpu::StringView label) const {
     wgpu::StringView::CStruct label_cstruct = label.to_cstruct();
     wgpuRenderPassEncoderSetLabel(m_raw, label_cstruct);
 }
 void RenderPassEncoder::setPipeline(wgpu::RenderPipeline const& pipeline) const {
-    wgpuRenderPassEncoderSetPipeline(m_raw, *reinterpret_cast<WGPURenderPipeline const*>(&pipeline));
+    wgpuRenderPassEncoderSetPipeline(m_raw, pipeline.raw());
 }
 void RenderPassEncoder::setScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height) const {
     wgpuRenderPassEncoderSetScissorRect(m_raw, x, y, width, height);
@@ -12624,7 +13008,7 @@ void RenderPassEncoder::setStencilReference(uint32_t reference) const {
     wgpuRenderPassEncoderSetStencilReference(m_raw, reference);
 }
 void RenderPassEncoder::setVertexBuffer(uint32_t slot, wgpu::Buffer const& buffer, uint64_t offset, uint64_t size) const {
-    wgpuRenderPassEncoderSetVertexBuffer(m_raw, slot, *reinterpret_cast<WGPUBuffer const*>(&buffer), offset, size);
+    wgpuRenderPassEncoderSetVertexBuffer(m_raw, slot, buffer.raw(), offset, size);
 }
 void RenderPassEncoder::setViewport(float x, float y, float width, float height, float minDepth, float maxDepth) const {
     wgpuRenderPassEncoderSetViewport(m_raw, x, y, width, height, minDepth, maxDepth);
@@ -12639,25 +13023,25 @@ void RenderPassEncoder::setPushConstants(wgpu::ShaderStage stages, uint32_t offs
     wgpuRenderPassEncoderSetPushConstants(m_raw, static_cast<WGPUShaderStage>(stages), offset, sizeBytes, data);
 }
 void RenderPassEncoder::multiDrawIndirect(wgpu::Buffer const& buffer, uint64_t offset, uint32_t count) const {
-    wgpuRenderPassEncoderMultiDrawIndirect(m_raw, *reinterpret_cast<WGPUBuffer const*>(&buffer), offset, count);
+    wgpuRenderPassEncoderMultiDrawIndirect(m_raw, buffer.raw(), offset, count);
 }
 void RenderPassEncoder::multiDrawIndexedIndirect(wgpu::Buffer const& buffer, uint64_t offset, uint32_t count) const {
-    wgpuRenderPassEncoderMultiDrawIndexedIndirect(m_raw, *reinterpret_cast<WGPUBuffer const*>(&buffer), offset, count);
+    wgpuRenderPassEncoderMultiDrawIndexedIndirect(m_raw, buffer.raw(), offset, count);
 }
 void RenderPassEncoder::multiDrawIndirectCount(wgpu::Buffer const& buffer, uint64_t offset, wgpu::Buffer const& count_buffer, uint64_t count_buffer_offset, uint32_t max_count) const {
-    wgpuRenderPassEncoderMultiDrawIndirectCount(m_raw, *reinterpret_cast<WGPUBuffer const*>(&buffer), offset, *reinterpret_cast<WGPUBuffer const*>(&count_buffer), count_buffer_offset, max_count);
+    wgpuRenderPassEncoderMultiDrawIndirectCount(m_raw, buffer.raw(), offset, count_buffer.raw(), count_buffer_offset, max_count);
 }
 void RenderPassEncoder::multiDrawIndexedIndirectCount(wgpu::Buffer const& buffer, uint64_t offset, wgpu::Buffer const& count_buffer, uint64_t count_buffer_offset, uint32_t max_count) const {
-    wgpuRenderPassEncoderMultiDrawIndexedIndirectCount(m_raw, *reinterpret_cast<WGPUBuffer const*>(&buffer), offset, *reinterpret_cast<WGPUBuffer const*>(&count_buffer), count_buffer_offset, max_count);
+    wgpuRenderPassEncoderMultiDrawIndexedIndirectCount(m_raw, buffer.raw(), offset, count_buffer.raw(), count_buffer_offset, max_count);
 }
 void RenderPassEncoder::beginPipelineStatisticsQuery(wgpu::QuerySet const& querySet, uint32_t queryIndex) const {
-    wgpuRenderPassEncoderBeginPipelineStatisticsQuery(m_raw, *reinterpret_cast<WGPUQuerySet const*>(&querySet), queryIndex);
+    wgpuRenderPassEncoderBeginPipelineStatisticsQuery(m_raw, querySet.raw(), queryIndex);
 }
 void RenderPassEncoder::endPipelineStatisticsQuery() const {
     wgpuRenderPassEncoderEndPipelineStatisticsQuery(m_raw);
 }
 void RenderPassEncoder::writeTimestamp(wgpu::QuerySet const& querySet, uint32_t queryIndex) const {
-    wgpuRenderPassEncoderWriteTimestamp(m_raw, *reinterpret_cast<WGPUQuerySet const*>(&querySet), queryIndex);
+    wgpuRenderPassEncoderWriteTimestamp(m_raw, querySet.raw(), queryIndex);
 }
 wgpu::BindGroupLayout RenderPipeline::getBindGroupLayout(uint32_t groupIndex) const {
     wgpu::BindGroupLayout res = static_cast<wgpu::BindGroupLayout>(wgpuRenderPipelineGetBindGroupLayout(m_raw, groupIndex));
@@ -12673,6 +13057,7 @@ void RenderPipeline::addRef() const {
 void RenderPipeline::release() const {
     wgpuRenderPipelineRelease(m_raw);
 }
+std::atomic<size_t> RenderPipelineId::counter{1};
 void Sampler::setLabel(wgpu::StringView label) const {
     wgpu::StringView::CStruct label_cstruct = label.to_cstruct();
     wgpuSamplerSetLabel(m_raw, label_cstruct);
@@ -12683,6 +13068,7 @@ void Sampler::addRef() const {
 void Sampler::release() const {
     wgpuSamplerRelease(m_raw);
 }
+std::atomic<size_t> SamplerId::counter{1};
 wgpu::Future ShaderModule::getCompilationInfo(wgpu::CompilationInfoCallbackInfo callbackInfo) const {
     wgpu::CompilationInfoCallbackInfo::CStruct callbackInfo_cstruct = callbackInfo.to_cstruct();
     wgpu::Future res = static_cast<wgpu::Future>(wgpuShaderModuleGetCompilationInfo(m_raw, callbackInfo_cstruct));
@@ -12698,13 +13084,14 @@ void ShaderModule::addRef() const {
 void ShaderModule::release() const {
     wgpuShaderModuleRelease(m_raw);
 }
+std::atomic<size_t> ShaderModuleId::counter{1};
 void Surface::configure(wgpu::SurfaceConfiguration const& config) const {
     wgpu::SurfaceConfiguration::CStruct config_cstruct = config.to_cstruct();
     wgpuSurfaceConfigure(m_raw, &config_cstruct);
 }
 wgpu::Status Surface::getCapabilities(wgpu::Adapter const& adapter, wgpu::SurfaceCapabilities* capabilities) const {
     WGPUSurfaceCapabilities capabilities_native;
-    wgpu::Status res = static_cast<wgpu::Status>(wgpuSurfaceGetCapabilities(m_raw, *reinterpret_cast<WGPUAdapter const*>(&adapter), &capabilities_native));
+    wgpu::Status res = static_cast<wgpu::Status>(wgpuSurfaceGetCapabilities(m_raw, adapter.raw(), &capabilities_native));
     *capabilities = static_cast<wgpu::SurfaceCapabilities>(capabilities_native);
     wgpuSurfaceCapabilitiesFreeMembers(capabilities_native);
     return res;
@@ -12731,6 +13118,7 @@ void Surface::addRef() const {
 void Surface::release() const {
     wgpuSurfaceRelease(m_raw);
 }
+std::atomic<size_t> SurfaceId::counter{1};
 wgpu::TextureView Texture::createView(wgpu::TextureViewDescriptor const& descriptor) const {
     wgpu::TextureViewDescriptor::CStruct descriptor_cstruct = descriptor.to_cstruct();
     wgpu::TextureView res = static_cast<wgpu::TextureView>(wgpuTextureCreateView(m_raw, &descriptor_cstruct));
@@ -12785,6 +13173,7 @@ void Texture::addRef() const {
 void Texture::release() const {
     wgpuTextureRelease(m_raw);
 }
+std::atomic<size_t> TextureId::counter{1};
 void TextureView::setLabel(wgpu::StringView label) const {
     wgpu::StringView::CStruct label_cstruct = label.to_cstruct();
     wgpuTextureViewSetLabel(m_raw, label_cstruct);
@@ -12795,6 +13184,7 @@ void TextureView::addRef() const {
 void TextureView::release() const {
     wgpuTextureViewRelease(m_raw);
 }
+std::atomic<size_t> TextureViewId::counter{1};
 }
 namespace wgpu {
 struct BufferMapCallbackControlNative : BufferMapCallback::Control {
@@ -12881,7 +13271,7 @@ struct CreateComputePipelineAsyncCallbackControlNative : CreateComputePipelineAs
     void* userdata1;
     void* userdata2;
     CreateComputePipelineAsyncCallbackControlNative(WGPUCreateComputePipelineAsyncCallback n, void* userdata1, void* userdata2) : native(n), userdata1(userdata1), userdata2(userdata2) {}
-    void invoke(wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline const& pipeline, wgpu::StringView message) const override {}
+    void invoke(wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline pipeline, wgpu::StringView message) const override {}
     void invoke_c(WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline pipeline, WGPUStringView message) const override;
 };
 void CreateComputePipelineAsyncCallbackControlNative::invoke_c(WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline pipeline, WGPUStringView message) const {
@@ -12895,7 +13285,7 @@ CreateComputePipelineAsyncCallback::CreateComputePipelineAsyncCallback(WGPUCreat
     }
 }
 void CreateComputePipelineAsyncCallback::Control::invoke_c(WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline pipeline, WGPUStringView message) const {
-    invoke(static_cast<wgpu::CreatePipelineAsyncStatus>(status), *reinterpret_cast<wgpu::ComputePipeline const*>(&pipeline), static_cast<wgpu::StringView>(message));
+    invoke(static_cast<wgpu::CreatePipelineAsyncStatus>(status), static_cast<wgpu::ComputePipeline>(pipeline), static_cast<wgpu::StringView>(message));
 }
 CreateComputePipelineAsyncCallback& CreateComputePipelineAsyncCallback::operator=(const CreateComputePipelineAsyncCallback& other) {
     if (this != &other) {
@@ -12913,14 +13303,14 @@ CreateComputePipelineAsyncCallback& CreateComputePipelineAsyncCallback::operator
     }
     return *this;
 }
-void CreateComputePipelineAsyncCallback::operator()(wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline const& pipeline, wgpu::StringView message) const { if (data) data->invoke(status, pipeline, message); }
+void CreateComputePipelineAsyncCallback::operator()(wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline pipeline, wgpu::StringView message) const { if (data) data->invoke(status, pipeline, message); }
 void CreateComputePipelineAsyncCallback::operator()(WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline pipeline, WGPUStringView message) const { if (data) data->invoke_c(status, pipeline, message); }
 struct CreateRenderPipelineAsyncCallbackControlNative : CreateRenderPipelineAsyncCallback::Control {
     WGPUCreateRenderPipelineAsyncCallback native;
     void* userdata1;
     void* userdata2;
     CreateRenderPipelineAsyncCallbackControlNative(WGPUCreateRenderPipelineAsyncCallback n, void* userdata1, void* userdata2) : native(n), userdata1(userdata1), userdata2(userdata2) {}
-    void invoke(wgpu::CreatePipelineAsyncStatus status, wgpu::RenderPipeline const& pipeline, wgpu::StringView message) const override {}
+    void invoke(wgpu::CreatePipelineAsyncStatus status, wgpu::RenderPipeline pipeline, wgpu::StringView message) const override {}
     void invoke_c(WGPUCreatePipelineAsyncStatus status, WGPURenderPipeline pipeline, WGPUStringView message) const override;
 };
 void CreateRenderPipelineAsyncCallbackControlNative::invoke_c(WGPUCreatePipelineAsyncStatus status, WGPURenderPipeline pipeline, WGPUStringView message) const {
@@ -12934,7 +13324,7 @@ CreateRenderPipelineAsyncCallback::CreateRenderPipelineAsyncCallback(WGPUCreateR
     }
 }
 void CreateRenderPipelineAsyncCallback::Control::invoke_c(WGPUCreatePipelineAsyncStatus status, WGPURenderPipeline pipeline, WGPUStringView message) const {
-    invoke(static_cast<wgpu::CreatePipelineAsyncStatus>(status), *reinterpret_cast<wgpu::RenderPipeline const*>(&pipeline), static_cast<wgpu::StringView>(message));
+    invoke(static_cast<wgpu::CreatePipelineAsyncStatus>(status), static_cast<wgpu::RenderPipeline>(pipeline), static_cast<wgpu::StringView>(message));
 }
 CreateRenderPipelineAsyncCallback& CreateRenderPipelineAsyncCallback::operator=(const CreateRenderPipelineAsyncCallback& other) {
     if (this != &other) {
@@ -12952,7 +13342,7 @@ CreateRenderPipelineAsyncCallback& CreateRenderPipelineAsyncCallback::operator=(
     }
     return *this;
 }
-void CreateRenderPipelineAsyncCallback::operator()(wgpu::CreatePipelineAsyncStatus status, wgpu::RenderPipeline const& pipeline, wgpu::StringView message) const { if (data) data->invoke(status, pipeline, message); }
+void CreateRenderPipelineAsyncCallback::operator()(wgpu::CreatePipelineAsyncStatus status, wgpu::RenderPipeline pipeline, wgpu::StringView message) const { if (data) data->invoke(status, pipeline, message); }
 void CreateRenderPipelineAsyncCallback::operator()(WGPUCreatePipelineAsyncStatus status, WGPURenderPipeline pipeline, WGPUStringView message) const { if (data) data->invoke_c(status, pipeline, message); }
 struct DeviceLostCallbackControlNative : DeviceLostCallback::Control {
     WGPUDeviceLostCallback native;
@@ -13076,7 +13466,7 @@ struct RequestAdapterCallbackControlNative : RequestAdapterCallback::Control {
     void* userdata1;
     void* userdata2;
     RequestAdapterCallbackControlNative(WGPURequestAdapterCallback n, void* userdata1, void* userdata2) : native(n), userdata1(userdata1), userdata2(userdata2) {}
-    void invoke(wgpu::RequestAdapterStatus status, wgpu::Adapter const& adapter, wgpu::StringView message) const override {}
+    void invoke(wgpu::RequestAdapterStatus status, wgpu::Adapter adapter, wgpu::StringView message) const override {}
     void invoke_c(WGPURequestAdapterStatus status, WGPUAdapter adapter, WGPUStringView message) const override;
 };
 void RequestAdapterCallbackControlNative::invoke_c(WGPURequestAdapterStatus status, WGPUAdapter adapter, WGPUStringView message) const {
@@ -13090,7 +13480,7 @@ RequestAdapterCallback::RequestAdapterCallback(WGPURequestAdapterCallback native
     }
 }
 void RequestAdapterCallback::Control::invoke_c(WGPURequestAdapterStatus status, WGPUAdapter adapter, WGPUStringView message) const {
-    invoke(static_cast<wgpu::RequestAdapterStatus>(status), *reinterpret_cast<wgpu::Adapter const*>(&adapter), static_cast<wgpu::StringView>(message));
+    invoke(static_cast<wgpu::RequestAdapterStatus>(status), static_cast<wgpu::Adapter>(adapter), static_cast<wgpu::StringView>(message));
 }
 RequestAdapterCallback& RequestAdapterCallback::operator=(const RequestAdapterCallback& other) {
     if (this != &other) {
@@ -13108,14 +13498,14 @@ RequestAdapterCallback& RequestAdapterCallback::operator=(RequestAdapterCallback
     }
     return *this;
 }
-void RequestAdapterCallback::operator()(wgpu::RequestAdapterStatus status, wgpu::Adapter const& adapter, wgpu::StringView message) const { if (data) data->invoke(status, adapter, message); }
+void RequestAdapterCallback::operator()(wgpu::RequestAdapterStatus status, wgpu::Adapter adapter, wgpu::StringView message) const { if (data) data->invoke(status, adapter, message); }
 void RequestAdapterCallback::operator()(WGPURequestAdapterStatus status, WGPUAdapter adapter, WGPUStringView message) const { if (data) data->invoke_c(status, adapter, message); }
 struct RequestDeviceCallbackControlNative : RequestDeviceCallback::Control {
     WGPURequestDeviceCallback native;
     void* userdata1;
     void* userdata2;
     RequestDeviceCallbackControlNative(WGPURequestDeviceCallback n, void* userdata1, void* userdata2) : native(n), userdata1(userdata1), userdata2(userdata2) {}
-    void invoke(wgpu::RequestDeviceStatus status, wgpu::Device const& device, wgpu::StringView message) const override {}
+    void invoke(wgpu::RequestDeviceStatus status, wgpu::Device device, wgpu::StringView message) const override {}
     void invoke_c(WGPURequestDeviceStatus status, WGPUDevice device, WGPUStringView message) const override;
 };
 void RequestDeviceCallbackControlNative::invoke_c(WGPURequestDeviceStatus status, WGPUDevice device, WGPUStringView message) const {
@@ -13129,7 +13519,7 @@ RequestDeviceCallback::RequestDeviceCallback(WGPURequestDeviceCallback native, v
     }
 }
 void RequestDeviceCallback::Control::invoke_c(WGPURequestDeviceStatus status, WGPUDevice device, WGPUStringView message) const {
-    invoke(static_cast<wgpu::RequestDeviceStatus>(status), *reinterpret_cast<wgpu::Device const*>(&device), static_cast<wgpu::StringView>(message));
+    invoke(static_cast<wgpu::RequestDeviceStatus>(status), static_cast<wgpu::Device>(device), static_cast<wgpu::StringView>(message));
 }
 RequestDeviceCallback& RequestDeviceCallback::operator=(const RequestDeviceCallback& other) {
     if (this != &other) {
@@ -13147,7 +13537,7 @@ RequestDeviceCallback& RequestDeviceCallback::operator=(RequestDeviceCallback&& 
     }
     return *this;
 }
-void RequestDeviceCallback::operator()(wgpu::RequestDeviceStatus status, wgpu::Device const& device, wgpu::StringView message) const { if (data) data->invoke(status, device, message); }
+void RequestDeviceCallback::operator()(wgpu::RequestDeviceStatus status, wgpu::Device device, wgpu::StringView message) const { if (data) data->invoke(status, device, message); }
 void RequestDeviceCallback::operator()(WGPURequestDeviceStatus status, WGPUDevice device, WGPUStringView message) const { if (data) data->invoke_c(status, device, message); }
 struct UncapturedErrorCallbackControlNative : UncapturedErrorCallback::Control {
     WGPUUncapturedErrorCallback native;
@@ -13245,7 +13635,7 @@ wgpu::Status getInstanceCapabilities(wgpu::InstanceCapabilities* capabilities) {
 }
 void generateReport(wgpu::Instance const& instance, wgpu::GlobalReport* report) {
     WGPUGlobalReport report_native;
-    wgpuGenerateReport(*reinterpret_cast<WGPUInstance const*>(&instance), &report_native);
+    wgpuGenerateReport(instance.raw(), &report_native);
     *report = static_cast<wgpu::GlobalReport>(report_native);
 }
 void setLogCallback(wgpu::LogCallback callback, void* userdata) {
@@ -13274,74 +13664,66 @@ namespace raw
 #endif
 {
 WEBGPU_CPP_NAMESPACE::Adapter Instance::requestAdapter(const RequestAdapterOptions& options) const {
-	struct Context {
-		Adapter adapter = nullptr;
-		bool requestEnded = false;
-	};
-	Context context;
-	WGPURequestAdapterCallbackInfo callbackInfo;
-	callbackInfo.nextInChain = nullptr;
-	callbackInfo.userdata1 = &context;
-	callbackInfo.callback = [](
-		WGPURequestAdapterStatus status,
-		WGPUAdapter adapter,
-		WGPUStringView message,
-		void* userdata1,
-		[[maybe_unused]] void* userdata2
-	) {
-		Context& context = *reinterpret_cast<Context*>(userdata1);
-		if (status == WGPURequestAdapterStatus_Success) {
-			context.adapter = adapter;
-		}
-		else {
-			std::cout << "Could not get WebGPU adapter: " << std::string_view(StringView(message)) << std::endl;
-		}
-		context.requestEnded = true;
-	};
-	callbackInfo.mode = WGPUCallbackMode_AllowSpontaneous;
-	wgpuInstanceRequestAdapter(*this, reinterpret_cast<const WGPURequestAdapterOptions*>(&options), callbackInfo);
+    struct Context {
+        WEBGPU_CPP_NAMESPACE::Adapter adapter = nullptr;
+        bool requestEnded = false;
+    };
+    Context context;
+    RequestAdapterCallbackInfo callbackInfo;
+    callbackInfo.callback = [&](
+        RequestAdapterStatus status,
+        WEBGPU_CPP_NAMESPACE::Adapter adapter,
+        StringView message
+    ) {
+        if (status == RequestAdapterStatus::eSuccess) {
+            context.adapter = std::move(adapter);
+        }
+        else {
+            std::cout << "Could not get WebGPU adapter: " << std::string_view(StringView(message)) << std::endl;
+        }
+        context.requestEnded = true;
+    };
+    callbackInfo.mode = CallbackMode::eAllowSpontaneous;
+	auto options_c = options.to_cstruct();
+    wgpuInstanceRequestAdapter(*this, &options_c, callbackInfo.to_cstruct());
 #if __EMSCRIPTEN__
-	while (!context.requestEnded) {
-		emscripten_sleep(50);
-	}
+    while (!context.requestEnded) {
+        emscripten_sleep(50);
+    }
 #endif
-	assert(context.requestEnded);
-	return context.adapter;
+    assert(context.requestEnded);
+    return context.adapter;
 }
 WEBGPU_CPP_NAMESPACE::Device Adapter::requestDevice(const DeviceDescriptor& descriptor) const {
-	struct Context {
-		Device device = nullptr;
-		bool requestEnded = false;
-	};
-	Context context;
-	WGPURequestDeviceCallbackInfo callbackInfo;
-	callbackInfo.nextInChain = nullptr;
-	callbackInfo.userdata1 = &context;
-	callbackInfo.callback = [](
-		WGPURequestDeviceStatus status,
-		WGPUDevice device,
-		WGPUStringView message,
-		void* userdata1,
-		[[maybe_unused]] void* userdata2
-	) {
-		Context& context = *reinterpret_cast<Context*>(userdata1);
-		if (status == WGPURequestDeviceStatus_Success) {
-			context.device = device;
-		}
-		else {
-			std::cout << "Could not get WebGPU device: " << std::string_view(StringView(message)) << std::endl;
-		}
-		context.requestEnded = true;
-	};
-	callbackInfo.mode = WGPUCallbackMode_AllowSpontaneous;
-	wgpuAdapterRequestDevice(*this, reinterpret_cast<const WGPUDeviceDescriptor*>(&descriptor), callbackInfo);
+    struct Context {
+        WEBGPU_CPP_NAMESPACE::Device device = nullptr;
+        bool requestEnded = false;
+    };
+    Context context;
+    RequestDeviceCallbackInfo callbackInfo;
+    callbackInfo.callback = [&](
+        RequestDeviceStatus status,
+        WEBGPU_CPP_NAMESPACE::Device device,
+        StringView message
+    ) {
+        if (status == RequestDeviceStatus::eSuccess) {
+            context.device = std::move(device);
+        }
+        else {
+            std::cout << "Could not get WebGPU device: " << std::string_view(StringView(message)) << std::endl;
+        }
+        context.requestEnded = true;
+    };
+    callbackInfo.mode = CallbackMode::eAllowSpontaneous;
+	auto descriptor_c = descriptor.to_cstruct();
+    wgpuAdapterRequestDevice(*this, &descriptor_c, callbackInfo.to_cstruct());
 #if __EMSCRIPTEN__
-	while (!context.requestEnded) {
-		emscripten_sleep(50);
-	}
+    while (!context.requestEnded) {
+        emscripten_sleep(50);
+    }
 #endif
-	assert(context.requestEnded);
-	return context.device;
+    assert(context.requestEnded);
+    return context.device;
 }
 }
 }
