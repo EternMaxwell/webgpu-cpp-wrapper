@@ -877,6 +877,7 @@ struct HandleApiCpp {
 
     std::string gen_raii_definition() const {
         return std::format(R"(
+using {0}Id = raw::{0}Id;
 class {0} : public raw::{0} {{
 public:
     using base_type = raw::{0};

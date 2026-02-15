@@ -746,6 +746,7 @@ class HandleApiCpp:
 
 	def gen_raii_definition(self) -> str:
 		return (
+			f"\n{f'using {self.name}Id = raw::{self.name}Id;' if self.indexed else ''}"
 			f"\nclass {self.name} : public raw::{self.name} {{\n"
 			f"public:\n"
 			f"    using base_type = raw::{self.name};\n"
