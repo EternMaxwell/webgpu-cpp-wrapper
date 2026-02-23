@@ -384,10 +384,12 @@ struct CallbackApiCpp {
 struct {0} {{
     struct Control {{
         std::atomic<std::size_t> count{{1}};
+        std::atomic<std::size_t> invoke_times{{0}};
         virtual ~Control() = default;
         virtual void invoke({3}) const = 0;
         virtual void invoke_c({4}) const;
     }};
+    friend struct {0}Info;
 private:
     template <typename F>
     struct ControlImpl : Control {{
@@ -1371,8 +1373,9 @@ template <std::ranges::range T> requires std::convertible_to<std::ranges::range_
                     R"(
     if (this->{0}) {{
         cstruct.{0} = []({1}) {{
-            auto callback = std::move(*reinterpret_cast<{4}*>(&{2}));
+            auto& callback = *reinterpret_cast<{4}*>(&{2});
             callback({3});
+            if (callback.data->invoke_times.fetch_add(1) == 0) callback.reset();
         }};
         new (&cstruct.{2}) {4}(this->{0});
     }} else {{

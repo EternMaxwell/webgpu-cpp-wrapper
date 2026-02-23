@@ -2419,10 +2419,12 @@ namespace wgpu {
 struct BufferMapCallback {
     struct Control {
         std::atomic<std::size_t> count{1};
+        std::atomic<std::size_t> invoke_times{0};
         virtual ~Control() = default;
         virtual void invoke(wgpu::MapAsyncStatus status, wgpu::StringView message) const = 0;
         virtual void invoke_c(WGPUMapAsyncStatus status, WGPUStringView message) const;
     };
+    friend struct BufferMapCallbackInfo;
 private:
     template <typename F>
     struct ControlImpl : Control {
@@ -2450,10 +2452,12 @@ public:
 struct CompilationInfoCallback {
     struct Control {
         std::atomic<std::size_t> count{1};
+        std::atomic<std::size_t> invoke_times{0};
         virtual ~Control() = default;
         virtual void invoke(wgpu::CompilationInfoRequestStatus status, wgpu::CompilationInfo const& compilationInfo) const = 0;
         virtual void invoke_c(WGPUCompilationInfoRequestStatus status, WGPUCompilationInfo const* compilationInfo) const;
     };
+    friend struct CompilationInfoCallbackInfo;
 private:
     template <typename F>
     struct ControlImpl : Control {
@@ -2481,10 +2485,12 @@ public:
 struct CreateComputePipelineAsyncCallback {
     struct Control {
         std::atomic<std::size_t> count{1};
+        std::atomic<std::size_t> invoke_times{0};
         virtual ~Control() = default;
         virtual void invoke(wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline pipeline, wgpu::StringView message) const = 0;
         virtual void invoke_c(WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline pipeline, WGPUStringView message) const;
     };
+    friend struct CreateComputePipelineAsyncCallbackInfo;
 private:
     template <typename F>
     struct ControlImpl : Control {
@@ -2512,10 +2518,12 @@ public:
 struct CreateRenderPipelineAsyncCallback {
     struct Control {
         std::atomic<std::size_t> count{1};
+        std::atomic<std::size_t> invoke_times{0};
         virtual ~Control() = default;
         virtual void invoke(wgpu::CreatePipelineAsyncStatus status, wgpu::RenderPipeline pipeline, wgpu::StringView message) const = 0;
         virtual void invoke_c(WGPUCreatePipelineAsyncStatus status, WGPURenderPipeline pipeline, WGPUStringView message) const;
     };
+    friend struct CreateRenderPipelineAsyncCallbackInfo;
 private:
     template <typename F>
     struct ControlImpl : Control {
@@ -2543,10 +2551,12 @@ public:
 struct DeviceLostCallback {
     struct Control {
         std::atomic<std::size_t> count{1};
+        std::atomic<std::size_t> invoke_times{0};
         virtual ~Control() = default;
         virtual void invoke(wgpu::Device const& device, wgpu::DeviceLostReason reason, wgpu::StringView message) const = 0;
         virtual void invoke_c(WGPUDevice const* device, WGPUDeviceLostReason reason, WGPUStringView message) const;
     };
+    friend struct DeviceLostCallbackInfo;
 private:
     template <typename F>
     struct ControlImpl : Control {
@@ -2574,10 +2584,12 @@ public:
 struct PopErrorScopeCallback {
     struct Control {
         std::atomic<std::size_t> count{1};
+        std::atomic<std::size_t> invoke_times{0};
         virtual ~Control() = default;
         virtual void invoke(wgpu::PopErrorScopeStatus status, wgpu::ErrorType type, wgpu::StringView message) const = 0;
         virtual void invoke_c(WGPUPopErrorScopeStatus status, WGPUErrorType type, WGPUStringView message) const;
     };
+    friend struct PopErrorScopeCallbackInfo;
 private:
     template <typename F>
     struct ControlImpl : Control {
@@ -2605,10 +2617,12 @@ public:
 struct QueueWorkDoneCallback {
     struct Control {
         std::atomic<std::size_t> count{1};
+        std::atomic<std::size_t> invoke_times{0};
         virtual ~Control() = default;
         virtual void invoke(wgpu::QueueWorkDoneStatus status) const = 0;
         virtual void invoke_c(WGPUQueueWorkDoneStatus status) const;
     };
+    friend struct QueueWorkDoneCallbackInfo;
 private:
     template <typename F>
     struct ControlImpl : Control {
@@ -2636,10 +2650,12 @@ public:
 struct RequestAdapterCallback {
     struct Control {
         std::atomic<std::size_t> count{1};
+        std::atomic<std::size_t> invoke_times{0};
         virtual ~Control() = default;
         virtual void invoke(wgpu::RequestAdapterStatus status, wgpu::Adapter adapter, wgpu::StringView message) const = 0;
         virtual void invoke_c(WGPURequestAdapterStatus status, WGPUAdapter adapter, WGPUStringView message) const;
     };
+    friend struct RequestAdapterCallbackInfo;
 private:
     template <typename F>
     struct ControlImpl : Control {
@@ -2667,10 +2683,12 @@ public:
 struct RequestDeviceCallback {
     struct Control {
         std::atomic<std::size_t> count{1};
+        std::atomic<std::size_t> invoke_times{0};
         virtual ~Control() = default;
         virtual void invoke(wgpu::RequestDeviceStatus status, wgpu::Device device, wgpu::StringView message) const = 0;
         virtual void invoke_c(WGPURequestDeviceStatus status, WGPUDevice device, WGPUStringView message) const;
     };
+    friend struct RequestDeviceCallbackInfo;
 private:
     template <typename F>
     struct ControlImpl : Control {
@@ -2698,10 +2716,12 @@ public:
 struct UncapturedErrorCallback {
     struct Control {
         std::atomic<std::size_t> count{1};
+        std::atomic<std::size_t> invoke_times{0};
         virtual ~Control() = default;
         virtual void invoke(wgpu::Device const& device, wgpu::ErrorType type, wgpu::StringView message) const = 0;
         virtual void invoke_c(WGPUDevice const* device, WGPUErrorType type, WGPUStringView message) const;
     };
+    friend struct UncapturedErrorCallbackInfo;
 private:
     template <typename F>
     struct ControlImpl : Control {
@@ -2729,10 +2749,12 @@ public:
 struct LogCallback {
     struct Control {
         std::atomic<std::size_t> count{1};
+        std::atomic<std::size_t> invoke_times{0};
         virtual ~Control() = default;
         virtual void invoke(wgpu::LogLevel level, wgpu::StringView message) const = 0;
         virtual void invoke_c(WGPULogLevel level, WGPUStringView message) const;
     };
+    friend struct LogCallbackInfo;
 private:
     template <typename F>
     struct ControlImpl : Control {
@@ -7430,8 +7452,9 @@ void BufferMapCallbackInfo::to_cstruct(CStruct* out) const {
     cstruct.mode = static_cast<WGPUCallbackMode>(this->mode);
     if (this->callback) {
         cstruct.callback = [](WGPUMapAsyncStatus status, WGPUStringView message, void* userdata1, void* userdata2) {
-            auto callback = std::move(*reinterpret_cast<wgpu::BufferMapCallback*>(&userdata1));
-            callback(status, message);
+            auto& callback = *reinterpret_cast<wgpu::BufferMapCallback*>(&userdata1);
+            if (callback.data) callback(status, message);
+            if (callback.data->invoke_times.fetch_add(1) == 0) callback.reset();
         };
         new (&cstruct.userdata1) wgpu::BufferMapCallback(this->callback);
     } else {
@@ -7467,8 +7490,9 @@ void CompilationInfoCallbackInfo::to_cstruct(CStruct* out) const {
     cstruct.mode = static_cast<WGPUCallbackMode>(this->mode);
     if (this->callback) {
         cstruct.callback = [](WGPUCompilationInfoRequestStatus status, WGPUCompilationInfo const* compilationInfo, void* userdata1, void* userdata2) {
-            auto callback = std::move(*reinterpret_cast<wgpu::CompilationInfoCallback*>(&userdata1));
-            callback(status, compilationInfo);
+            auto& callback = *reinterpret_cast<wgpu::CompilationInfoCallback*>(&userdata1);
+            if (callback.data) callback(status, compilationInfo);
+            if (callback.data->invoke_times.fetch_add(1) == 0) callback.reset();
         };
         new (&cstruct.userdata1) wgpu::CompilationInfoCallback(this->callback);
     } else {
@@ -7504,8 +7528,9 @@ void CreateComputePipelineAsyncCallbackInfo::to_cstruct(CStruct* out) const {
     cstruct.mode = static_cast<WGPUCallbackMode>(this->mode);
     if (this->callback) {
         cstruct.callback = [](WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline pipeline, WGPUStringView message, void* userdata1, void* userdata2) {
-            auto callback = std::move(*reinterpret_cast<wgpu::CreateComputePipelineAsyncCallback*>(&userdata1));
-            callback(status, pipeline, message);
+            auto& callback = *reinterpret_cast<wgpu::CreateComputePipelineAsyncCallback*>(&userdata1);
+            if (callback.data) callback(status, pipeline, message);
+            if (callback.data->invoke_times.fetch_add(1) == 0) callback.reset();
         };
         new (&cstruct.userdata1) wgpu::CreateComputePipelineAsyncCallback(this->callback);
     } else {
@@ -7541,8 +7566,9 @@ void CreateRenderPipelineAsyncCallbackInfo::to_cstruct(CStruct* out) const {
     cstruct.mode = static_cast<WGPUCallbackMode>(this->mode);
     if (this->callback) {
         cstruct.callback = [](WGPUCreatePipelineAsyncStatus status, WGPURenderPipeline pipeline, WGPUStringView message, void* userdata1, void* userdata2) {
-            auto callback = std::move(*reinterpret_cast<wgpu::CreateRenderPipelineAsyncCallback*>(&userdata1));
-            callback(status, pipeline, message);
+            auto& callback = *reinterpret_cast<wgpu::CreateRenderPipelineAsyncCallback*>(&userdata1);
+            if (callback.data) callback(status, pipeline, message);
+            if (callback.data->invoke_times.fetch_add(1) == 0) callback.reset();
         };
         new (&cstruct.userdata1) wgpu::CreateRenderPipelineAsyncCallback(this->callback);
     } else {
@@ -7578,8 +7604,9 @@ void DeviceLostCallbackInfo::to_cstruct(CStruct* out) const {
     cstruct.mode = static_cast<WGPUCallbackMode>(this->mode);
     if (this->callback) {
         cstruct.callback = [](WGPUDevice const* device, WGPUDeviceLostReason reason, WGPUStringView message, void* userdata1, void* userdata2) {
-            auto callback = std::move(*reinterpret_cast<wgpu::DeviceLostCallback*>(&userdata1));
-            callback(device, reason, message);
+            auto& callback = *reinterpret_cast<wgpu::DeviceLostCallback*>(&userdata1);
+            if (callback.data) callback(device, reason, message);
+            if (callback.data->invoke_times.fetch_add(1) == 0) callback.reset();
         };
         new (&cstruct.userdata1) wgpu::DeviceLostCallback(this->callback);
     } else {
@@ -7615,8 +7642,9 @@ void PopErrorScopeCallbackInfo::to_cstruct(CStruct* out) const {
     cstruct.mode = static_cast<WGPUCallbackMode>(this->mode);
     if (this->callback) {
         cstruct.callback = [](WGPUPopErrorScopeStatus status, WGPUErrorType type, WGPUStringView message, void* userdata1, void* userdata2) {
-            auto callback = std::move(*reinterpret_cast<wgpu::PopErrorScopeCallback*>(&userdata1));
-            callback(status, type, message);
+            auto& callback = *reinterpret_cast<wgpu::PopErrorScopeCallback*>(&userdata1);
+            if (callback.data) callback(status, type, message);
+            if (callback.data->invoke_times.fetch_add(1) == 0) callback.reset();
         };
         new (&cstruct.userdata1) wgpu::PopErrorScopeCallback(this->callback);
     } else {
@@ -7652,8 +7680,9 @@ void QueueWorkDoneCallbackInfo::to_cstruct(CStruct* out) const {
     cstruct.mode = static_cast<WGPUCallbackMode>(this->mode);
     if (this->callback) {
         cstruct.callback = [](WGPUQueueWorkDoneStatus status, void* userdata1, void* userdata2) {
-            auto callback = std::move(*reinterpret_cast<wgpu::QueueWorkDoneCallback*>(&userdata1));
-            callback(status);
+            auto& callback = *reinterpret_cast<wgpu::QueueWorkDoneCallback*>(&userdata1);
+            if (callback.data) callback(status);
+            if (callback.data->invoke_times.fetch_add(1) == 0) callback.reset();
         };
         new (&cstruct.userdata1) wgpu::QueueWorkDoneCallback(this->callback);
     } else {
@@ -7689,8 +7718,9 @@ void RequestAdapterCallbackInfo::to_cstruct(CStruct* out) const {
     cstruct.mode = static_cast<WGPUCallbackMode>(this->mode);
     if (this->callback) {
         cstruct.callback = [](WGPURequestAdapterStatus status, WGPUAdapter adapter, WGPUStringView message, void* userdata1, void* userdata2) {
-            auto callback = std::move(*reinterpret_cast<wgpu::RequestAdapterCallback*>(&userdata1));
-            callback(status, adapter, message);
+            auto& callback = *reinterpret_cast<wgpu::RequestAdapterCallback*>(&userdata1);
+            if (callback.data) callback(status, adapter, message);
+            if (callback.data->invoke_times.fetch_add(1) == 0) callback.reset();
         };
         new (&cstruct.userdata1) wgpu::RequestAdapterCallback(this->callback);
     } else {
@@ -7726,8 +7756,9 @@ void RequestDeviceCallbackInfo::to_cstruct(CStruct* out) const {
     cstruct.mode = static_cast<WGPUCallbackMode>(this->mode);
     if (this->callback) {
         cstruct.callback = [](WGPURequestDeviceStatus status, WGPUDevice device, WGPUStringView message, void* userdata1, void* userdata2) {
-            auto callback = std::move(*reinterpret_cast<wgpu::RequestDeviceCallback*>(&userdata1));
-            callback(status, device, message);
+            auto& callback = *reinterpret_cast<wgpu::RequestDeviceCallback*>(&userdata1);
+            if (callback.data) callback(status, device, message);
+            if (callback.data->invoke_times.fetch_add(1) == 0) callback.reset();
         };
         new (&cstruct.userdata1) wgpu::RequestDeviceCallback(this->callback);
     } else {
@@ -7761,8 +7792,9 @@ void UncapturedErrorCallbackInfo::to_cstruct(CStruct* out) const {
     cstruct.nextInChain = this->nextInChain.getNext();
     if (this->callback) {
         cstruct.callback = [](WGPUDevice const* device, WGPUErrorType type, WGPUStringView message, void* userdata1, void* userdata2) {
-            auto callback = std::move(*reinterpret_cast<wgpu::UncapturedErrorCallback*>(&userdata1));
-            callback(device, type, message);
+            auto& callback = *reinterpret_cast<wgpu::UncapturedErrorCallback*>(&userdata1);
+            if (callback.data) callback(device, type, message);
+            if (callback.data->invoke_times.fetch_add(1) == 0) callback.reset();
         };
         new (&cstruct.userdata1) wgpu::UncapturedErrorCallback(this->callback);
     } else {
