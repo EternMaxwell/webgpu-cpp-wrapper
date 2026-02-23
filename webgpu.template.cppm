@@ -98,8 +98,11 @@ WEBGPU_CPP_NAMESPACE::Adapter Instance::requestAdapter(const RequestAdapterOptio
         context.requestEnded = true;
     };
     callbackInfo.mode = CallbackMode::eAllowSpontaneous;
-	auto options_c = options.to_cstruct();
-    wgpuInstanceRequestAdapter(*this, &options_c, callbackInfo.to_cstruct());
+    RequestAdapterOptions::CStruct options_c;
+    options.to_cstruct(&options_c);
+    RequestAdapterCallbackInfo::CStruct callbackInfo_c;
+    callbackInfo.to_cstruct(&callbackInfo_c);
+    wgpuInstanceRequestAdapter(*this, &options_c, callbackInfo_c);
 
 #if __EMSCRIPTEN__
     while (!context.requestEnded) {
@@ -132,8 +135,11 @@ WEBGPU_CPP_NAMESPACE::Device Adapter::requestDevice(const DeviceDescriptor& desc
         context.requestEnded = true;
     };
     callbackInfo.mode = CallbackMode::eAllowSpontaneous;
-	auto descriptor_c = descriptor.to_cstruct();
-    wgpuAdapterRequestDevice(*this, &descriptor_c, callbackInfo.to_cstruct());
+    DeviceDescriptor::CStruct descriptor_c;
+    descriptor.to_cstruct(&descriptor_c);
+    RequestDeviceCallbackInfo::CStruct callbackInfo_c;
+    callbackInfo.to_cstruct(&callbackInfo_c);
+    wgpuAdapterRequestDevice(*this, &descriptor_c, callbackInfo_c);
 
 #if __EMSCRIPTEN__
     while (!context.requestEnded) {

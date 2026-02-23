@@ -287,7 +287,7 @@ class CallbackApiCpp:
 			f"        ControlImpl(const F& f) : func(f) {{}}\n"
 			f"        void invoke({self.gen_param_sig()}) const override;\n"
 			f"    }};\n"
-			f"    Control* data;\n"
+			f"    Control* data{{}};\n"
 			f"public:\n"
 			f"    {self.name}() : data(nullptr) {{}}\n"
 			f"    {self.name}(WGPU{self.name} native, {userdatas});\n"
@@ -380,13 +380,13 @@ template <typename Struct, typename ChainT>
 struct NextInChainImpl : Struct, NextInChainBase<ChainT> {
     mutable typename Struct::CStruct cstruct;
     NextInChainImpl(const Struct& s) : Struct(s) {
-        cstruct = this->to_cstruct();
+		this->to_cstruct(&cstruct);
     }
     NextInChainImpl(Struct&& s) : Struct(std::move(s)) {
-        cstruct = this->to_cstruct();
+		this->to_cstruct(&cstruct);
     }
     ChainT* getNextInChain() const override {
-        cstruct = this->to_cstruct();
+		this->to_cstruct(&cstruct);
         return reinterpret_cast<ChainT*>(&cstruct);
     }
     void updateFromCStruct() {
@@ -560,6 +560,44 @@ struct SmallVec {
 		size_ = 0;
 	}
 
+	void resize(size_t new_size) {
+		if (new_size < size_) {
+			T* ptr = storage();
+			for (size_t i = new_size; i < size_; ++i) {
+				std::destroy_at(ptr + i);
+			}
+			size_ = new_size;
+			return;
+		}
+		if (new_size > size_) {
+			reserve(new_size);
+			T* ptr = storage();
+			for (size_t i = size_; i < new_size; ++i) {
+				::new (static_cast<void*>(ptr + i)) T{};
+			}
+			size_ = new_size;
+		}
+	}
+
+	void resize(size_t new_size, const T& value) {
+		if (new_size < size_) {
+			T* ptr = storage();
+			for (size_t i = new_size; i < size_; ++i) {
+				std::destroy_at(ptr + i);
+			}
+			size_ = new_size;
+			return;
+		}
+		if (new_size > size_) {
+			reserve(new_size);
+			T* ptr = storage();
+			for (size_t i = size_; i < new_size; ++i) {
+				::new (static_cast<void*>(ptr + i)) T(value);
+			}
+			size_ = new_size;
+		}
+	}
+
 	void reserve(size_t new_cap) {
 		if (new_cap <= capacity()) {
 			return;
@@ -697,7 +735,16 @@ class StructApiCpp:
 			f"    }};\n"
 			f"    {self.name}(const WGPU{self.name}& native);\n"
 			f"    {self.name}() {{{init}}};\n"
-			f"    CStruct to_cstruct() const;\n"
+			f"    void to_cstruct(CStruct* out) const;\n"
+			f"    {methods_decl}\n"
+			f"    {fields_decl}\n"
+			f"}};"
+		) if self.extra_cstruct_members else (
+			f"\nstruct {self.name} {{\n"
+			f"    using CStruct = WGPU{self.name};\n"
+			f"    {self.name}(const WGPU{self.name}& native);\n"
+			f"    {self.name}() {{{init}}};\n"
+			f"    void to_cstruct(CStruct* out) const;\n"
 			f"    {methods_decl}\n"
 			f"    {fields_decl}\n"
 			f"}};"
@@ -714,10 +761,9 @@ class StructApiCpp:
 			f"\n{self.name}::{self.name}(const WGPU{self.name}& native) {{\n"
 			f"{from_native}\n"
 			f"}}\n"
-			f"\n{self.name}::CStruct {self.name}::to_cstruct() const {{\n"
-			f"    CStruct cstruct;\n"
+			f"\nvoid {self.name}::to_cstruct(CStruct* out) const {{\n"
+			f"    auto& cstruct = *out;\n"
 			f"{to_cstruct}\n"
-			f"    return cstruct;\n"
 			f"}}\n"
 			f"\n{methods}"
 		)
@@ -1347,7 +1393,10 @@ def produce_webgpu_cpp(api: WebGpuApi) -> WebGpuApiCpp:
 				elif not get_struct_api_cpp(field.type[4:]).extra_cstruct_members:
 					struct_cpp.extra_cstruct_members.append(f"SmallVec<{field.type}> {field.name}_vec;")
 					field_cpp.assign_to_cstruct = (
-						f"\n    cstruct.{field.name}_vec = this->{field.name} | std::views::transform([](auto&& e) {{ return static_cast<{field.type}>(e.to_cstruct()); }}) | std::ranges::to<SmallVec<{field.type}>>();\n"
+						f"\n    cstruct.{field.name}_vec.resize(this->{field.name}.size());\n"
+						f"    for (size_t i = 0; i < this->{field.name}.size(); ++i) {{\n"
+						f"        this->{field.name}[i].to_cstruct(&cstruct.{field.name}_vec[i]);\n"
+						f"    }}\n"
 						f"    cstruct.{field.name} = cstruct.{field.name}_vec.data();\n"
 						f"    cstruct.{field.counter} = static_cast<{counter_type}>(cstruct.{field.name}_vec.size());"
 					)
@@ -1355,8 +1404,12 @@ def produce_webgpu_cpp(api: WebGpuApi) -> WebGpuApiCpp:
 					struct_cpp.extra_cstruct_members.append(f"SmallVec<{cpp_type}::CStruct> {field.name}_cstruct_vec;")
 					struct_cpp.extra_cstruct_members.append(f"SmallVec<{field.type}> {field.name}_vec;")
 					field_cpp.assign_to_cstruct = (
-						f"\n    cstruct.{field.name}_cstruct_vec = this->{field.name} | std::views::transform([](auto&& e) {{ return e.to_cstruct(); }}) | std::ranges::to<SmallVec<{cpp_type}::CStruct>>();\n"
-						f"    cstruct.{field.name}_vec = cstruct.{field.name}_cstruct_vec | std::views::transform([](auto&& e) {{ return static_cast<{field.type}>(e); }}) | std::ranges::to<SmallVec<{field.type}>>();\n"
+						f"\n    cstruct.{field.name}_cstruct_vec.resize(this->{field.name}.size());\n"
+						f"    cstruct.{field.name}_vec.resize(this->{field.name}.size());\n"
+						f"    for (size_t i = 0; i < this->{field.name}.size(); ++i) {{\n"
+						f"        this->{field.name}[i].to_cstruct(&cstruct.{field.name}_cstruct_vec[i]);\n"
+						f"        cstruct.{field.name}_vec[i] = static_cast<{field.type}>(cstruct.{field.name}_cstruct_vec[i]);\n"
+						f"    }}\n"
 						f"    cstruct.{field.name} = cstruct.{field.name}_vec.data();\n"
 						f"    cstruct.{field.counter} = static_cast<{counter_type}>(cstruct.{field.name}_vec.size());"
 					)
@@ -1389,10 +1442,20 @@ def produce_webgpu_cpp(api: WebGpuApi) -> WebGpuApiCpp:
 					type=cpp_type,
 					name=field.name,
 					assign_from_native=(
-						f"\n    if (native.{field.name} != nullptr) {{\n        this->{field.name} = {cpp_type}(native.{field.name}, {', '.join('native.' + f.name for f in struct_api.fields if f.name.startswith('userdata'))});\n    }}"
+						f"\n    if (native.{field.name} != nullptr) {{\n"
+      					f"        this->{field.name} = {cpp_type}(native.{field.name}, {', '.join('native.' + f.name for f in struct_api.fields if f.name.startswith('userdata'))});\n"
+           				f"    }}"
 					),
 					assign_to_cstruct=(
-						f"\n    if (this->{field.name}) {{\n        cstruct.{field.name} = []({', '.join(p.full_type() + ' ' + p.name for p in callback_api.params)}) {{\n            auto callback = std::move(*reinterpret_cast<{cpp_type}*>({next(p.name for p in callback_api.params if p.name.startswith('userdata'))}));\n            callback({', '.join(p.name for p in callback_api.params if not p.name.startswith('userdata'))});\n        }};\n        new (cstruct.{next(p.name for p in callback_api.params if p.name.startswith('userdata'))}) {cpp_type}(this->{field.name});\n    }} else {{\n        cstruct.{field.name} = nullptr;\n    }}"
+						f"\n    if (this->{field.name}) {{\n"
+						f"        cstruct.{field.name} = []({', '.join(p.full_type() + ' ' + p.name for p in callback_api.params)}) {{\n"
+						f"            auto callback = std::move(*reinterpret_cast<{cpp_type}*>(&{next(p.name for p in callback_api.params if p.name.startswith('userdata'))}));\n"
+						f"            callback({', '.join(p.name for p in callback_api.params if not p.name.startswith('userdata'))});\n"
+						f"        }};\n"
+						f"        new (&cstruct.{next(p.name for p in callback_api.params if p.name.startswith('userdata'))}) {cpp_type}(this->{field.name});\n"
+						f"    }} else {{\n"
+						f"        cstruct.{field.name} = nullptr;\n"
+						f"    }}"
 					),
 				)
 				setter_name = "set" + field.name[:1].upper() + field.name[1:]
@@ -1430,7 +1493,7 @@ def produce_webgpu_cpp(api: WebGpuApi) -> WebGpuApiCpp:
 				else:
 					struct_cpp.extra_cstruct_members.append(f"{cpp_type}::CStruct {field.name}_cstruct;")
 					field_cpp.assign_to_cstruct = (
-						f"\n    if (this->{field.name}.has_value()) {{\n        cstruct.{field.name}_cstruct = this->{field.name}->to_cstruct();\n        cstruct.{field.name} = &(cstruct.{field.name}_cstruct);\n    }} else {{\n        cstruct.{field.name} = nullptr;\n    }}"
+						f"\n    if (this->{field.name}.has_value()) {{\n        this->{field.name}->to_cstruct(&cstruct.{field.name}_cstruct);\n        cstruct.{field.name} = &(cstruct.{field.name}_cstruct);\n    }} else {{\n        cstruct.{field.name} = nullptr;\n    }}"
 					)
 				setter_name = "set" + field.name[:1].upper() + field.name[1:]
 				struct_cpp.methods_decl.append(f"\n    {struct_cpp.name}& {setter_name}(const {cpp_type}& value) &;")
@@ -1494,11 +1557,11 @@ def produce_webgpu_cpp(api: WebGpuApi) -> WebGpuApiCpp:
 				if get_struct_api_cpp(field.type[4:]).extra_cstruct_members:
 					struct_cpp.extra_cstruct_members.append(f"{get_cpp_field_type(field.type, struct_api.owning)}::CStruct {field.name}_cstruct;")
 					field_cpp.assign_to_cstruct = (
-						f"\n    cstruct.{field.name}_cstruct = this->{field.name}.to_cstruct();\n    cstruct.{field.name} = static_cast<{field.type}>(cstruct.{field.name}_cstruct);"
+						f"\n    this->{field.name}.to_cstruct(&cstruct.{field.name}_cstruct);\n    cstruct.{field.name} = static_cast<{field.type}>(cstruct.{field.name}_cstruct);"
 					)
 				else:
 					field_cpp.assign_to_cstruct = (
-						f"\n    cstruct.{field.name} = static_cast<{field.type}>(this->{field.name}.to_cstruct());"
+						f"\n    this->{field.name}.to_cstruct(&cstruct.{field.name});"
 					)
 				if field.name == "chain" and field.type == "WGPUChainedStruct":
 					setter_name = "setNext"
@@ -1602,7 +1665,7 @@ def produce_webgpu_cpp(api: WebGpuApi) -> WebGpuApiCpp:
 					assign = f"reinterpret_cast<WGPU{type_without_wgpu}{' const' if param.is_const else ''}*>({param.name})"
 				elif param.is_const:
 					temp_data = (
-						f"\n    {param.type}::CStruct {param.name}_cstruct;\n    if ({param.name}) {param.name}_cstruct = {param.name}->to_cstruct();"
+						f"\n    {param.type}::CStruct {param.name}_cstruct;\n    if ({param.name}) {param.name}->to_cstruct(&{param.name}_cstruct);"
 					)
 					assign = f"{param.name}? &{param.name}_cstruct : nullptr"
 				else:
@@ -1618,7 +1681,7 @@ def produce_webgpu_cpp(api: WebGpuApi) -> WebGpuApiCpp:
 					else:
 						assign = f"reinterpret_cast<WGPU{type_without_wgpu}*>({param.name})"
 				elif param.is_const:
-					temp_data = f"\n    {param.type}::CStruct {param.name}_cstruct = {param.name}.to_cstruct();"
+					temp_data = f"\n    {param.type}::CStruct {param.name}_cstruct;\n    {param.name}.to_cstruct(&{param.name}_cstruct);"
 					assign = f"&{param.name}_cstruct"
 				else:
 					temp_data = f"\n    WGPU{type_without_wgpu} {param.name}_native;"
@@ -1627,7 +1690,7 @@ def produce_webgpu_cpp(api: WebGpuApi) -> WebGpuApiCpp:
 					if has_free_members:
 						write_back += f"\n    {free_members}({param.name}_native);"
 		elif param.is_struct:
-			temp_data = f"\n    {param.type}::CStruct {param.name}_cstruct = {param.name}.to_cstruct();"
+			temp_data = f"\n    {param.type}::CStruct {param.name}_cstruct;\n    {param.name}.to_cstruct(&{param.name}_cstruct);"
 			assign = f"{param.name}_cstruct"
 		elif param.is_pointer:
 			const_suffix = " const" if param.is_const else ""
@@ -1678,18 +1741,22 @@ def produce_webgpu_cpp(api: WebGpuApi) -> WebGpuApiCpp:
 				return f"reinterpret_cast<WGPU{type_without_wgpu}{const_suffix}*>({span_name}.data())", ""
 			if not struct_cpp.extra_cstruct_members:
 				temp = (
-					f"\n    std::vector<WGPU{type_without_wgpu}> {span_name}_native = {span_name} | "
-					f"std::views::transform([](auto&& e) {{ return static_cast<WGPU{type_without_wgpu}>(e.to_cstruct()); }}) | "
-					f"std::ranges::to<std::vector<WGPU{type_without_wgpu}>>();"
+					f"\n    std::vector<WGPU{type_without_wgpu}> {span_name}_native;\n"
+					f"    {span_name}_native.resize({span_name}.size());\n"
+					f"    for (size_t i = 0; i < {span_name}.size(); ++i) {{\n"
+					f"        {span_name}[i].to_cstruct(&{span_name}_native[i]);\n"
+					f"    }}"
 				)
 				return f"{span_name}_native.data()", temp
 			temp = (
-				f"\n    std::vector<{param.type}::CStruct> {span_name}_cstruct_vec = {span_name} | "
-				f"std::views::transform([](auto&& e) {{ return e.to_cstruct(); }}) | "
-				f"std::ranges::to<std::vector<{param.type}::CStruct>>();\n"
-				f"    std::vector<WGPU{type_without_wgpu}> {span_name}_native = {span_name}_cstruct_vec | "
-				f"std::views::transform([](auto&& e) {{ return static_cast<WGPU{type_without_wgpu}>(e); }}) | "
-				f"std::ranges::to<std::vector<WGPU{type_without_wgpu}>>();"
+				f"\n    std::vector<{param.type}::CStruct> {span_name}_cstruct_vec;\n"
+				f"    std::vector<WGPU{type_without_wgpu}> {span_name}_native;\n"
+				f"    {span_name}_cstruct_vec.resize({span_name}.size());\n"
+				f"    {span_name}_native.resize({span_name}.size());\n"
+				f"    for (size_t i = 0; i < {span_name}.size(); ++i) {{\n"
+				f"        {span_name}[i].to_cstruct(&{span_name}_cstruct_vec[i]);\n"
+				f"        {span_name}_native[i] = static_cast<WGPU{type_without_wgpu}>({span_name}_cstruct_vec[i]);\n"
+				f"    }}"
 			)
 			return f"{span_name}_native.data()", temp
 		return f"{span_name}.data()", ""

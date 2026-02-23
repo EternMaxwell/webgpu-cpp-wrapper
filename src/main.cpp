@@ -395,7 +395,7 @@ private:
         ControlImpl(const F& f) : func(f) {{}}
         void invoke({3}) const override;
     }};
-    Control* data;
+    Control* data{{}};
 public:
     {0}() : data(nullptr) {{}}
     {0}(WGPU{0} native, {5});
@@ -500,13 +500,13 @@ template <typename Struct, typename ChainT>
 struct NextInChainImpl : Struct, NextInChainBase<ChainT> {
     mutable typename Struct::CStruct cstruct;
     NextInChainImpl(const Struct& s) : Struct(s) {
-        cstruct = this->to_cstruct();
+        this->to_cstruct(&cstruct);
     }
     NextInChainImpl(Struct&& s) : Struct(std::move(s)) {
-        cstruct = this->to_cstruct();
+        this->to_cstruct(&cstruct);
     }
     ChainT* getNextInChain() const override {
-        cstruct = this->to_cstruct();
+        this->to_cstruct(&cstruct);
         return reinterpret_cast<ChainT*>(&cstruct);
     }
     void updateFromCStruct() {
@@ -680,6 +680,44 @@ struct SmallVec {
         size_ = 0;
     }
 
+    void resize(size_t new_size) {
+        if (new_size < size_) {
+            T* ptr = storage();
+            for (size_t i = new_size; i < size_; ++i) {
+                std::destroy_at(ptr + i);
+            }
+            size_ = new_size;
+            return;
+        }
+        if (new_size > size_) {
+            reserve(new_size);
+            T* ptr = storage();
+            for (size_t i = size_; i < new_size; ++i) {
+                ::new (static_cast<void*>(ptr + i)) T{};
+            }
+            size_ = new_size;
+        }
+    }
+
+    void resize(size_t new_size, const T& value) {
+        if (new_size < size_) {
+            T* ptr = storage();
+            for (size_t i = new_size; i < size_; ++i) {
+                std::destroy_at(ptr + i);
+            }
+            size_ = new_size;
+            return;
+        }
+        if (new_size > size_) {
+            reserve(new_size);
+            T* ptr = storage();
+            for (size_t i = size_; i < new_size; ++i) {
+                ::new (static_cast<void*>(ptr + i)) T(value);
+            }
+            size_ = new_size;
+        }
+    }
+
     void reserve(size_t new_cap) {
         if (new_cap <= capacity()) {
             return;
@@ -800,32 +838,60 @@ struct StructApiCpp {
         extra_cstruct_members;  // a CStruct nested struct which inherits from the native struct and adds extra members
 
     std::string gen_definition() const {
-        return std::format(
-            R"(
+        if (!extra_cstruct_members.empty())
+            return std::format(
+                R"(
 struct {0} {{
     struct CStruct : public WGPU{0} {{
         {2}
     }};
     {0}(const WGPU{0}& native);
     {0}() {{{1}}};
-    CStruct to_cstruct() const;
+    void to_cstruct(CStruct* out) const;
     {3}
     {4}
 }};)",
-            name,
-            init_macro.empty() ? ""
-                               : std::format(R"(
+                name,
+                init_macro.empty() ? ""
+                                   : std::format(R"(
         WGPU{0} native = {1};
         *this = static_cast<{0}>(native);
     )",
-                                             name, init_macro),
-            extra_cstruct_members | std::views::join_with(std::string("\n        ")) | std::ranges::to<std::string>(),
-            methods_decl | std::views::join_with(std::string("\n    ")) | std::ranges::to<std::string>(),
-            fields | std::views::transform([](const StructFieldCpp& f) {
-                return std::format("{} {}{{}};", f.type, f.name);
-            }) | std::views::join_with(std::string("\n    ")) |
-                std::ranges::to<std::string>(),
-            binary_compatible ? "true" : "false");
+                                                 name, init_macro),
+                extra_cstruct_members | std::views::join_with(std::string("\n        ")) |
+                    std::ranges::to<std::string>(),
+                methods_decl | std::views::join_with(std::string("\n    ")) | std::ranges::to<std::string>(),
+                fields | std::views::transform([](const StructFieldCpp& f) {
+                    return std::format("{} {}{{}};", f.type, f.name);
+                }) | std::views::join_with(std::string("\n    ")) |
+                    std::ranges::to<std::string>(),
+                binary_compatible ? "true" : "false");
+        else
+            return std::format(
+                R"(
+struct {0} {{
+    using CStruct = WGPU{0};
+    {0}(const WGPU{0}& native);
+    {0}() {{{1}}};
+    void to_cstruct(CStruct* out) const;
+    {3}
+    {4}
+}};)",
+                name,
+                init_macro.empty() ? ""
+                                   : std::format(R"(
+        WGPU{0} native = {1};
+        *this = static_cast<{0}>(native);
+    )",
+                                                 name, init_macro),
+                extra_cstruct_members | std::views::join_with(std::string("\n        ")) |
+                    std::ranges::to<std::string>(),
+                methods_decl | std::views::join_with(std::string("\n    ")) | std::ranges::to<std::string>(),
+                fields | std::views::transform([](const StructFieldCpp& f) {
+                    return std::format("{} {}{{}};", f.type, f.name);
+                }) | std::views::join_with(std::string("\n    ")) |
+                    std::ranges::to<std::string>(),
+                binary_compatible ? "true" : "false");
     }
     std::string gen_template_impl() const {
         return methods_template_impl | std::views::join_with(std::string("\n")) | std::ranges::to<std::string>();
@@ -841,10 +907,9 @@ struct {0} {{
                             std::views::join_with(std::string("\n")) | std::ranges::to<std::string>());
         std::string to_cstruct_impl =
             std::format(R"(
-{0}::CStruct {0}::to_cstruct() const {{
-    CStruct cstruct;
+{0}::to_cstruct(CStruct* out) const {{
+    auto& cstruct = *out;
 {1}
-    return cstruct;
 }})",
                         name,
                         fields | std::views::transform([](const StructFieldCpp& f) { return f.assign_to_cstruct; }) |
@@ -1217,10 +1282,13 @@ WebGpuApiCpp produce_webgpu_cpp(const WebGpuApi& api, const TemplateMeta& templa
                         std::format("SmallVec<{}> {}_vec;", field.type, field.name));
                     field_cpp.assign_to_cstruct =
                         std::format(R"(
-    cstruct.{0}_vec = this->{0} | std::views::transform([](auto&& e) {{ return static_cast<{1}>(e.to_cstruct()); }}) | std::ranges::to<SmallVec<{1}>>();
+    cstruct.{0}_vec.resize(this->{0}.size());
+    for (size_t i = 0; i < this->{0}.size(); ++i) {{
+        this->{0}[i].to_cstruct(&cstruct.{0}_vec[i]);
+    }
     cstruct.{0} = cstruct.{0}_vec.data();
     cstruct.{2} = static_cast<{3}>(cstruct.{0}_vec.size());)",
-                                    field.name, field.type, field.counter.value(), counter_type);
+                                    field.name, field.type, field.counter.value(), counter_type, cpp_type);
                 } else {
                     // has extra members, need to also store a cstruct array.
                     struct_cpp.extra_cstruct_members.push_back(
@@ -1229,8 +1297,12 @@ WebGpuApiCpp produce_webgpu_cpp(const WebGpuApi& api, const TemplateMeta& templa
                         std::format("SmallVec<{}> {}_vec;", field.type, field.name));
                     field_cpp.assign_to_cstruct =
                         std::format(R"(
-    cstruct.{0}_cstruct_vec = this->{0} | std::views::transform([](auto&& e) {{ return e.to_cstruct(); }}) | std::ranges::to<SmallVec<{4}::CStruct>>();
-    cstruct.{0}_vec = cstruct.{0}_cstruct_vec | std::views::transform([](auto&& e) {{ return static_cast<{1}>(e); }}) | std::ranges::to<SmallVec<{1}>>();
+    cstruct.{0}_cstruct_vec.resize(this->{0}.size());
+    cstruct.{0}_vec.resize(this->{0}.size());
+    for (size_t i = 0; i < this->{0}.size(); ++i) {{
+        this->{0}[i].to_cstruct(&cstruct.{0}_cstruct_vec[i]);
+        cstruct.{0}_vec[i] = static_cast<{1}>(cstruct.{0}_cstruct_vec[i]);
+    }
     cstruct.{0} = cstruct.{0}_vec.data();
     cstruct.{2} = static_cast<{3}>(cstruct.{0}_vec.size());)",
                                     field.name, field.type, field.counter.value(), counter_type, cpp_type);
@@ -1299,10 +1371,10 @@ template <std::ranges::range T> requires std::convertible_to<std::ranges::range_
                     R"(
     if (this->{0}) {{
         cstruct.{0} = []({1}) {{
-            auto callback = std::move(*reinterpret_cast<{4}*>({2}));
+            auto callback = std::move(*reinterpret_cast<{4}*>(&{2}));
             callback({3});
         }};
-        new (cstruct.{2}) {4}(this->{0});
+        new (&cstruct.{2}) {4}(this->{0});
     }} else {{
         cstruct.{0} = nullptr;
     }})",
@@ -1389,7 +1461,7 @@ template <std::ranges::range T> requires std::convertible_to<std::ranges::range_
                         std::format("{}::CStruct {}_cstruct;", cpp_type, field.name));
                     field_cpp.assign_to_cstruct = std::format(R"(
     if (this->{0}.has_value()) {{
-        cstruct.{0}_cstruct = this->{0}->to_cstruct();
+        this->{0}->to_cstruct(&cstruct.{0}_cstruct);
         cstruct.{0} = &(cstruct.{0}_cstruct);
     }} else {{
         cstruct.{0} = nullptr;
@@ -1523,13 +1595,13 @@ template <typename T>
                     struct_cpp.extra_cstruct_members.push_back(std::format(
                         "{}::CStruct {}_cstruct;", get_cpp_field_type(field.type, struct_api.owning), field.name));
                     field_cpp.assign_to_cstruct = std::format(R"(
-    cstruct.{0}_cstruct = this->{0}.to_cstruct();
+    this->{0}.to_cstruct(&cstruct.{0}_cstruct);
     cstruct.{0} = static_cast<{1}>(cstruct.{0}_cstruct);)",
                                                               field.name, field.type);
                 } else {
                     field_cpp.assign_to_cstruct = std::format(R"(
-    cstruct.{0} = static_cast<{1}>(this->{0}.to_cstruct());)",
-                                                              field.name, field.type);
+    this->{0}.to_cstruct(&cstruct.{0});)",
+                                                              field.name);
                 }
 
                 if (field.name == "chain" &&
@@ -1708,7 +1780,7 @@ template <typename T>
                     temp_data = std::format(
                         R"(
     {1}::CStruct {0}_cstruct;
-    if ({0}) {0}_cstruct = {0}->to_cstruct();)",
+    if ({0}) {0}->to_cstruct(&{0}_cstruct);)",
                         param.name, param.type);
                     assign = std::format("{}? &{}_cstruct : nullptr", param.name, param.name);
                 } else {
@@ -1738,7 +1810,8 @@ template <typename T>
                     }
                 } else if (param.is_const) {
                     temp_data = std::format(R"(
-    {1}::CStruct {0}_cstruct = {0}.to_cstruct();)",
+    {1}::CStruct {0}_cstruct;
+    {0}.to_cstruct(&{0}_cstruct);)",
                                             param.name, param.type);
                     assign    = std::format("&{0}_cstruct", param.name);
                 } else {
@@ -1760,7 +1833,8 @@ template <typename T>
             }
         } else if (param.is_struct) {
             temp_data = std::format(R"(
-    {1}::CStruct {0}_cstruct = {0}.to_cstruct();)",
+        {1}::CStruct {0}_cstruct;
+        {0}.to_cstruct(&{0}_cstruct);)",
                                     param.name, param.type);
             assign    = std::format("{}_cstruct", param.name);
         } else if (param.is_pointer) {
@@ -1868,14 +1942,24 @@ template <typename T>
             if (struct_cpp.extra_cstruct_members.empty()) {
                 temp_data = std::format(
                     R"(
-    std::vector<WGPU{0}> {1}_native = {1} | std::views::transform([](auto&& e) {{ return static_cast<WGPU{0}>(e.to_cstruct()); }}) | std::ranges::to<std::vector<WGPU{0}>>();)",
+    std::vector<WGPU{0}> {1}_native;
+    {1}_native.resize({1}.size());
+    for (size_t i = 0; i < {1}.size(); ++i) {{
+        {1}[i].to_cstruct(&{1}_native[i]);
+    }})",
                     type_without_wgpu, span_name);
                 return std::pair<std::string, std::string>{span_name + "_native.data()", temp_data};
             }
             temp_data = std::format(
                 R"(
-    std::vector<{0}::CStruct> {1}_cstruct_vec = {1} | std::views::transform([](auto&& e) {{ return e.to_cstruct(); }}) | std::ranges::to<std::vector<{0}::CStruct>>();
-    std::vector<WGPU{2}> {1}_native = {1}_cstruct_vec | std::views::transform([](auto&& e) {{ return static_cast<WGPU{2}>(e); }}) | std::ranges::to<std::vector<WGPU{2}>>();)",
+    std::vector<{0}::CStruct> {1}_cstruct_vec;
+    std::vector<WGPU{2}> {1}_native;
+    {1}_cstruct_vec.resize({1}.size());
+    {1}_native.resize({1}.size());
+    for (size_t i = 0; i < {1}.size(); ++i) {{
+        {1}[i].to_cstruct(&{1}_cstruct_vec[i]);
+        {1}_native[i] = static_cast<WGPU{2}>({1}_cstruct_vec[i]);
+    }})",
                 param.type, span_name, type_without_wgpu);
             return std::pair<std::string, std::string>{span_name + "_native.data()", temp_data};
         }
