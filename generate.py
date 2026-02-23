@@ -1305,10 +1305,11 @@ def produce_webgpu_cpp(api: WebGpuApi) -> WebGpuApiCpp:
 					f"\n    WGPU{callback_api.name}Callback {callback_native_name} = nullptr;\n"
 					f"    if ({param.name}) {{\n"
 					f"        {callback_native_name} = []({', '.join(p.full_type() + ' ' + p.name for p in callback_api.params)}) {{\n"
-					f"            auto callback = std::move(*reinterpret_cast<{param.type}*>({userdata_name}));\n"
+					f"            auto& callback = *reinterpret_cast<{param.type}*>(&{userdata_name});\n"
 					f"            callback({', '.join(p.name for p in callback_api.params if not p.name.startswith('userdata'))});\n"
+					f"            if (reinterpret_cast<{callback_api.name}Callback::Control*>({userdata_name})->invoke_times.fetch_add(1) == 0) callback.reset();\n"
 					f"        }};\n"
-					f"        new ({userdata_name}) {param.type}({param.name});\n"
+					f"        new (&{userdata_name}) {param.type}({param.name});\n"
 					f"    }}"
 				)
 				arg_exprs.append(callback_native_name)

@@ -7453,7 +7453,7 @@ void BufferMapCallbackInfo::to_cstruct(CStruct* out) const {
     if (this->callback) {
         cstruct.callback = [](WGPUMapAsyncStatus status, WGPUStringView message, void* userdata1, void* userdata2) {
             auto& callback = *reinterpret_cast<wgpu::BufferMapCallback*>(&userdata1);
-            if (callback.data) callback(status, message);
+            callback(status, message);
             if (callback.data->invoke_times.fetch_add(1) == 0) callback.reset();
         };
         new (&cstruct.userdata1) wgpu::BufferMapCallback(this->callback);
@@ -7491,7 +7491,7 @@ void CompilationInfoCallbackInfo::to_cstruct(CStruct* out) const {
     if (this->callback) {
         cstruct.callback = [](WGPUCompilationInfoRequestStatus status, WGPUCompilationInfo const* compilationInfo, void* userdata1, void* userdata2) {
             auto& callback = *reinterpret_cast<wgpu::CompilationInfoCallback*>(&userdata1);
-            if (callback.data) callback(status, compilationInfo);
+            callback(status, compilationInfo);
             if (callback.data->invoke_times.fetch_add(1) == 0) callback.reset();
         };
         new (&cstruct.userdata1) wgpu::CompilationInfoCallback(this->callback);
@@ -7529,7 +7529,7 @@ void CreateComputePipelineAsyncCallbackInfo::to_cstruct(CStruct* out) const {
     if (this->callback) {
         cstruct.callback = [](WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline pipeline, WGPUStringView message, void* userdata1, void* userdata2) {
             auto& callback = *reinterpret_cast<wgpu::CreateComputePipelineAsyncCallback*>(&userdata1);
-            if (callback.data) callback(status, pipeline, message);
+            callback(status, pipeline, message);
             if (callback.data->invoke_times.fetch_add(1) == 0) callback.reset();
         };
         new (&cstruct.userdata1) wgpu::CreateComputePipelineAsyncCallback(this->callback);
@@ -7567,7 +7567,7 @@ void CreateRenderPipelineAsyncCallbackInfo::to_cstruct(CStruct* out) const {
     if (this->callback) {
         cstruct.callback = [](WGPUCreatePipelineAsyncStatus status, WGPURenderPipeline pipeline, WGPUStringView message, void* userdata1, void* userdata2) {
             auto& callback = *reinterpret_cast<wgpu::CreateRenderPipelineAsyncCallback*>(&userdata1);
-            if (callback.data) callback(status, pipeline, message);
+            callback(status, pipeline, message);
             if (callback.data->invoke_times.fetch_add(1) == 0) callback.reset();
         };
         new (&cstruct.userdata1) wgpu::CreateRenderPipelineAsyncCallback(this->callback);
@@ -7605,7 +7605,7 @@ void DeviceLostCallbackInfo::to_cstruct(CStruct* out) const {
     if (this->callback) {
         cstruct.callback = [](WGPUDevice const* device, WGPUDeviceLostReason reason, WGPUStringView message, void* userdata1, void* userdata2) {
             auto& callback = *reinterpret_cast<wgpu::DeviceLostCallback*>(&userdata1);
-            if (callback.data) callback(device, reason, message);
+            callback(device, reason, message);
             if (callback.data->invoke_times.fetch_add(1) == 0) callback.reset();
         };
         new (&cstruct.userdata1) wgpu::DeviceLostCallback(this->callback);
@@ -7643,7 +7643,7 @@ void PopErrorScopeCallbackInfo::to_cstruct(CStruct* out) const {
     if (this->callback) {
         cstruct.callback = [](WGPUPopErrorScopeStatus status, WGPUErrorType type, WGPUStringView message, void* userdata1, void* userdata2) {
             auto& callback = *reinterpret_cast<wgpu::PopErrorScopeCallback*>(&userdata1);
-            if (callback.data) callback(status, type, message);
+            callback(status, type, message);
             if (callback.data->invoke_times.fetch_add(1) == 0) callback.reset();
         };
         new (&cstruct.userdata1) wgpu::PopErrorScopeCallback(this->callback);
@@ -7681,7 +7681,7 @@ void QueueWorkDoneCallbackInfo::to_cstruct(CStruct* out) const {
     if (this->callback) {
         cstruct.callback = [](WGPUQueueWorkDoneStatus status, void* userdata1, void* userdata2) {
             auto& callback = *reinterpret_cast<wgpu::QueueWorkDoneCallback*>(&userdata1);
-            if (callback.data) callback(status);
+            callback(status);
             if (callback.data->invoke_times.fetch_add(1) == 0) callback.reset();
         };
         new (&cstruct.userdata1) wgpu::QueueWorkDoneCallback(this->callback);
@@ -7719,7 +7719,7 @@ void RequestAdapterCallbackInfo::to_cstruct(CStruct* out) const {
     if (this->callback) {
         cstruct.callback = [](WGPURequestAdapterStatus status, WGPUAdapter adapter, WGPUStringView message, void* userdata1, void* userdata2) {
             auto& callback = *reinterpret_cast<wgpu::RequestAdapterCallback*>(&userdata1);
-            if (callback.data) callback(status, adapter, message);
+            callback(status, adapter, message);
             if (callback.data->invoke_times.fetch_add(1) == 0) callback.reset();
         };
         new (&cstruct.userdata1) wgpu::RequestAdapterCallback(this->callback);
@@ -7757,7 +7757,7 @@ void RequestDeviceCallbackInfo::to_cstruct(CStruct* out) const {
     if (this->callback) {
         cstruct.callback = [](WGPURequestDeviceStatus status, WGPUDevice device, WGPUStringView message, void* userdata1, void* userdata2) {
             auto& callback = *reinterpret_cast<wgpu::RequestDeviceCallback*>(&userdata1);
-            if (callback.data) callback(status, device, message);
+            callback(status, device, message);
             if (callback.data->invoke_times.fetch_add(1) == 0) callback.reset();
         };
         new (&cstruct.userdata1) wgpu::RequestDeviceCallback(this->callback);
@@ -7793,7 +7793,7 @@ void UncapturedErrorCallbackInfo::to_cstruct(CStruct* out) const {
     if (this->callback) {
         cstruct.callback = [](WGPUDevice const* device, WGPUErrorType type, WGPUStringView message, void* userdata1, void* userdata2) {
             auto& callback = *reinterpret_cast<wgpu::UncapturedErrorCallback*>(&userdata1);
-            if (callback.data) callback(device, type, message);
+            callback(device, type, message);
             if (callback.data->invoke_times.fetch_add(1) == 0) callback.reset();
         };
         new (&cstruct.userdata1) wgpu::UncapturedErrorCallback(this->callback);
@@ -13637,10 +13637,11 @@ void setLogCallback(wgpu::LogCallback callback, void* userdata) {
     WGPULogCallback callback_native = nullptr;
     if (callback) {
         callback_native = [](WGPULogLevel level, WGPUStringView message, void* userdata) {
-            auto callback = std::move(*reinterpret_cast<wgpu::LogCallback*>(userdata));
+            auto& callback = *reinterpret_cast<wgpu::LogCallback*>(&userdata);
             callback(level, message);
+            if (reinterpret_cast<LogCallback::Control*>(userdata)->invoke_times.fetch_add(1) == 0) callback.reset();
         };
-        new (userdata) wgpu::LogCallback(callback);
+        new (&userdata) wgpu::LogCallback(callback);
     }
     wgpuSetLogCallback(callback_native, userdata);
 }

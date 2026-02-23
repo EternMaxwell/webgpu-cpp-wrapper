@@ -1884,10 +1884,11 @@ template <typename T>
     WGPU{0}Callback {1} = nullptr;
     if ({2}) {{
         {1} = []({3}) {{
-            auto callback = std::move(*reinterpret_cast<{4}*>({5}));
+            auto& callback = *reinterpret_cast<{4}*>(&{5});
             callback({6});
+            if (reinterpret_cast<{0}Callback::Control*>({5})->invoke_times.fetch_add(1) == 0) callback.reset();
         }};
-        new ({5}) {4}({2});
+        new (&{5}) {4}({2});
     }})",
                     callback_api.name, callback_native_name, param.name, lambda_sig, param.type, userdata_name,
                     lambda_args));
