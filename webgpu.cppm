@@ -22,11 +22,13 @@
 #include <utility>
 export module webgpu;
 export {
+// Type aliases
 namespace wgpu {
 using Flags = uint64_t;
 using Bool = uint32_t;
 using SubmissionIndex = uint64_t;
 }
+// Enums
 namespace wgpu {
 enum class AdapterType {
     eDiscreteGPU = WGPUAdapterType_DiscreteGPU,
@@ -767,6 +769,7 @@ TextureUsage operator|(TextureUsage lhs, TextureUsage rhs);
 InstanceBackend operator|(InstanceBackend lhs, InstanceBackend rhs);
 InstanceFlag operator|(InstanceFlag lhs, InstanceFlag rhs);
 }
+// Struct declarations
 namespace wgpu {
 struct StringView;
 struct ChainedStruct;
@@ -870,6 +873,7 @@ struct BindGroupLayoutEntryExtras;
 struct QuerySetDescriptorExtras;
 struct SurfaceConfigurationExtras;
 }
+// Handle declarations
 namespace wgpu::raw {
 class Adapter;
 class BindGroup;
@@ -918,6 +922,7 @@ class Surface;
 class Texture;
 class TextureView;
 }
+// Callback declarations
 namespace wgpu {
 struct BufferMapCallback;
 struct CompilationInfoCallback;
@@ -931,6 +936,7 @@ struct RequestDeviceCallback;
 struct UncapturedErrorCallback;
 struct LogCallback;
 }
+// Handles
 #define WEBGPU_HANDLE_FRIENDS \
     friend class wgpu::Adapter; \
     friend class wgpu::BindGroup; \
@@ -2415,6 +2421,7 @@ public:
 }
 #undef WEBGPU_RAII_FRIENDS
 #undef WEBGPU_HANDLE_FRIENDS
+// Callbacks
 namespace wgpu {
 struct BufferMapCallback {
     struct Control {
@@ -2780,6 +2787,7 @@ public:
     operator bool() const { return data != nullptr; }
 };
 }
+// Structs
 namespace wgpu {
 template <typename T, size_t N = 4>
 struct SmallVec {
@@ -5384,6 +5392,7 @@ void setLogLevel(wgpu::LogLevel level);
 uint32_t getVersion();
 }
 }
+// Struct template implementations
 namespace wgpu {
 template <typename T>
 ChainedStruct& ChainedStruct::setNext(T&& value) & {
@@ -6396,8 +6405,10 @@ SurfaceConfigurationExtras&& SurfaceConfigurationExtras::setNext(T&& value) && {
     return std::move(*this);
 }
 }
+// Handle template implementations
 namespace wgpu::raw {
 }
+// Callback template implementations
 namespace wgpu {
 template <std::invocable<wgpu::MapAsyncStatus, wgpu::StringView> F>
 BufferMapCallback::BufferMapCallback(const F& f) {
@@ -6488,6 +6499,7 @@ void LogCallback::ControlImpl<F>::invoke(wgpu::LogLevel level, wgpu::StringView 
     func(level, message);
 }
 }
+// Enum implementations
 namespace wgpu {
 std::string_view to_string(AdapterType value) {
     switch (value) {
@@ -7379,6 +7391,7 @@ InstanceFlag operator|(InstanceFlag lhs, InstanceFlag rhs) {
     return static_cast<InstanceFlag>(static_cast<T>(lhs) | static_cast<T>(rhs));
 }
 }
+// Struct implementations
 namespace wgpu {
 StringView::StringView(const WGPUStringView& native) {
     this->data = static_cast<char const*>(native.data);
@@ -12268,6 +12281,7 @@ SurfaceConfigurationExtras&& SurfaceConfigurationExtras::setDesiredMaximumFrameL
     return std::move(*this);
 }
 }
+// Handle implementations
 namespace wgpu::raw {
 void Adapter::getFeatures(wgpu::SupportedFeatures* features) const {
     WGPUSupportedFeatures features_native;
@@ -13180,6 +13194,7 @@ void TextureView::release() const {
 }
 std::atomic<size_t> TextureViewId::counter{1};
 }
+// Callback implementations
 namespace wgpu {
 struct BufferMapCallbackControlNative : BufferMapCallback::Control {
     WGPUBufferMapCallback native;
@@ -13611,6 +13626,7 @@ LogCallback& LogCallback::operator=(LogCallback&& other) {
 void LogCallback::operator()(wgpu::LogLevel level, wgpu::StringView message) const { if (data) data->invoke(level, message); }
 void LogCallback::operator()(WGPULogLevel level, WGPUStringView message) const { if (data) data->invoke_c(level, message); }
 }
+// Non member function implementations
 namespace wgpu {
 wgpu::Instance createInstance(wgpu::InstanceDescriptor const& descriptor) {
     wgpu::InstanceDescriptor::CStruct descriptor_cstruct;

@@ -43,16 +43,24 @@ typename Origin3D:
 
 export {
 
+// Type aliases
 {{type_aliases}}
 
+// Enums
 {{enums}}
 
+// Struct declarations
 {{structs_decl}}
+// Handle declarations
 {{handles_decl}}
+// Callback declarations
 {{callbacks_decl}}
 
+// Handles
 {{handles}}
+// Callbacks
 {{callbacks}}
+// Structs
 {{structs}}
 
 // Non member functions
@@ -60,14 +68,22 @@ export {
 
 }
 
+// Struct template implementations
 {{structs_template_impl}}
+// Handle template implementations
 {{handles_template_impl}}
+// Callback template implementations
 {{callbacks_template_impl}}
 
+// Enum implementations
 {{enums_impl}}
+// Struct implementations
 {{structs_impl}}
+// Handle implementations
 {{handles_impl}}
+// Callback implementations
 {{callbacks_impl}}
+// Non member function implementations
 {{functions_impl}}
 
 namespace WEBGPU_CPP_NAMESPACE
