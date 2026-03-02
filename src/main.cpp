@@ -2548,6 +2548,39 @@ void generate_webgpu_cpp(const WebGpuApiCpp& api_cpp, const TemplateMeta& templa
         handles_def_text = std::format("namespace {} {{\n{}\n}}", namespace_name, handles_def_text);
     }
     handles_def_text = handle_friends_text + "\n\n" + handles_def_text + "\n#undef WEBGPU_HANDLE_FRIENDS";
+
+    std::string handles_hash_text;
+    for (const auto& handle_cpp : api_cpp.handles) {
+        std::string raw_type_name = parser.contains("--use-raii")
+                                        ? std::format("{}::raw::{}", namespace_name, handle_cpp.name)
+                                        : std::format("{}::{}", namespace_name, handle_cpp.name);
+        handles_hash_text += std::format(
+            R"(template <>
+struct hash<{}> {{
+    size_t operator()(const {}& value) const noexcept {{
+        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+        return std::hash<raw_type>{{}}(value.raw());
+    }}
+}};
+)",
+            raw_type_name, raw_type_name);
+        if (parser.contains("--use-raii")) {
+            std::string raii_type_name = std::format("{}::{}", namespace_name, handle_cpp.name);
+            handles_hash_text += std::format(
+                R"(template <>
+struct hash<{}> {{
+    size_t operator()(const {}& value) const noexcept {{
+        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+        return std::hash<raw_type>{{}}(value.raw());
+    }}
+}};
+)",
+                raii_type_name, raii_type_name);
+        }
+    }
+    handles_hash_text = std::format("namespace std {{\n{}\n}}", handles_hash_text);
+    handles_def_text += "\n\n" + handles_hash_text;
+
     output           = std::regex_replace(output, std::regex(R"(\{\{handles\}\})"), handles_def_text);
 
     // {{handles_template_impl}}
