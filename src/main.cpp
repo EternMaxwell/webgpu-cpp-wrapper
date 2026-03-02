@@ -950,6 +950,7 @@ public:
     using base_type = raw::{0};
     using wgpu_type = WGPU{0};
     {0}() : base_type() {{}}
+    {0}(std::nullptr_t) : base_type(nullptr) {{}}
 private:
     WEBGPU_RAII_FRIENDS
     {0}(wgpu_type raw) : base_type(raw) {{}}

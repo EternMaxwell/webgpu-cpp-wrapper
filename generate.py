@@ -800,6 +800,7 @@ class HandleApiCpp:
 			f"    using base_type = raw::{self.name};\n"
 			f"    using wgpu_type = WGPU{self.name};\n"
 			f"    {self.name}() : base_type() {{}}\n"
+			f"    {self.name}(std::nullptr_t) : base_type(nullptr) {{}}\n"
 			f"private:\n"
 			f"    WEBGPU_RAII_FRIENDS\n"
 			f"    {self.name}(wgpu_type raw) : base_type(raw) {{}}\n"
