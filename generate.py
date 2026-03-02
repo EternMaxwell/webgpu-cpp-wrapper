@@ -2165,29 +2165,38 @@ def generate_webgpu_cpp(api: WebGpuApi, api_cpp: WebGpuApiCpp, template_meta: Te
 	else:
 		handles_def_text = f"namespace {namespace} {{\n{handles_def_text}\n}}\n"
 	handles_def_text = handle_friends_text + "\n\n" + handles_def_text + "\n#undef WEBGPU_HANDLE_FRIENDS"
-	handles_hash_text = ""
+	handles_hash_decl_text = ""
+	handles_hash_impl_text = ""
 	for handle_cpp in api_cpp.handles:
-		handles_hash_text += (
+		raw_handle_type = f"{namespace}::{f'raw::' if use_raii else ''}{handle_cpp.name}"
+		handles_hash_decl_text += (
 			f"template <>\n"
-			f"struct hash<{namespace}::{f'raw::' if use_raii else ''}{handle_cpp.name}> {{\n"
-			f"    size_t operator()(const {namespace}::{f'raw::' if use_raii else ''}{handle_cpp.name}& value) const noexcept {{\n"
-			f"        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;\n"
-			f"        return std::hash<raw_type>{{}}(value.raw());\n"
-			f"    }}\n"
+			f"struct hash<{raw_handle_type}> {{\n"
+			f"    size_t operator()(const {raw_handle_type}& value) const noexcept;\n"
 			f"}};\n"
 		)
+		handles_hash_impl_text += (
+			f"size_t std::hash<{raw_handle_type}>::operator()(const {raw_handle_type}& value) const noexcept {{\n"
+			f"    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;\n"
+			f"    return std::hash<raw_type>{{}}(value.raw());\n"
+			f"}}\n"
+		)
 		if use_raii:
-			handles_hash_text += (
+			raii_handle_type = f"{namespace}::{handle_cpp.name}"
+			handles_hash_decl_text += (
 				f"template <>\n"
-				f"struct hash<{namespace}::{handle_cpp.name}> {{\n"
-				f"    size_t operator()(const {namespace}::{handle_cpp.name}& value) const noexcept {{\n"
-				f"        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;\n"
-				f"        return std::hash<raw_type>{{}}(value.raw());\n"
-				f"    }}\n"
+				f"struct hash<{raii_handle_type}> {{\n"
+				f"    size_t operator()(const {raii_handle_type}& value) const noexcept;\n"
 				f"}};\n"
 			)
-	handles_hash_text = f"namespace std {{\n{handles_hash_text}\n}}"
-	handles_def_text += "\n\n" + handles_hash_text
+			handles_hash_impl_text += (
+				f"size_t std::hash<{raii_handle_type}>::operator()(const {raii_handle_type}& value) const noexcept {{\n"
+				f"    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;\n"
+				f"    return std::hash<raw_type>{{}}(value.raw());\n"
+				f"}}\n"
+			)
+	handles_hash_decl_text = f"namespace std {{\n{handles_hash_decl_text}\n}}"
+	handles_def_text += "\n\n" + handles_hash_decl_text
 	output = re.sub(r"\{\{handles\}\}", handles_def_text, output)
 
 	handles_template_impl_text = "\n\n".join(h.gen_template_impl() for h in api_cpp.handles) + "\n\n"
@@ -2202,6 +2211,7 @@ def generate_webgpu_cpp(api: WebGpuApi, api_cpp: WebGpuApiCpp, template_meta: Te
 		handles_impl_text = f"namespace {namespace}::raw {{\n{handles_impl_text}\n}}\n"
 	else:
 		handles_impl_text = f"namespace {namespace} {{\n{handles_impl_text}\n}}"
+	handles_impl_text += "\n" + handles_hash_impl_text
 	output = re.sub(r"\{\{handles_impl\}\}", handles_impl_text, output)
 
 	functions_decl_text = "".join(f.func_decl + "\n" for f in api_cpp.functions)

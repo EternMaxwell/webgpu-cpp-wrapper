@@ -2446,311 +2446,179 @@ public:
 namespace std {
 template <>
 struct hash<wgpu::raw::Adapter> {
-    size_t operator()(const wgpu::raw::Adapter& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::raw::Adapter& value) const noexcept;
 };
 template <>
 struct hash<wgpu::Adapter> {
-    size_t operator()(const wgpu::Adapter& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::Adapter& value) const noexcept;
 };
 template <>
 struct hash<wgpu::raw::BindGroup> {
-    size_t operator()(const wgpu::raw::BindGroup& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::raw::BindGroup& value) const noexcept;
 };
 template <>
 struct hash<wgpu::BindGroup> {
-    size_t operator()(const wgpu::BindGroup& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::BindGroup& value) const noexcept;
 };
 template <>
 struct hash<wgpu::raw::BindGroupLayout> {
-    size_t operator()(const wgpu::raw::BindGroupLayout& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::raw::BindGroupLayout& value) const noexcept;
 };
 template <>
 struct hash<wgpu::BindGroupLayout> {
-    size_t operator()(const wgpu::BindGroupLayout& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::BindGroupLayout& value) const noexcept;
 };
 template <>
 struct hash<wgpu::raw::Buffer> {
-    size_t operator()(const wgpu::raw::Buffer& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::raw::Buffer& value) const noexcept;
 };
 template <>
 struct hash<wgpu::Buffer> {
-    size_t operator()(const wgpu::Buffer& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::Buffer& value) const noexcept;
 };
 template <>
 struct hash<wgpu::raw::CommandBuffer> {
-    size_t operator()(const wgpu::raw::CommandBuffer& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::raw::CommandBuffer& value) const noexcept;
 };
 template <>
 struct hash<wgpu::CommandBuffer> {
-    size_t operator()(const wgpu::CommandBuffer& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::CommandBuffer& value) const noexcept;
 };
 template <>
 struct hash<wgpu::raw::CommandEncoder> {
-    size_t operator()(const wgpu::raw::CommandEncoder& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::raw::CommandEncoder& value) const noexcept;
 };
 template <>
 struct hash<wgpu::CommandEncoder> {
-    size_t operator()(const wgpu::CommandEncoder& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::CommandEncoder& value) const noexcept;
 };
 template <>
 struct hash<wgpu::raw::ComputePassEncoder> {
-    size_t operator()(const wgpu::raw::ComputePassEncoder& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::raw::ComputePassEncoder& value) const noexcept;
 };
 template <>
 struct hash<wgpu::ComputePassEncoder> {
-    size_t operator()(const wgpu::ComputePassEncoder& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::ComputePassEncoder& value) const noexcept;
 };
 template <>
 struct hash<wgpu::raw::ComputePipeline> {
-    size_t operator()(const wgpu::raw::ComputePipeline& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::raw::ComputePipeline& value) const noexcept;
 };
 template <>
 struct hash<wgpu::ComputePipeline> {
-    size_t operator()(const wgpu::ComputePipeline& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::ComputePipeline& value) const noexcept;
 };
 template <>
 struct hash<wgpu::raw::Device> {
-    size_t operator()(const wgpu::raw::Device& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::raw::Device& value) const noexcept;
 };
 template <>
 struct hash<wgpu::Device> {
-    size_t operator()(const wgpu::Device& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::Device& value) const noexcept;
 };
 template <>
 struct hash<wgpu::raw::Instance> {
-    size_t operator()(const wgpu::raw::Instance& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::raw::Instance& value) const noexcept;
 };
 template <>
 struct hash<wgpu::Instance> {
-    size_t operator()(const wgpu::Instance& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::Instance& value) const noexcept;
 };
 template <>
 struct hash<wgpu::raw::PipelineLayout> {
-    size_t operator()(const wgpu::raw::PipelineLayout& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::raw::PipelineLayout& value) const noexcept;
 };
 template <>
 struct hash<wgpu::PipelineLayout> {
-    size_t operator()(const wgpu::PipelineLayout& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::PipelineLayout& value) const noexcept;
 };
 template <>
 struct hash<wgpu::raw::QuerySet> {
-    size_t operator()(const wgpu::raw::QuerySet& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::raw::QuerySet& value) const noexcept;
 };
 template <>
 struct hash<wgpu::QuerySet> {
-    size_t operator()(const wgpu::QuerySet& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::QuerySet& value) const noexcept;
 };
 template <>
 struct hash<wgpu::raw::Queue> {
-    size_t operator()(const wgpu::raw::Queue& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::raw::Queue& value) const noexcept;
 };
 template <>
 struct hash<wgpu::Queue> {
-    size_t operator()(const wgpu::Queue& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::Queue& value) const noexcept;
 };
 template <>
 struct hash<wgpu::raw::RenderBundle> {
-    size_t operator()(const wgpu::raw::RenderBundle& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::raw::RenderBundle& value) const noexcept;
 };
 template <>
 struct hash<wgpu::RenderBundle> {
-    size_t operator()(const wgpu::RenderBundle& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::RenderBundle& value) const noexcept;
 };
 template <>
 struct hash<wgpu::raw::RenderBundleEncoder> {
-    size_t operator()(const wgpu::raw::RenderBundleEncoder& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::raw::RenderBundleEncoder& value) const noexcept;
 };
 template <>
 struct hash<wgpu::RenderBundleEncoder> {
-    size_t operator()(const wgpu::RenderBundleEncoder& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::RenderBundleEncoder& value) const noexcept;
 };
 template <>
 struct hash<wgpu::raw::RenderPassEncoder> {
-    size_t operator()(const wgpu::raw::RenderPassEncoder& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::raw::RenderPassEncoder& value) const noexcept;
 };
 template <>
 struct hash<wgpu::RenderPassEncoder> {
-    size_t operator()(const wgpu::RenderPassEncoder& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::RenderPassEncoder& value) const noexcept;
 };
 template <>
 struct hash<wgpu::raw::RenderPipeline> {
-    size_t operator()(const wgpu::raw::RenderPipeline& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::raw::RenderPipeline& value) const noexcept;
 };
 template <>
 struct hash<wgpu::RenderPipeline> {
-    size_t operator()(const wgpu::RenderPipeline& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::RenderPipeline& value) const noexcept;
 };
 template <>
 struct hash<wgpu::raw::Sampler> {
-    size_t operator()(const wgpu::raw::Sampler& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::raw::Sampler& value) const noexcept;
 };
 template <>
 struct hash<wgpu::Sampler> {
-    size_t operator()(const wgpu::Sampler& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::Sampler& value) const noexcept;
 };
 template <>
 struct hash<wgpu::raw::ShaderModule> {
-    size_t operator()(const wgpu::raw::ShaderModule& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::raw::ShaderModule& value) const noexcept;
 };
 template <>
 struct hash<wgpu::ShaderModule> {
-    size_t operator()(const wgpu::ShaderModule& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::ShaderModule& value) const noexcept;
 };
 template <>
 struct hash<wgpu::raw::Surface> {
-    size_t operator()(const wgpu::raw::Surface& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::raw::Surface& value) const noexcept;
 };
 template <>
 struct hash<wgpu::Surface> {
-    size_t operator()(const wgpu::Surface& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::Surface& value) const noexcept;
 };
 template <>
 struct hash<wgpu::raw::Texture> {
-    size_t operator()(const wgpu::raw::Texture& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::raw::Texture& value) const noexcept;
 };
 template <>
 struct hash<wgpu::Texture> {
-    size_t operator()(const wgpu::Texture& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::Texture& value) const noexcept;
 };
 template <>
 struct hash<wgpu::raw::TextureView> {
-    size_t operator()(const wgpu::raw::TextureView& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::raw::TextureView& value) const noexcept;
 };
 template <>
 struct hash<wgpu::TextureView> {
-    size_t operator()(const wgpu::TextureView& value) const noexcept {
-        using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
-        return std::hash<raw_type>{}(value.raw());
-    }
+    size_t operator()(const wgpu::TextureView& value) const noexcept;
 };
 }
 // Callbacks
@@ -13525,6 +13393,182 @@ void TextureView::release() const {
     wgpuTextureViewRelease(m_raw);
 }
 std::atomic<size_t> TextureViewId::counter{1};
+}
+size_t std::hash<wgpu::raw::Adapter>::operator()(const wgpu::raw::Adapter& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::Adapter>::operator()(const wgpu::Adapter& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::raw::BindGroup>::operator()(const wgpu::raw::BindGroup& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::BindGroup>::operator()(const wgpu::BindGroup& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::raw::BindGroupLayout>::operator()(const wgpu::raw::BindGroupLayout& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::BindGroupLayout>::operator()(const wgpu::BindGroupLayout& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::raw::Buffer>::operator()(const wgpu::raw::Buffer& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::Buffer>::operator()(const wgpu::Buffer& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::raw::CommandBuffer>::operator()(const wgpu::raw::CommandBuffer& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::CommandBuffer>::operator()(const wgpu::CommandBuffer& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::raw::CommandEncoder>::operator()(const wgpu::raw::CommandEncoder& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::CommandEncoder>::operator()(const wgpu::CommandEncoder& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::raw::ComputePassEncoder>::operator()(const wgpu::raw::ComputePassEncoder& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::ComputePassEncoder>::operator()(const wgpu::ComputePassEncoder& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::raw::ComputePipeline>::operator()(const wgpu::raw::ComputePipeline& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::ComputePipeline>::operator()(const wgpu::ComputePipeline& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::raw::Device>::operator()(const wgpu::raw::Device& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::Device>::operator()(const wgpu::Device& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::raw::Instance>::operator()(const wgpu::raw::Instance& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::Instance>::operator()(const wgpu::Instance& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::raw::PipelineLayout>::operator()(const wgpu::raw::PipelineLayout& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::PipelineLayout>::operator()(const wgpu::PipelineLayout& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::raw::QuerySet>::operator()(const wgpu::raw::QuerySet& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::QuerySet>::operator()(const wgpu::QuerySet& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::raw::Queue>::operator()(const wgpu::raw::Queue& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::Queue>::operator()(const wgpu::Queue& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::raw::RenderBundle>::operator()(const wgpu::raw::RenderBundle& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::RenderBundle>::operator()(const wgpu::RenderBundle& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::raw::RenderBundleEncoder>::operator()(const wgpu::raw::RenderBundleEncoder& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::RenderBundleEncoder>::operator()(const wgpu::RenderBundleEncoder& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::raw::RenderPassEncoder>::operator()(const wgpu::raw::RenderPassEncoder& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::RenderPassEncoder>::operator()(const wgpu::RenderPassEncoder& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::raw::RenderPipeline>::operator()(const wgpu::raw::RenderPipeline& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::RenderPipeline>::operator()(const wgpu::RenderPipeline& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::raw::Sampler>::operator()(const wgpu::raw::Sampler& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::Sampler>::operator()(const wgpu::Sampler& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::raw::ShaderModule>::operator()(const wgpu::raw::ShaderModule& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::ShaderModule>::operator()(const wgpu::ShaderModule& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::raw::Surface>::operator()(const wgpu::raw::Surface& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::Surface>::operator()(const wgpu::Surface& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::raw::Texture>::operator()(const wgpu::raw::Texture& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::Texture>::operator()(const wgpu::Texture& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::raw::TextureView>::operator()(const wgpu::raw::TextureView& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
+}
+size_t std::hash<wgpu::TextureView>::operator()(const wgpu::TextureView& value) const noexcept {
+    using raw_type = std::remove_cv_t<std::remove_reference_t<decltype(value.raw())>>;
+    return std::hash<raw_type>{}(value.raw());
 }
 // Callback implementations
 namespace wgpu {
