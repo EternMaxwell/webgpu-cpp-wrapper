@@ -716,6 +716,7 @@ class StructApiCpp:
 	name: str
 	binary_compatible: bool = True
 	init_macro: str = ""
+	default_init: str = ""
 	fields: List[StructFieldCpp] = field(default_factory=list)
 	methods_decl: List[str] = field(default_factory=list)
 	methods_template_impl: List[str] = field(default_factory=list)
@@ -726,10 +727,17 @@ class StructApiCpp:
 		extra_members = "\n        ".join(self.extra_cstruct_members)
 		methods_decl = "\n    ".join(self.methods_decl)
 		fields_decl = "\n    ".join(f"{f.type} {f.name}{{}};" for f in self.fields)
-		init = "" if not self.init_macro else f"""
+		init_parts: List[str] = []
+		if self.init_macro:
+			init_parts.append(
+				f"""
         WGPU{self.name} native = {self.init_macro};
         *this = static_cast<{self.name}>(native);
     """
+			)
+		if self.default_init:
+			init_parts.append(self.default_init)
+		init = "\n".join(init_parts)
 		return (
 			f"\nstruct {self.name} {{\n"
 			f"    struct CStruct : public WGPU{self.name} {{\n"
@@ -1354,6 +1362,12 @@ def produce_webgpu_cpp(api: WebGpuApi) -> WebGpuApiCpp:
 				struct_cpp.init_macro = init_macro.macro
 				break
 
+		has_chain_field = any(f.name == "chain" for f in struct_api.fields)
+		if has_chain_field:
+			struct_cpp.default_init += (
+				f"\n        this->chain.sType = static_cast<decltype(this->chain.sType)>(WGPUSType_{struct_api.name});\n    "
+			)
+
 		for field in struct_api.fields:
 			if field.is_counter:
 				continue
@@ -1525,7 +1539,11 @@ def produce_webgpu_cpp(api: WebGpuApi) -> WebGpuApiCpp:
 				field_cpp = StructFieldCpp(
 					type=f"NextInChain<{field.type}{' const' if field.is_const else ''}>",
 					name=field.name,
-					assign_from_native=f"\n    this->{field.name}.setNext(native.{field.name});",
+					assign_from_native=(
+						f"\n    if (native.{field.name} != this->{field.name}.getNext()) {{\n"
+						f"        this->{field.name}.setNext(native.{field.name});\n"
+						f"    }}"
+					),
 					assign_to_cstruct=f"\n    cstruct.{field.name} = this->{field.name}.getNext();",
 				)
 				setter_name = "set" + field.name[:1].upper() + field.name[1:]
@@ -1655,7 +1673,7 @@ def produce_webgpu_cpp(api: WebGpuApi) -> WebGpuApiCpp:
 			is_indexed = any(h.name == type_without_wgpu and h.indexed for h in result.handles)
 			if param.is_pointer and not param.is_const:
 				if is_indexed:
-					temp_data = f"\n    WGPU{type_without_wgpu} {param.name}_native;"
+					temp_data = f"\n    WGPU{type_without_wgpu} {param.name}_native{{}};"
 					assign = f"&{param.name}_native"
 					write_back = f"\n    *{param.name} = static_cast<{param.type}>({param.name}_native);"
 				else:
@@ -1674,11 +1692,13 @@ def produce_webgpu_cpp(api: WebGpuApi) -> WebGpuApiCpp:
 					)
 					assign = f"{param.name}? &{param.name}_cstruct : nullptr"
 				else:
-					temp_data = f"\n    WGPU{type_without_wgpu} {param.name}_native;"
-					assign = f"{param.name}? &{param.name}_native : nullptr"
-					write_back = f"\n    if ({param.name}) *{param.name} = static_cast<{param.type}>({param.name}_native);"
+					temp_data = (
+						f"\n    {param.type}::CStruct {param.name}_cstruct;\n    if ({param.name}) {param.name}->to_cstruct(&{param.name}_cstruct);"
+					)
+					assign = f"{param.name}? &{param.name}_cstruct : nullptr"
+					write_back = f"\n    if ({param.name}) *{param.name} = static_cast<{param.type}>({param.name}_cstruct);"
 					if has_free_members:
-						write_back += f"\n    if ({param.name}) {free_members}({param.name}_native);"
+						write_back += f"\n    if ({param.name}) {free_members}({param.name}_cstruct);"
 			else:
 				if param.binary_compatible:
 					if param.is_const:
@@ -1689,11 +1709,11 @@ def produce_webgpu_cpp(api: WebGpuApi) -> WebGpuApiCpp:
 					temp_data = f"\n    {param.type}::CStruct {param.name}_cstruct;\n    {param.name}.to_cstruct(&{param.name}_cstruct);"
 					assign = f"&{param.name}_cstruct"
 				else:
-					temp_data = f"\n    WGPU{type_without_wgpu} {param.name}_native;"
-					assign = f"&{param.name}_native"
-					write_back = f"\n    *{param.name} = static_cast<{param.type}>({param.name}_native);"
+					temp_data = f"\n    {param.type}::CStruct {param.name}_cstruct;\n    {param.name}->to_cstruct(&{param.name}_cstruct);"
+					assign = f"&{param.name}_cstruct"
+					write_back = f"\n    *{param.name} = static_cast<{param.type}>({param.name}_cstruct);"
 					if has_free_members:
-						write_back += f"\n    {free_members}({param.name}_native);"
+						write_back += f"\n    {free_members}({param.name}_cstruct);"
 		elif param.is_struct:
 			temp_data = f"\n    {param.type}::CStruct {param.name}_cstruct;\n    {param.name}.to_cstruct(&{param.name}_cstruct);"
 			assign = f"{param.name}_cstruct"

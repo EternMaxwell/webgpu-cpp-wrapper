@@ -832,6 +832,7 @@ struct StructApiCpp {
     bool binary_compatible = true;
     std::string name;
     std::string init_macro;
+    std::string default_init;
     std::vector<StructFieldCpp> fields;
     std::vector<std::string> methods_decl;
     std::vector<std::string> methods_template_impl;
@@ -854,12 +855,13 @@ struct {0} {{
     {4}
 }};)",
                 name,
-                init_macro.empty() ? ""
-                                   : std::format(R"(
+                (init_macro.empty() ? ""
+                                    : std::format(R"(
         WGPU{0} native = {1};
         *this = static_cast<{0}>(native);
     )",
-                                                 name, init_macro),
+                                                  name, init_macro)) +
+                    default_init,
                 extra_cstruct_members | std::views::join_with(std::string("\n        ")) |
                     std::ranges::to<std::string>(),
                 methods_decl | std::views::join_with(std::string("\n    ")) | std::ranges::to<std::string>(),
@@ -880,12 +882,13 @@ struct {0} {{
     {4}
 }};)",
                 name,
-                init_macro.empty() ? ""
-                                   : std::format(R"(
+                (init_macro.empty() ? ""
+                                    : std::format(R"(
         WGPU{0} native = {1};
         *this = static_cast<{0}>(native);
     )",
-                                                 name, init_macro),
+                                                  name, init_macro)) +
+                    default_init,
                 extra_cstruct_members | std::views::join_with(std::string("\n        ")) |
                     std::ranges::to<std::string>(),
                 methods_decl | std::views::join_with(std::string("\n    ")) | std::ranges::to<std::string>(),
@@ -1224,6 +1227,13 @@ WebGpuApiCpp produce_webgpu_cpp(const WebGpuApi& api, const TemplateMeta& templa
                 break;
             }
         }
+        bool has_chain_field =
+            std::ranges::any_of(struct_api.fields, [](const FieldApi& f) { return f.name == "chain"; });
+        if (has_chain_field) {
+            struct_cpp.default_init += std::format(
+                "\n        this->chain.sType = static_cast<decltype(this->chain.sType)>(WGPUSType_{});\n    ",
+                struct_api.name);
+        }
         // fields, converts, setters
         for (const auto& field : struct_api.fields) {
             if (field.is_counter) continue;   // we store vector for array, so no need to store count field
@@ -1530,7 +1540,9 @@ template <std::ranges::range T> requires std::convertible_to<std::ranges::range_
                 field_cpp.type = std::format("NextInChain<{}{}>", field.type, field.is_const ? " const" : "");
                 // converter
                 field_cpp.assign_from_native = std::format(R"(
-    this->{0}.setNext(native.{0});)",
+    if (native.{0} != this->{0}.getNext()) {{
+        this->{0}.setNext(native.{0});
+    }})",
                                                            field.name);
                 field_cpp.assign_to_cstruct  = std::format(R"(
     cstruct.{0} = this->{0}.getNext();)",
@@ -1764,7 +1776,7 @@ template <typename T>
         if (param.is_handle) {
             if (param.is_pointer && !param.is_const) {
                 if (param.is_indexed) {
-                    temp_data  = std::format("\n    WGPU{} {}_native;", type_without_wgpu, param.name);
+                    temp_data  = std::format("\n    WGPU{} {}_native{{}};", type_without_wgpu, param.name);
                     assign     = std::format("&{}_native", param.name);
                     write_back = std::format("\n    *{0} = static_cast<{1}>({0}_native);", param.name, param.type);
                 } else {
@@ -1790,17 +1802,18 @@ template <typename T>
                 } else {
                     temp_data = std::format(
                         R"(
-    WGPU{1} {0}_native;)",
-                        param.name, type_without_wgpu);
-                    assign = std::format("{}? &{}_native : nullptr", param.name, param.name);
+    {1}::CStruct {0}_cstruct;
+    if ({0}) {0}->to_cstruct(&{0}_cstruct);)",
+                        param.name, param.type);
+                    assign = std::format("{}? &{}_cstruct : nullptr", param.name, param.name);
                     if (!param.is_const) {
                         write_back = std::format(
                             R"(
-    if ({0}) *{0} = static_cast<{1}>({0}_native);)",
+    if ({0}) *{0} = static_cast<{1}>({0}_cstruct);)",
                             param.name, param.type);
                         if (has_free_members) {
                             write_back += std::format(R"(
-    if ({0}) {1}({0}_native);)",
+    if ({0}) {1}({0}_cstruct);)",
                                                       param.name, free_members);
                         }
                     }
@@ -1820,16 +1833,17 @@ template <typename T>
                     assign    = std::format("&{0}_cstruct", param.name);
                 } else {
                     temp_data = std::format(R"(
-    WGPU{1} {0}_native;)",
-                                            param.name, type_without_wgpu);
-                    assign    = std::format("&{0}_native", param.name);
+    {1}::CStruct {0}_cstruct;
+    {0}->to_cstruct(&{0}_cstruct);)",
+                                            param.name, param.type);
+                    assign    = std::format("&{0}_cstruct", param.name);
                     if (!param.is_const) {
                         write_back = std::format(R"(
-    *{0} = static_cast<{1}>({0}_native);)",
+    *{0} = static_cast<{1}>({0}_cstruct);)",
                                                  param.name, param.type);
                         if (has_free_members) {
                             write_back += std::format(R"(
-    {1}({0}_native);)",
+    {1}({0}_cstruct);)",
                                                       param.name, free_members);
                         }
                     }
@@ -1837,7 +1851,7 @@ template <typename T>
             }
         } else if (param.is_struct) {
             temp_data = std::format(R"(
-        {1}::CStruct {0}_cstruct;
+        {1}::CStruct {0}_cstruct{{}};
         {0}.to_cstruct(&{0}_cstruct);)",
                                     param.name, param.type);
             assign    = std::format("{}_cstruct", param.name);
