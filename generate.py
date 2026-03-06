@@ -744,6 +744,7 @@ class StructApiCpp:
 			f"        {extra_members}\n"
 			f"    }};\n"
 			f"    {self.name}(const WGPU{self.name}& native);\n"
+			f"    {self.name}& operator=(const WGPU{self.name}& native);\n"
 			f"    {self.name}() {{{init}}};\n"
 			f"    void to_cstruct(CStruct* out) const;\n"
 			f"    {methods_decl}\n"
@@ -753,6 +754,7 @@ class StructApiCpp:
 			f"\nstruct {self.name} {{\n"
 			f"    using CStruct = WGPU{self.name};\n"
 			f"    {self.name}(const WGPU{self.name}& native);\n"
+			f"    {self.name}& operator=(const WGPU{self.name}& native);\n"
 			f"    {self.name}() {{{init}}};\n"
 			f"    void to_cstruct(CStruct* out) const;\n"
 			f"    {methods_decl}\n"
@@ -770,6 +772,10 @@ class StructApiCpp:
 		return (
 			f"\n{self.name}::{self.name}(const WGPU{self.name}& native) {{\n"
 			f"{from_native}\n"
+			f"}}\n"
+			f"\n{self.name}& {self.name}::operator=(const WGPU{self.name}& native) {{\n"
+			f"{from_native}\n"
+			f"    return *this;\n"
 			f"}}\n"
 			f"\nvoid {self.name}::to_cstruct(CStruct* out) const {{\n"
 			f"    auto& cstruct = *out;\n"
@@ -1696,7 +1702,7 @@ def produce_webgpu_cpp(api: WebGpuApi) -> WebGpuApiCpp:
 						f"\n    {param.type}::CStruct {param.name}_cstruct;\n    if ({param.name}) {param.name}->to_cstruct(&{param.name}_cstruct);"
 					)
 					assign = f"{param.name}? &{param.name}_cstruct : nullptr"
-					write_back = f"\n    if ({param.name}) *{param.name} = static_cast<{param.type}>({param.name}_cstruct);"
+					write_back = f"\n    if ({param.name}) *{param.name} = {param.name}_cstruct;"
 					if has_free_members:
 						write_back += f"\n    if ({param.name}) {free_members}({param.name}_cstruct);"
 			else:
@@ -1711,7 +1717,7 @@ def produce_webgpu_cpp(api: WebGpuApi) -> WebGpuApiCpp:
 				else:
 					temp_data = f"\n    {param.type}::CStruct {param.name}_cstruct;\n    {param.name}->to_cstruct(&{param.name}_cstruct);"
 					assign = f"&{param.name}_cstruct"
-					write_back = f"\n    *{param.name} = static_cast<{param.type}>({param.name}_cstruct);"
+					write_back = f"\n    *{param.name} = {param.name}_cstruct;"
 					if has_free_members:
 						write_back += f"\n    {free_members}({param.name}_cstruct);"
 		elif param.is_struct:

@@ -3289,6 +3289,7 @@ private:
 struct StringView {
     using CStruct = WGPUStringView;
     StringView(const WGPUStringView& native);
+    StringView& operator=(const WGPUStringView& native);
     StringView() {
         WGPUStringView native = WGPU_STRING_VIEW_INIT;
         *this = static_cast<StringView>(native);
@@ -3309,6 +3310,7 @@ struct StringView {
 struct ChainedStruct {
     using CStruct = WGPUChainedStruct;
     ChainedStruct(const WGPUChainedStruct& native);
+    ChainedStruct& operator=(const WGPUChainedStruct& native);
     ChainedStruct() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -3323,6 +3325,7 @@ struct ChainedStruct {
 struct ChainedStructOut {
     using CStruct = WGPUChainedStructOut;
     ChainedStructOut(const WGPUChainedStructOut& native);
+    ChainedStructOut& operator=(const WGPUChainedStructOut& native);
     ChainedStructOut() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -3337,6 +3340,7 @@ struct ChainedStructOut {
 struct BufferMapCallbackInfo {
     using CStruct = WGPUBufferMapCallbackInfo;
     BufferMapCallbackInfo(const WGPUBufferMapCallbackInfo& native);
+    BufferMapCallbackInfo& operator=(const WGPUBufferMapCallbackInfo& native);
     BufferMapCallbackInfo() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -3354,6 +3358,7 @@ struct BufferMapCallbackInfo {
 struct CompilationInfoCallbackInfo {
     using CStruct = WGPUCompilationInfoCallbackInfo;
     CompilationInfoCallbackInfo(const WGPUCompilationInfoCallbackInfo& native);
+    CompilationInfoCallbackInfo& operator=(const WGPUCompilationInfoCallbackInfo& native);
     CompilationInfoCallbackInfo() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -3371,6 +3376,7 @@ struct CompilationInfoCallbackInfo {
 struct CreateComputePipelineAsyncCallbackInfo {
     using CStruct = WGPUCreateComputePipelineAsyncCallbackInfo;
     CreateComputePipelineAsyncCallbackInfo(const WGPUCreateComputePipelineAsyncCallbackInfo& native);
+    CreateComputePipelineAsyncCallbackInfo& operator=(const WGPUCreateComputePipelineAsyncCallbackInfo& native);
     CreateComputePipelineAsyncCallbackInfo() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -3388,6 +3394,7 @@ struct CreateComputePipelineAsyncCallbackInfo {
 struct CreateRenderPipelineAsyncCallbackInfo {
     using CStruct = WGPUCreateRenderPipelineAsyncCallbackInfo;
     CreateRenderPipelineAsyncCallbackInfo(const WGPUCreateRenderPipelineAsyncCallbackInfo& native);
+    CreateRenderPipelineAsyncCallbackInfo& operator=(const WGPUCreateRenderPipelineAsyncCallbackInfo& native);
     CreateRenderPipelineAsyncCallbackInfo() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -3405,6 +3412,7 @@ struct CreateRenderPipelineAsyncCallbackInfo {
 struct DeviceLostCallbackInfo {
     using CStruct = WGPUDeviceLostCallbackInfo;
     DeviceLostCallbackInfo(const WGPUDeviceLostCallbackInfo& native);
+    DeviceLostCallbackInfo& operator=(const WGPUDeviceLostCallbackInfo& native);
     DeviceLostCallbackInfo() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -3422,6 +3430,7 @@ struct DeviceLostCallbackInfo {
 struct PopErrorScopeCallbackInfo {
     using CStruct = WGPUPopErrorScopeCallbackInfo;
     PopErrorScopeCallbackInfo(const WGPUPopErrorScopeCallbackInfo& native);
+    PopErrorScopeCallbackInfo& operator=(const WGPUPopErrorScopeCallbackInfo& native);
     PopErrorScopeCallbackInfo() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -3439,6 +3448,7 @@ struct PopErrorScopeCallbackInfo {
 struct QueueWorkDoneCallbackInfo {
     using CStruct = WGPUQueueWorkDoneCallbackInfo;
     QueueWorkDoneCallbackInfo(const WGPUQueueWorkDoneCallbackInfo& native);
+    QueueWorkDoneCallbackInfo& operator=(const WGPUQueueWorkDoneCallbackInfo& native);
     QueueWorkDoneCallbackInfo() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -3456,6 +3466,7 @@ struct QueueWorkDoneCallbackInfo {
 struct RequestAdapterCallbackInfo {
     using CStruct = WGPURequestAdapterCallbackInfo;
     RequestAdapterCallbackInfo(const WGPURequestAdapterCallbackInfo& native);
+    RequestAdapterCallbackInfo& operator=(const WGPURequestAdapterCallbackInfo& native);
     RequestAdapterCallbackInfo() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -3473,6 +3484,7 @@ struct RequestAdapterCallbackInfo {
 struct RequestDeviceCallbackInfo {
     using CStruct = WGPURequestDeviceCallbackInfo;
     RequestDeviceCallbackInfo(const WGPURequestDeviceCallbackInfo& native);
+    RequestDeviceCallbackInfo& operator=(const WGPURequestDeviceCallbackInfo& native);
     RequestDeviceCallbackInfo() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -3490,6 +3502,7 @@ struct RequestDeviceCallbackInfo {
 struct UncapturedErrorCallbackInfo {
     using CStruct = WGPUUncapturedErrorCallbackInfo;
     UncapturedErrorCallbackInfo(const WGPUUncapturedErrorCallbackInfo& native);
+    UncapturedErrorCallbackInfo& operator=(const WGPUUncapturedErrorCallbackInfo& native);
     UncapturedErrorCallbackInfo() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -3504,6 +3517,7 @@ struct UncapturedErrorCallbackInfo {
 struct AdapterInfo {
     using CStruct = WGPUAdapterInfo;
     AdapterInfo(const WGPUAdapterInfo& native);
+    AdapterInfo& operator=(const WGPUAdapterInfo& native);
     AdapterInfo() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -3547,6 +3561,7 @@ struct AdapterInfo {
 struct BindGroupEntry {
     using CStruct = WGPUBindGroupEntry;
     BindGroupEntry(const WGPUBindGroupEntry& native);
+    BindGroupEntry& operator=(const WGPUBindGroupEntry& native);
     BindGroupEntry() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -3576,6 +3591,7 @@ struct BindGroupEntry {
 struct BlendComponent {
     using CStruct = WGPUBlendComponent;
     BlendComponent(const WGPUBlendComponent& native);
+    BlendComponent& operator=(const WGPUBlendComponent& native);
     BlendComponent() {};
     void to_cstruct(CStruct* out) const;
     BlendComponent& setOperation(wgpu::BlendOperation value) &;
@@ -3591,6 +3607,7 @@ struct BlendComponent {
 struct BufferBindingLayout {
     using CStruct = WGPUBufferBindingLayout;
     BufferBindingLayout(const WGPUBufferBindingLayout& native);
+    BufferBindingLayout& operator=(const WGPUBufferBindingLayout& native);
     BufferBindingLayout() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -3611,6 +3628,7 @@ struct BufferBindingLayout {
 struct BufferDescriptor {
     using CStruct = WGPUBufferDescriptor;
     BufferDescriptor(const WGPUBufferDescriptor& native);
+    BufferDescriptor& operator=(const WGPUBufferDescriptor& native);
     BufferDescriptor() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -3636,6 +3654,7 @@ struct BufferDescriptor {
 struct Color {
     using CStruct = WGPUColor;
     Color(const WGPUColor& native);
+    Color& operator=(const WGPUColor& native);
     Color() {};
     void to_cstruct(CStruct* out) const;
     Color& setR(double value) &;
@@ -3655,6 +3674,7 @@ struct Color {
 struct CommandBufferDescriptor {
     using CStruct = WGPUCommandBufferDescriptor;
     CommandBufferDescriptor(const WGPUCommandBufferDescriptor& native);
+    CommandBufferDescriptor& operator=(const WGPUCommandBufferDescriptor& native);
     CommandBufferDescriptor() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -3671,6 +3691,7 @@ struct CommandBufferDescriptor {
 struct CommandEncoderDescriptor {
     using CStruct = WGPUCommandEncoderDescriptor;
     CommandEncoderDescriptor(const WGPUCommandEncoderDescriptor& native);
+    CommandEncoderDescriptor& operator=(const WGPUCommandEncoderDescriptor& native);
     CommandEncoderDescriptor() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -3687,6 +3708,7 @@ struct CommandEncoderDescriptor {
 struct CompilationMessage {
     using CStruct = WGPUCompilationMessage;
     CompilationMessage(const WGPUCompilationMessage& native);
+    CompilationMessage& operator=(const WGPUCompilationMessage& native);
     CompilationMessage() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -3718,6 +3740,7 @@ struct CompilationMessage {
 struct ComputePassTimestampWrites {
     using CStruct = WGPUComputePassTimestampWrites;
     ComputePassTimestampWrites(const WGPUComputePassTimestampWrites& native);
+    ComputePassTimestampWrites& operator=(const WGPUComputePassTimestampWrites& native);
     ComputePassTimestampWrites() {};
     void to_cstruct(CStruct* out) const;
     ComputePassTimestampWrites& setQuerySet(wgpu::QuerySet value) &;
@@ -3733,6 +3756,7 @@ struct ComputePassTimestampWrites {
 struct ConstantEntry {
     using CStruct = WGPUConstantEntry;
     ConstantEntry(const WGPUConstantEntry& native);
+    ConstantEntry& operator=(const WGPUConstantEntry& native);
     ConstantEntry() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -3752,6 +3776,7 @@ struct ConstantEntry {
 struct Extent3D {
     using CStruct = WGPUExtent3D;
     Extent3D(const WGPUExtent3D& native);
+    Extent3D& operator=(const WGPUExtent3D& native);
     Extent3D() {};
     void to_cstruct(CStruct* out) const;
     Extent3D& setWidth(uint32_t value) &;
@@ -3768,6 +3793,7 @@ struct Extent3D {
 struct Future {
     using CStruct = WGPUFuture;
     Future(const WGPUFuture& native);
+    Future& operator=(const WGPUFuture& native);
     Future() {};
     void to_cstruct(CStruct* out) const;
     Future& setId(uint64_t value) &;
@@ -3777,6 +3803,7 @@ struct Future {
 struct InstanceCapabilities {
     using CStruct = WGPUInstanceCapabilities;
     InstanceCapabilities(const WGPUInstanceCapabilities& native);
+    InstanceCapabilities& operator=(const WGPUInstanceCapabilities& native);
     InstanceCapabilities() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -3794,6 +3821,7 @@ struct InstanceCapabilities {
 struct Limits {
     using CStruct = WGPULimits;
     Limits(const WGPULimits& native);
+    Limits& operator=(const WGPULimits& native);
     Limits() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -3898,6 +3926,7 @@ struct Limits {
 struct MultisampleState {
     using CStruct = WGPUMultisampleState;
     MultisampleState(const WGPUMultisampleState& native);
+    MultisampleState& operator=(const WGPUMultisampleState& native);
     MultisampleState() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -3918,6 +3947,7 @@ struct MultisampleState {
 struct Origin3D {
     using CStruct = WGPUOrigin3D;
     Origin3D(const WGPUOrigin3D& native);
+    Origin3D& operator=(const WGPUOrigin3D& native);
     Origin3D() {};
     void to_cstruct(CStruct* out) const;
     Origin3D& setX(uint32_t value) &;
@@ -3936,6 +3966,7 @@ struct PipelineLayoutDescriptor {
         SmallVec<WGPUBindGroupLayout> bindGroupLayouts_vec;
     };
     PipelineLayoutDescriptor(const WGPUPipelineLayoutDescriptor& native);
+    PipelineLayoutDescriptor& operator=(const WGPUPipelineLayoutDescriptor& native);
     PipelineLayoutDescriptor() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -3957,6 +3988,7 @@ struct PipelineLayoutDescriptor {
 struct PrimitiveState {
     using CStruct = WGPUPrimitiveState;
     PrimitiveState(const WGPUPrimitiveState& native);
+    PrimitiveState& operator=(const WGPUPrimitiveState& native);
     PrimitiveState() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -3983,6 +4015,7 @@ struct PrimitiveState {
 struct QuerySetDescriptor {
     using CStruct = WGPUQuerySetDescriptor;
     QuerySetDescriptor(const WGPUQuerySetDescriptor& native);
+    QuerySetDescriptor& operator=(const WGPUQuerySetDescriptor& native);
     QuerySetDescriptor() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -4005,6 +4038,7 @@ struct QuerySetDescriptor {
 struct QueueDescriptor {
     using CStruct = WGPUQueueDescriptor;
     QueueDescriptor(const WGPUQueueDescriptor& native);
+    QueueDescriptor& operator=(const WGPUQueueDescriptor& native);
     QueueDescriptor() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -4021,6 +4055,7 @@ struct QueueDescriptor {
 struct RenderBundleDescriptor {
     using CStruct = WGPURenderBundleDescriptor;
     RenderBundleDescriptor(const WGPURenderBundleDescriptor& native);
+    RenderBundleDescriptor& operator=(const WGPURenderBundleDescriptor& native);
     RenderBundleDescriptor() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -4037,6 +4072,7 @@ struct RenderBundleDescriptor {
 struct RenderBundleEncoderDescriptor {
     using CStruct = WGPURenderBundleEncoderDescriptor;
     RenderBundleEncoderDescriptor(const WGPURenderBundleEncoderDescriptor& native);
+    RenderBundleEncoderDescriptor& operator=(const WGPURenderBundleEncoderDescriptor& native);
     RenderBundleEncoderDescriptor() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -4070,6 +4106,7 @@ struct RenderBundleEncoderDescriptor {
 struct RenderPassDepthStencilAttachment {
     using CStruct = WGPURenderPassDepthStencilAttachment;
     RenderPassDepthStencilAttachment(const WGPURenderPassDepthStencilAttachment& native);
+    RenderPassDepthStencilAttachment& operator=(const WGPURenderPassDepthStencilAttachment& native);
     RenderPassDepthStencilAttachment() {};
     void to_cstruct(CStruct* out) const;
     RenderPassDepthStencilAttachment& setView(wgpu::TextureView value) &;
@@ -4103,6 +4140,7 @@ struct RenderPassDepthStencilAttachment {
 struct RenderPassMaxDrawCount {
     using CStruct = WGPURenderPassMaxDrawCount;
     RenderPassMaxDrawCount(const WGPURenderPassMaxDrawCount& native);
+    RenderPassMaxDrawCount& operator=(const WGPURenderPassMaxDrawCount& native);
     RenderPassMaxDrawCount() {
         this->chain.sType = static_cast<decltype(this->chain.sType)>(WGPUSType_RenderPassMaxDrawCount);
     };
@@ -4119,6 +4157,7 @@ struct RenderPassMaxDrawCount {
 struct RenderPassTimestampWrites {
     using CStruct = WGPURenderPassTimestampWrites;
     RenderPassTimestampWrites(const WGPURenderPassTimestampWrites& native);
+    RenderPassTimestampWrites& operator=(const WGPURenderPassTimestampWrites& native);
     RenderPassTimestampWrites() {};
     void to_cstruct(CStruct* out) const;
     RenderPassTimestampWrites& setQuerySet(wgpu::QuerySet value) &;
@@ -4134,6 +4173,7 @@ struct RenderPassTimestampWrites {
 struct RequestAdapterOptions {
     using CStruct = WGPURequestAdapterOptions;
     RequestAdapterOptions(const WGPURequestAdapterOptions& native);
+    RequestAdapterOptions& operator=(const WGPURequestAdapterOptions& native);
     RequestAdapterOptions() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -4160,6 +4200,7 @@ struct RequestAdapterOptions {
 struct SamplerBindingLayout {
     using CStruct = WGPUSamplerBindingLayout;
     SamplerBindingLayout(const WGPUSamplerBindingLayout& native);
+    SamplerBindingLayout& operator=(const WGPUSamplerBindingLayout& native);
     SamplerBindingLayout() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -4174,6 +4215,7 @@ struct SamplerBindingLayout {
 struct SamplerDescriptor {
     using CStruct = WGPUSamplerDescriptor;
     SamplerDescriptor(const WGPUSamplerDescriptor& native);
+    SamplerDescriptor& operator=(const WGPUSamplerDescriptor& native);
     SamplerDescriptor() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -4220,6 +4262,7 @@ struct SamplerDescriptor {
 struct ShaderModuleDescriptor {
     using CStruct = WGPUShaderModuleDescriptor;
     ShaderModuleDescriptor(const WGPUShaderModuleDescriptor& native);
+    ShaderModuleDescriptor& operator=(const WGPUShaderModuleDescriptor& native);
     ShaderModuleDescriptor() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -4236,6 +4279,7 @@ struct ShaderModuleDescriptor {
 struct ShaderSourceSPIRV {
     using CStruct = WGPUShaderSourceSPIRV;
     ShaderSourceSPIRV(const WGPUShaderSourceSPIRV& native);
+    ShaderSourceSPIRV& operator=(const WGPUShaderSourceSPIRV& native);
     ShaderSourceSPIRV() {
         this->chain.sType = static_cast<decltype(this->chain.sType)>(WGPUSType_ShaderSourceSPIRV);
     };
@@ -4255,6 +4299,7 @@ struct ShaderSourceSPIRV {
 struct ShaderSourceWGSL {
     using CStruct = WGPUShaderSourceWGSL;
     ShaderSourceWGSL(const WGPUShaderSourceWGSL& native);
+    ShaderSourceWGSL& operator=(const WGPUShaderSourceWGSL& native);
     ShaderSourceWGSL() {
         this->chain.sType = static_cast<decltype(this->chain.sType)>(WGPUSType_ShaderSourceWGSL);
     };
@@ -4273,6 +4318,7 @@ struct ShaderSourceWGSL {
 struct StencilFaceState {
     using CStruct = WGPUStencilFaceState;
     StencilFaceState(const WGPUStencilFaceState& native);
+    StencilFaceState& operator=(const WGPUStencilFaceState& native);
     StencilFaceState() {};
     void to_cstruct(CStruct* out) const;
     StencilFaceState& setCompare(wgpu::CompareFunction value) &;
@@ -4291,6 +4337,7 @@ struct StencilFaceState {
 struct StorageTextureBindingLayout {
     using CStruct = WGPUStorageTextureBindingLayout;
     StorageTextureBindingLayout(const WGPUStorageTextureBindingLayout& native);
+    StorageTextureBindingLayout& operator=(const WGPUStorageTextureBindingLayout& native);
     StorageTextureBindingLayout() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -4311,6 +4358,7 @@ struct StorageTextureBindingLayout {
 struct SupportedFeatures {
     using CStruct = WGPUSupportedFeatures;
     SupportedFeatures(const WGPUSupportedFeatures& native);
+    SupportedFeatures& operator=(const WGPUSupportedFeatures& native);
     SupportedFeatures() {};
     void to_cstruct(CStruct* out) const;
     template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::FeatureName>
@@ -4322,6 +4370,7 @@ struct SupportedFeatures {
 struct SupportedWGSLLanguageFeatures {
     using CStruct = WGPUSupportedWGSLLanguageFeatures;
     SupportedWGSLLanguageFeatures(const WGPUSupportedWGSLLanguageFeatures& native);
+    SupportedWGSLLanguageFeatures& operator=(const WGPUSupportedWGSLLanguageFeatures& native);
     SupportedWGSLLanguageFeatures() {};
     void to_cstruct(CStruct* out) const;
     template <std::ranges::range T> requires std::convertible_to<std::ranges::range_value_t<T>, wgpu::WGSLLanguageFeatureName>
@@ -4333,6 +4382,7 @@ struct SupportedWGSLLanguageFeatures {
 struct SurfaceCapabilities {
     using CStruct = WGPUSurfaceCapabilities;
     SurfaceCapabilities(const WGPUSurfaceCapabilities& native);
+    SurfaceCapabilities& operator=(const WGPUSurfaceCapabilities& native);
     SurfaceCapabilities() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -4362,6 +4412,7 @@ struct SurfaceCapabilities {
 struct SurfaceConfiguration {
     using CStruct = WGPUSurfaceConfiguration;
     SurfaceConfiguration(const WGPUSurfaceConfiguration& native);
+    SurfaceConfiguration& operator=(const WGPUSurfaceConfiguration& native);
     SurfaceConfiguration() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -4399,6 +4450,7 @@ struct SurfaceConfiguration {
 struct SurfaceDescriptor {
     using CStruct = WGPUSurfaceDescriptor;
     SurfaceDescriptor(const WGPUSurfaceDescriptor& native);
+    SurfaceDescriptor& operator=(const WGPUSurfaceDescriptor& native);
     SurfaceDescriptor() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -4415,6 +4467,7 @@ struct SurfaceDescriptor {
 struct SurfaceSourceAndroidNativeWindow {
     using CStruct = WGPUSurfaceSourceAndroidNativeWindow;
     SurfaceSourceAndroidNativeWindow(const WGPUSurfaceSourceAndroidNativeWindow& native);
+    SurfaceSourceAndroidNativeWindow& operator=(const WGPUSurfaceSourceAndroidNativeWindow& native);
     SurfaceSourceAndroidNativeWindow() {
         this->chain.sType = static_cast<decltype(this->chain.sType)>(WGPUSType_SurfaceSourceAndroidNativeWindow);
     };
@@ -4431,6 +4484,7 @@ struct SurfaceSourceAndroidNativeWindow {
 struct SurfaceSourceMetalLayer {
     using CStruct = WGPUSurfaceSourceMetalLayer;
     SurfaceSourceMetalLayer(const WGPUSurfaceSourceMetalLayer& native);
+    SurfaceSourceMetalLayer& operator=(const WGPUSurfaceSourceMetalLayer& native);
     SurfaceSourceMetalLayer() {
         this->chain.sType = static_cast<decltype(this->chain.sType)>(WGPUSType_SurfaceSourceMetalLayer);
     };
@@ -4447,6 +4501,7 @@ struct SurfaceSourceMetalLayer {
 struct SurfaceSourceWaylandSurface {
     using CStruct = WGPUSurfaceSourceWaylandSurface;
     SurfaceSourceWaylandSurface(const WGPUSurfaceSourceWaylandSurface& native);
+    SurfaceSourceWaylandSurface& operator=(const WGPUSurfaceSourceWaylandSurface& native);
     SurfaceSourceWaylandSurface() {
         this->chain.sType = static_cast<decltype(this->chain.sType)>(WGPUSType_SurfaceSourceWaylandSurface);
     };
@@ -4466,6 +4521,7 @@ struct SurfaceSourceWaylandSurface {
 struct SurfaceSourceWindowsHWND {
     using CStruct = WGPUSurfaceSourceWindowsHWND;
     SurfaceSourceWindowsHWND(const WGPUSurfaceSourceWindowsHWND& native);
+    SurfaceSourceWindowsHWND& operator=(const WGPUSurfaceSourceWindowsHWND& native);
     SurfaceSourceWindowsHWND() {
         this->chain.sType = static_cast<decltype(this->chain.sType)>(WGPUSType_SurfaceSourceWindowsHWND);
     };
@@ -4485,6 +4541,7 @@ struct SurfaceSourceWindowsHWND {
 struct SurfaceSourceXCBWindow {
     using CStruct = WGPUSurfaceSourceXCBWindow;
     SurfaceSourceXCBWindow(const WGPUSurfaceSourceXCBWindow& native);
+    SurfaceSourceXCBWindow& operator=(const WGPUSurfaceSourceXCBWindow& native);
     SurfaceSourceXCBWindow() {
         this->chain.sType = static_cast<decltype(this->chain.sType)>(WGPUSType_SurfaceSourceXCBWindow);
     };
@@ -4504,6 +4561,7 @@ struct SurfaceSourceXCBWindow {
 struct SurfaceSourceXlibWindow {
     using CStruct = WGPUSurfaceSourceXlibWindow;
     SurfaceSourceXlibWindow(const WGPUSurfaceSourceXlibWindow& native);
+    SurfaceSourceXlibWindow& operator=(const WGPUSurfaceSourceXlibWindow& native);
     SurfaceSourceXlibWindow() {
         this->chain.sType = static_cast<decltype(this->chain.sType)>(WGPUSType_SurfaceSourceXlibWindow);
     };
@@ -4523,6 +4581,7 @@ struct SurfaceSourceXlibWindow {
 struct SurfaceTexture {
     using CStruct = WGPUSurfaceTexture;
     SurfaceTexture(const WGPUSurfaceTexture& native);
+    SurfaceTexture& operator=(const WGPUSurfaceTexture& native);
     SurfaceTexture() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -4540,6 +4599,7 @@ struct SurfaceTexture {
 struct TexelCopyBufferLayout {
     using CStruct = WGPUTexelCopyBufferLayout;
     TexelCopyBufferLayout(const WGPUTexelCopyBufferLayout& native);
+    TexelCopyBufferLayout& operator=(const WGPUTexelCopyBufferLayout& native);
     TexelCopyBufferLayout() {};
     void to_cstruct(CStruct* out) const;
     TexelCopyBufferLayout& setOffset(uint64_t value) &;
@@ -4555,6 +4615,7 @@ struct TexelCopyBufferLayout {
 struct TextureBindingLayout {
     using CStruct = WGPUTextureBindingLayout;
     TextureBindingLayout(const WGPUTextureBindingLayout& native);
+    TextureBindingLayout& operator=(const WGPUTextureBindingLayout& native);
     TextureBindingLayout() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -4575,6 +4636,7 @@ struct TextureBindingLayout {
 struct TextureViewDescriptor {
     using CStruct = WGPUTextureViewDescriptor;
     TextureViewDescriptor(const WGPUTextureViewDescriptor& native);
+    TextureViewDescriptor& operator=(const WGPUTextureViewDescriptor& native);
     TextureViewDescriptor() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -4615,6 +4677,7 @@ struct TextureViewDescriptor {
 struct VertexAttribute {
     using CStruct = WGPUVertexAttribute;
     VertexAttribute(const WGPUVertexAttribute& native);
+    VertexAttribute& operator=(const WGPUVertexAttribute& native);
     VertexAttribute() {};
     void to_cstruct(CStruct* out) const;
     VertexAttribute& setFormat(wgpu::VertexFormat value) &;
@@ -4632,6 +4695,7 @@ struct BindGroupDescriptor {
         SmallVec<WGPUBindGroupEntry> entries_vec;
     };
     BindGroupDescriptor(const WGPUBindGroupDescriptor& native);
+    BindGroupDescriptor& operator=(const WGPUBindGroupDescriptor& native);
     BindGroupDescriptor() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -4656,6 +4720,7 @@ struct BindGroupDescriptor {
 struct BindGroupLayoutEntry {
     using CStruct = WGPUBindGroupLayoutEntry;
     BindGroupLayoutEntry(const WGPUBindGroupLayoutEntry& native);
+    BindGroupLayoutEntry& operator=(const WGPUBindGroupLayoutEntry& native);
     BindGroupLayoutEntry() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -4693,6 +4758,7 @@ struct BindGroupLayoutEntry {
 struct BlendState {
     using CStruct = WGPUBlendState;
     BlendState(const WGPUBlendState& native);
+    BlendState& operator=(const WGPUBlendState& native);
     BlendState() {};
     void to_cstruct(CStruct* out) const;
     BlendState& setColor(const wgpu::BlendComponent& value) &;
@@ -4711,6 +4777,7 @@ struct CompilationInfo {
         SmallVec<WGPUCompilationMessage> messages_vec;
     };
     CompilationInfo(const WGPUCompilationInfo& native);
+    CompilationInfo& operator=(const WGPUCompilationInfo& native);
     CompilationInfo() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -4727,6 +4794,7 @@ struct CompilationInfo {
 struct ComputePassDescriptor {
     using CStruct = WGPUComputePassDescriptor;
     ComputePassDescriptor(const WGPUComputePassDescriptor& native);
+    ComputePassDescriptor& operator=(const WGPUComputePassDescriptor& native);
     ComputePassDescriptor() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -4748,6 +4816,7 @@ struct ComputePassDescriptor {
 struct DepthStencilState {
     using CStruct = WGPUDepthStencilState;
     DepthStencilState(const WGPUDepthStencilState& native);
+    DepthStencilState& operator=(const WGPUDepthStencilState& native);
     DepthStencilState() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -4795,6 +4864,7 @@ struct DeviceDescriptor {
         wgpu::Limits::CStruct requiredLimits_cstruct;
     };
     DeviceDescriptor(const WGPUDeviceDescriptor& native);
+    DeviceDescriptor& operator=(const WGPUDeviceDescriptor& native);
     DeviceDescriptor() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -4836,6 +4906,7 @@ struct DeviceDescriptor {
 struct FutureWaitInfo {
     using CStruct = WGPUFutureWaitInfo;
     FutureWaitInfo(const WGPUFutureWaitInfo& native);
+    FutureWaitInfo& operator=(const WGPUFutureWaitInfo& native);
     FutureWaitInfo() {};
     void to_cstruct(CStruct* out) const;
     FutureWaitInfo& setFuture(const wgpu::Future& value) &;
@@ -4850,6 +4921,7 @@ struct FutureWaitInfo {
 struct InstanceDescriptor {
     using CStruct = WGPUInstanceDescriptor;
     InstanceDescriptor(const WGPUInstanceDescriptor& native);
+    InstanceDescriptor& operator=(const WGPUInstanceDescriptor& native);
     InstanceDescriptor() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -4868,6 +4940,7 @@ struct ProgrammableStageDescriptor {
         SmallVec<WGPUConstantEntry> constants_vec;
     };
     ProgrammableStageDescriptor(const WGPUProgrammableStageDescriptor& native);
+    ProgrammableStageDescriptor& operator=(const WGPUProgrammableStageDescriptor& native);
     ProgrammableStageDescriptor() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -4892,6 +4965,7 @@ struct ProgrammableStageDescriptor {
 struct RenderPassColorAttachment {
     using CStruct = WGPURenderPassColorAttachment;
     RenderPassColorAttachment(const WGPURenderPassColorAttachment& native);
+    RenderPassColorAttachment& operator=(const WGPURenderPassColorAttachment& native);
     RenderPassColorAttachment() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -4923,6 +4997,7 @@ struct RenderPassColorAttachment {
 struct TexelCopyBufferInfo {
     using CStruct = WGPUTexelCopyBufferInfo;
     TexelCopyBufferInfo(const WGPUTexelCopyBufferInfo& native);
+    TexelCopyBufferInfo& operator=(const WGPUTexelCopyBufferInfo& native);
     TexelCopyBufferInfo() {};
     void to_cstruct(CStruct* out) const;
     TexelCopyBufferInfo& setLayout(const wgpu::TexelCopyBufferLayout& value) &;
@@ -4937,6 +5012,7 @@ struct TexelCopyBufferInfo {
 struct TexelCopyTextureInfo {
     using CStruct = WGPUTexelCopyTextureInfo;
     TexelCopyTextureInfo(const WGPUTexelCopyTextureInfo& native);
+    TexelCopyTextureInfo& operator=(const WGPUTexelCopyTextureInfo& native);
     TexelCopyTextureInfo() {};
     void to_cstruct(CStruct* out) const;
     TexelCopyTextureInfo& setTexture(wgpu::Texture value) &;
@@ -4957,6 +5033,7 @@ struct TexelCopyTextureInfo {
 struct TextureDescriptor {
     using CStruct = WGPUTextureDescriptor;
     TextureDescriptor(const WGPUTextureDescriptor& native);
+    TextureDescriptor& operator=(const WGPUTextureDescriptor& native);
     TextureDescriptor() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -4998,6 +5075,7 @@ struct TextureDescriptor {
 struct VertexBufferLayout {
     using CStruct = WGPUVertexBufferLayout;
     VertexBufferLayout(const WGPUVertexBufferLayout& native);
+    VertexBufferLayout& operator=(const WGPUVertexBufferLayout& native);
     VertexBufferLayout() {};
     void to_cstruct(CStruct* out) const;
     VertexBufferLayout& setStepMode(wgpu::VertexStepMode value) &;
@@ -5017,6 +5095,7 @@ struct BindGroupLayoutDescriptor {
         SmallVec<WGPUBindGroupLayoutEntry> entries_vec;
     };
     BindGroupLayoutDescriptor(const WGPUBindGroupLayoutDescriptor& native);
+    BindGroupLayoutDescriptor& operator=(const WGPUBindGroupLayoutDescriptor& native);
     BindGroupLayoutDescriptor() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -5038,6 +5117,7 @@ struct BindGroupLayoutDescriptor {
 struct ColorTargetState {
     using CStruct = WGPUColorTargetState;
     ColorTargetState(const WGPUColorTargetState& native);
+    ColorTargetState& operator=(const WGPUColorTargetState& native);
     ColorTargetState() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -5062,6 +5142,7 @@ struct ComputePipelineDescriptor {
         wgpu::ProgrammableStageDescriptor::CStruct compute_cstruct;
     };
     ComputePipelineDescriptor(const WGPUComputePipelineDescriptor& native);
+    ComputePipelineDescriptor& operator=(const WGPUComputePipelineDescriptor& native);
     ComputePipelineDescriptor() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -5088,6 +5169,7 @@ struct RenderPassDescriptor {
         SmallVec<WGPURenderPassColorAttachment> colorAttachments_vec;
     };
     RenderPassDescriptor(const WGPURenderPassDescriptor& native);
+    RenderPassDescriptor& operator=(const WGPURenderPassDescriptor& native);
     RenderPassDescriptor() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -5125,6 +5207,7 @@ struct VertexState {
         SmallVec<WGPUVertexBufferLayout> buffers_vec;
     };
     VertexState(const WGPUVertexState& native);
+    VertexState& operator=(const WGPUVertexState& native);
     VertexState() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -5157,6 +5240,7 @@ struct FragmentState {
         SmallVec<WGPUColorTargetState> targets_vec;
     };
     FragmentState(const WGPUFragmentState& native);
+    FragmentState& operator=(const WGPUFragmentState& native);
     FragmentState() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -5190,6 +5274,7 @@ struct RenderPipelineDescriptor {
         wgpu::FragmentState::CStruct fragment_cstruct;
     };
     RenderPipelineDescriptor(const WGPURenderPipelineDescriptor& native);
+    RenderPipelineDescriptor& operator=(const WGPURenderPipelineDescriptor& native);
     RenderPipelineDescriptor() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -5234,6 +5319,7 @@ struct RenderPipelineDescriptor {
 struct InstanceExtras {
     using CStruct = WGPUInstanceExtras;
     InstanceExtras(const WGPUInstanceExtras& native);
+    InstanceExtras& operator=(const WGPUInstanceExtras& native);
     InstanceExtras() {
         this->chain.sType = static_cast<decltype(this->chain.sType)>(WGPUSType_InstanceExtras);
     };
@@ -5269,6 +5355,7 @@ struct InstanceExtras {
 struct DeviceExtras {
     using CStruct = WGPUDeviceExtras;
     DeviceExtras(const WGPUDeviceExtras& native);
+    DeviceExtras& operator=(const WGPUDeviceExtras& native);
     DeviceExtras() {
         this->chain.sType = static_cast<decltype(this->chain.sType)>(WGPUSType_DeviceExtras);
     };
@@ -5287,6 +5374,7 @@ struct DeviceExtras {
 struct NativeLimits {
     using CStruct = WGPUNativeLimits;
     NativeLimits(const WGPUNativeLimits& native);
+    NativeLimits& operator=(const WGPUNativeLimits& native);
     NativeLimits() {
         this->chain.sType = static_cast<decltype(this->chain.sType)>(WGPUSType_NativeLimits);
     };
@@ -5306,6 +5394,7 @@ struct NativeLimits {
 struct PushConstantRange {
     using CStruct = WGPUPushConstantRange;
     PushConstantRange(const WGPUPushConstantRange& native);
+    PushConstantRange& operator=(const WGPUPushConstantRange& native);
     PushConstantRange() {};
     void to_cstruct(CStruct* out) const;
     PushConstantRange& setStages(wgpu::ShaderStage value) &;
@@ -5321,6 +5410,7 @@ struct PushConstantRange {
 struct PipelineLayoutExtras {
     using CStruct = WGPUPipelineLayoutExtras;
     PipelineLayoutExtras(const WGPUPipelineLayoutExtras& native);
+    PipelineLayoutExtras& operator=(const WGPUPipelineLayoutExtras& native);
     PipelineLayoutExtras() {
         this->chain.sType = static_cast<decltype(this->chain.sType)>(WGPUSType_PipelineLayoutExtras);
     };
@@ -5339,6 +5429,7 @@ struct PipelineLayoutExtras {
 struct ShaderDefine {
     using CStruct = WGPUShaderDefine;
     ShaderDefine(const WGPUShaderDefine& native);
+    ShaderDefine& operator=(const WGPUShaderDefine& native);
     ShaderDefine() {};
     void to_cstruct(CStruct* out) const;
     ShaderDefine& setName(const wgpu::StringView& value) &;
@@ -5355,6 +5446,7 @@ struct ShaderDefine {
 struct ShaderModuleGLSLDescriptor {
     using CStruct = WGPUShaderModuleGLSLDescriptor;
     ShaderModuleGLSLDescriptor(const WGPUShaderModuleGLSLDescriptor& native);
+    ShaderModuleGLSLDescriptor& operator=(const WGPUShaderModuleGLSLDescriptor& native);
     ShaderModuleGLSLDescriptor() {
         this->chain.sType = static_cast<decltype(this->chain.sType)>(WGPUSType_ShaderModuleGLSLDescriptor);
     };
@@ -5381,6 +5473,7 @@ struct ShaderModuleGLSLDescriptor {
 struct ShaderModuleDescriptorSpirV {
     using CStruct = WGPUShaderModuleDescriptorSpirV;
     ShaderModuleDescriptorSpirV(const WGPUShaderModuleDescriptorSpirV& native);
+    ShaderModuleDescriptorSpirV& operator=(const WGPUShaderModuleDescriptorSpirV& native);
     ShaderModuleDescriptorSpirV() {};
     void to_cstruct(CStruct* out) const;
     ShaderModuleDescriptorSpirV& setLabel(const wgpu::StringView& value) &;
@@ -5398,6 +5491,7 @@ struct ShaderModuleDescriptorSpirV {
 struct RegistryReport {
     using CStruct = WGPURegistryReport;
     RegistryReport(const WGPURegistryReport& native);
+    RegistryReport& operator=(const WGPURegistryReport& native);
     RegistryReport() {};
     void to_cstruct(CStruct* out) const;
     RegistryReport& setNumAllocated(size_t value) &;
@@ -5416,6 +5510,7 @@ struct RegistryReport {
 struct HubReport {
     using CStruct = WGPUHubReport;
     HubReport(const WGPUHubReport& native);
+    HubReport& operator=(const WGPUHubReport& native);
     HubReport() {};
     void to_cstruct(CStruct* out) const;
     HubReport& setAdapters(const wgpu::RegistryReport& value) &;
@@ -5507,6 +5602,7 @@ struct HubReport {
 struct GlobalReport {
     using CStruct = WGPUGlobalReport;
     GlobalReport(const WGPUGlobalReport& native);
+    GlobalReport& operator=(const WGPUGlobalReport& native);
     GlobalReport() {};
     void to_cstruct(CStruct* out) const;
     GlobalReport& setSurfaces(const wgpu::RegistryReport& value) &;
@@ -5523,6 +5619,7 @@ struct GlobalReport {
 struct InstanceEnumerateAdapterOptions {
     using CStruct = WGPUInstanceEnumerateAdapterOptions;
     InstanceEnumerateAdapterOptions(const WGPUInstanceEnumerateAdapterOptions& native);
+    InstanceEnumerateAdapterOptions& operator=(const WGPUInstanceEnumerateAdapterOptions& native);
     InstanceEnumerateAdapterOptions() {};
     void to_cstruct(CStruct* out) const;
     template <typename T>
@@ -5541,6 +5638,7 @@ struct BindGroupEntryExtras {
         SmallVec<WGPUTextureView> textureViews_vec;
     };
     BindGroupEntryExtras(const WGPUBindGroupEntryExtras& native);
+    BindGroupEntryExtras& operator=(const WGPUBindGroupEntryExtras& native);
     BindGroupEntryExtras() {
         this->chain.sType = static_cast<decltype(this->chain.sType)>(WGPUSType_BindGroupEntryExtras);
     };
@@ -5569,6 +5667,7 @@ struct BindGroupEntryExtras {
 struct BindGroupLayoutEntryExtras {
     using CStruct = WGPUBindGroupLayoutEntryExtras;
     BindGroupLayoutEntryExtras(const WGPUBindGroupLayoutEntryExtras& native);
+    BindGroupLayoutEntryExtras& operator=(const WGPUBindGroupLayoutEntryExtras& native);
     BindGroupLayoutEntryExtras() {
         this->chain.sType = static_cast<decltype(this->chain.sType)>(WGPUSType_BindGroupLayoutEntryExtras);
     };
@@ -5585,6 +5684,7 @@ struct BindGroupLayoutEntryExtras {
 struct QuerySetDescriptorExtras {
     using CStruct = WGPUQuerySetDescriptorExtras;
     QuerySetDescriptorExtras(const WGPUQuerySetDescriptorExtras& native);
+    QuerySetDescriptorExtras& operator=(const WGPUQuerySetDescriptorExtras& native);
     QuerySetDescriptorExtras() {
         this->chain.sType = static_cast<decltype(this->chain.sType)>(WGPUSType_QuerySetDescriptorExtras);
     };
@@ -5603,6 +5703,7 @@ struct QuerySetDescriptorExtras {
 struct SurfaceConfigurationExtras {
     using CStruct = WGPUSurfaceConfigurationExtras;
     SurfaceConfigurationExtras(const WGPUSurfaceConfigurationExtras& native);
+    SurfaceConfigurationExtras& operator=(const WGPUSurfaceConfigurationExtras& native);
     SurfaceConfigurationExtras() {
         this->chain.sType = static_cast<decltype(this->chain.sType)>(WGPUSType_SurfaceConfigurationExtras);
     };
@@ -7633,6 +7734,11 @@ StringView::StringView(const WGPUStringView& native) {
     this->data = static_cast<char const*>(native.data);
     this->length = static_cast<size_t>(native.length);
 }
+StringView& StringView::operator=(const WGPUStringView& native) {
+    this->data = static_cast<char const*>(native.data);
+    this->length = static_cast<size_t>(native.length);
+    return *this;
+}
 void StringView::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     cstruct.data = static_cast<const char*>(this->data);
@@ -7660,6 +7766,13 @@ ChainedStruct::ChainedStruct(const WGPUChainedStruct& native) {
     }
     this->sType = static_cast<wgpu::SType>(native.sType);
 }
+ChainedStruct& ChainedStruct::operator=(const WGPUChainedStruct& native) {
+    if (native.next != this->next.getNext()) {
+        this->next.setNext(native.next);
+    }
+    this->sType = static_cast<wgpu::SType>(native.sType);
+    return *this;
+}
 void ChainedStruct::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     cstruct.next = this->next.getNext();
@@ -7678,6 +7791,13 @@ ChainedStructOut::ChainedStructOut(const WGPUChainedStructOut& native) {
         this->next.setNext(native.next);
     }
     this->sType = static_cast<wgpu::SType>(native.sType);
+}
+ChainedStructOut& ChainedStructOut::operator=(const WGPUChainedStructOut& native) {
+    if (native.next != this->next.getNext()) {
+        this->next.setNext(native.next);
+    }
+    this->sType = static_cast<wgpu::SType>(native.sType);
+    return *this;
 }
 void ChainedStructOut::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -7700,6 +7820,16 @@ BufferMapCallbackInfo::BufferMapCallbackInfo(const WGPUBufferMapCallbackInfo& na
     if (native.callback != nullptr) {
         this->callback = wgpu::BufferMapCallback(native.callback, native.userdata1, native.userdata2);
     }
+}
+BufferMapCallbackInfo& BufferMapCallbackInfo::operator=(const WGPUBufferMapCallbackInfo& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->mode = static_cast<wgpu::CallbackMode>(native.mode);
+    if (native.callback != nullptr) {
+        this->callback = wgpu::BufferMapCallback(native.callback, native.userdata1, native.userdata2);
+    }
+    return *this;
 }
 void BufferMapCallbackInfo::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -7741,6 +7871,16 @@ CompilationInfoCallbackInfo::CompilationInfoCallbackInfo(const WGPUCompilationIn
         this->callback = wgpu::CompilationInfoCallback(native.callback, native.userdata1, native.userdata2);
     }
 }
+CompilationInfoCallbackInfo& CompilationInfoCallbackInfo::operator=(const WGPUCompilationInfoCallbackInfo& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->mode = static_cast<wgpu::CallbackMode>(native.mode);
+    if (native.callback != nullptr) {
+        this->callback = wgpu::CompilationInfoCallback(native.callback, native.userdata1, native.userdata2);
+    }
+    return *this;
+}
 void CompilationInfoCallbackInfo::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     cstruct.nextInChain = this->nextInChain.getNext();
@@ -7780,6 +7920,16 @@ CreateComputePipelineAsyncCallbackInfo::CreateComputePipelineAsyncCallbackInfo(c
     if (native.callback != nullptr) {
         this->callback = wgpu::CreateComputePipelineAsyncCallback(native.callback, native.userdata1, native.userdata2);
     }
+}
+CreateComputePipelineAsyncCallbackInfo& CreateComputePipelineAsyncCallbackInfo::operator=(const WGPUCreateComputePipelineAsyncCallbackInfo& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->mode = static_cast<wgpu::CallbackMode>(native.mode);
+    if (native.callback != nullptr) {
+        this->callback = wgpu::CreateComputePipelineAsyncCallback(native.callback, native.userdata1, native.userdata2);
+    }
+    return *this;
 }
 void CreateComputePipelineAsyncCallbackInfo::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -7821,6 +7971,16 @@ CreateRenderPipelineAsyncCallbackInfo::CreateRenderPipelineAsyncCallbackInfo(con
         this->callback = wgpu::CreateRenderPipelineAsyncCallback(native.callback, native.userdata1, native.userdata2);
     }
 }
+CreateRenderPipelineAsyncCallbackInfo& CreateRenderPipelineAsyncCallbackInfo::operator=(const WGPUCreateRenderPipelineAsyncCallbackInfo& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->mode = static_cast<wgpu::CallbackMode>(native.mode);
+    if (native.callback != nullptr) {
+        this->callback = wgpu::CreateRenderPipelineAsyncCallback(native.callback, native.userdata1, native.userdata2);
+    }
+    return *this;
+}
 void CreateRenderPipelineAsyncCallbackInfo::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     cstruct.nextInChain = this->nextInChain.getNext();
@@ -7860,6 +8020,16 @@ DeviceLostCallbackInfo::DeviceLostCallbackInfo(const WGPUDeviceLostCallbackInfo&
     if (native.callback != nullptr) {
         this->callback = wgpu::DeviceLostCallback(native.callback, native.userdata1, native.userdata2);
     }
+}
+DeviceLostCallbackInfo& DeviceLostCallbackInfo::operator=(const WGPUDeviceLostCallbackInfo& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->mode = static_cast<wgpu::CallbackMode>(native.mode);
+    if (native.callback != nullptr) {
+        this->callback = wgpu::DeviceLostCallback(native.callback, native.userdata1, native.userdata2);
+    }
+    return *this;
 }
 void DeviceLostCallbackInfo::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -7901,6 +8071,16 @@ PopErrorScopeCallbackInfo::PopErrorScopeCallbackInfo(const WGPUPopErrorScopeCall
         this->callback = wgpu::PopErrorScopeCallback(native.callback, native.userdata1, native.userdata2);
     }
 }
+PopErrorScopeCallbackInfo& PopErrorScopeCallbackInfo::operator=(const WGPUPopErrorScopeCallbackInfo& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->mode = static_cast<wgpu::CallbackMode>(native.mode);
+    if (native.callback != nullptr) {
+        this->callback = wgpu::PopErrorScopeCallback(native.callback, native.userdata1, native.userdata2);
+    }
+    return *this;
+}
 void PopErrorScopeCallbackInfo::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     cstruct.nextInChain = this->nextInChain.getNext();
@@ -7940,6 +8120,16 @@ QueueWorkDoneCallbackInfo::QueueWorkDoneCallbackInfo(const WGPUQueueWorkDoneCall
     if (native.callback != nullptr) {
         this->callback = wgpu::QueueWorkDoneCallback(native.callback, native.userdata1, native.userdata2);
     }
+}
+QueueWorkDoneCallbackInfo& QueueWorkDoneCallbackInfo::operator=(const WGPUQueueWorkDoneCallbackInfo& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->mode = static_cast<wgpu::CallbackMode>(native.mode);
+    if (native.callback != nullptr) {
+        this->callback = wgpu::QueueWorkDoneCallback(native.callback, native.userdata1, native.userdata2);
+    }
+    return *this;
 }
 void QueueWorkDoneCallbackInfo::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -7981,6 +8171,16 @@ RequestAdapterCallbackInfo::RequestAdapterCallbackInfo(const WGPURequestAdapterC
         this->callback = wgpu::RequestAdapterCallback(native.callback, native.userdata1, native.userdata2);
     }
 }
+RequestAdapterCallbackInfo& RequestAdapterCallbackInfo::operator=(const WGPURequestAdapterCallbackInfo& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->mode = static_cast<wgpu::CallbackMode>(native.mode);
+    if (native.callback != nullptr) {
+        this->callback = wgpu::RequestAdapterCallback(native.callback, native.userdata1, native.userdata2);
+    }
+    return *this;
+}
 void RequestAdapterCallbackInfo::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     cstruct.nextInChain = this->nextInChain.getNext();
@@ -8021,6 +8221,16 @@ RequestDeviceCallbackInfo::RequestDeviceCallbackInfo(const WGPURequestDeviceCall
         this->callback = wgpu::RequestDeviceCallback(native.callback, native.userdata1, native.userdata2);
     }
 }
+RequestDeviceCallbackInfo& RequestDeviceCallbackInfo::operator=(const WGPURequestDeviceCallbackInfo& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->mode = static_cast<wgpu::CallbackMode>(native.mode);
+    if (native.callback != nullptr) {
+        this->callback = wgpu::RequestDeviceCallback(native.callback, native.userdata1, native.userdata2);
+    }
+    return *this;
+}
 void RequestDeviceCallbackInfo::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     cstruct.nextInChain = this->nextInChain.getNext();
@@ -8060,6 +8270,15 @@ UncapturedErrorCallbackInfo::UncapturedErrorCallbackInfo(const WGPUUncapturedErr
         this->callback = wgpu::UncapturedErrorCallback(native.callback, native.userdata1, native.userdata2);
     }
 }
+UncapturedErrorCallbackInfo& UncapturedErrorCallbackInfo::operator=(const WGPUUncapturedErrorCallbackInfo& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    if (native.callback != nullptr) {
+        this->callback = wgpu::UncapturedErrorCallback(native.callback, native.userdata1, native.userdata2);
+    }
+    return *this;
+}
 void UncapturedErrorCallbackInfo::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     cstruct.nextInChain = this->nextInChain.getNext();
@@ -8094,6 +8313,20 @@ AdapterInfo::AdapterInfo(const WGPUAdapterInfo& native) {
     this->adapterType = static_cast<wgpu::AdapterType>(native.adapterType);
     this->vendorID = static_cast<uint32_t>(native.vendorID);
     this->deviceID = static_cast<uint32_t>(native.deviceID);
+}
+AdapterInfo& AdapterInfo::operator=(const WGPUAdapterInfo& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->vendor = static_cast<wgpu::StringView>(native.vendor);
+    this->architecture = static_cast<wgpu::StringView>(native.architecture);
+    this->device = static_cast<wgpu::StringView>(native.device);
+    this->description = static_cast<wgpu::StringView>(native.description);
+    this->backendType = static_cast<wgpu::BackendType>(native.backendType);
+    this->adapterType = static_cast<wgpu::AdapterType>(native.adapterType);
+    this->vendorID = static_cast<uint32_t>(native.vendorID);
+    this->deviceID = static_cast<uint32_t>(native.deviceID);
+    return *this;
 }
 void AdapterInfo::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -8217,6 +8450,21 @@ BindGroupEntry::BindGroupEntry(const WGPUBindGroupEntry& native) {
     this->textureView = static_cast<wgpu::TextureView>(native.textureView);
     if (this->textureView) this->textureView.addRef();
 }
+BindGroupEntry& BindGroupEntry::operator=(const WGPUBindGroupEntry& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->binding = static_cast<uint32_t>(native.binding);
+    this->buffer = static_cast<wgpu::Buffer>(native.buffer);
+    if (this->buffer) this->buffer.addRef();
+    this->offset = static_cast<uint64_t>(native.offset);
+    this->size = static_cast<uint64_t>(native.size);
+    this->sampler = static_cast<wgpu::Sampler>(native.sampler);
+    if (this->sampler) this->sampler.addRef();
+    this->textureView = static_cast<wgpu::TextureView>(native.textureView);
+    if (this->textureView) this->textureView.addRef();
+    return *this;
+}
 void BindGroupEntry::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     cstruct.nextInChain = this->nextInChain.getNext();
@@ -8280,6 +8528,12 @@ BlendComponent::BlendComponent(const WGPUBlendComponent& native) {
     this->srcFactor = static_cast<wgpu::BlendFactor>(native.srcFactor);
     this->dstFactor = static_cast<wgpu::BlendFactor>(native.dstFactor);
 }
+BlendComponent& BlendComponent::operator=(const WGPUBlendComponent& native) {
+    this->operation = static_cast<wgpu::BlendOperation>(native.operation);
+    this->srcFactor = static_cast<wgpu::BlendFactor>(native.srcFactor);
+    this->dstFactor = static_cast<wgpu::BlendFactor>(native.dstFactor);
+    return *this;
+}
 void BlendComponent::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     cstruct.operation = static_cast<WGPUBlendOperation>(this->operation);
@@ -8317,6 +8571,15 @@ BufferBindingLayout::BufferBindingLayout(const WGPUBufferBindingLayout& native) 
     this->type = static_cast<wgpu::BufferBindingType>(native.type);
     this->hasDynamicOffset = static_cast<wgpu::Bool>(native.hasDynamicOffset);
     this->minBindingSize = static_cast<uint64_t>(native.minBindingSize);
+}
+BufferBindingLayout& BufferBindingLayout::operator=(const WGPUBufferBindingLayout& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->type = static_cast<wgpu::BufferBindingType>(native.type);
+    this->hasDynamicOffset = static_cast<wgpu::Bool>(native.hasDynamicOffset);
+    this->minBindingSize = static_cast<uint64_t>(native.minBindingSize);
+    return *this;
 }
 void BufferBindingLayout::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -8357,6 +8620,16 @@ BufferDescriptor::BufferDescriptor(const WGPUBufferDescriptor& native) {
     this->usage = static_cast<wgpu::BufferUsage>(native.usage);
     this->size = static_cast<uint64_t>(native.size);
     this->mappedAtCreation = static_cast<wgpu::Bool>(native.mappedAtCreation);
+}
+BufferDescriptor& BufferDescriptor::operator=(const WGPUBufferDescriptor& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->label = static_cast<wgpu::StringView>(native.label);
+    this->usage = static_cast<wgpu::BufferUsage>(native.usage);
+    this->size = static_cast<uint64_t>(native.size);
+    this->mappedAtCreation = static_cast<wgpu::Bool>(native.mappedAtCreation);
+    return *this;
 }
 void BufferDescriptor::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -8412,6 +8685,13 @@ Color::Color(const WGPUColor& native) {
     this->b = static_cast<double>(native.b);
     this->a = static_cast<double>(native.a);
 }
+Color& Color::operator=(const WGPUColor& native) {
+    this->r = static_cast<double>(native.r);
+    this->g = static_cast<double>(native.g);
+    this->b = static_cast<double>(native.b);
+    this->a = static_cast<double>(native.a);
+    return *this;
+}
 void Color::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     cstruct.r = static_cast<double>(this->r);
@@ -8457,6 +8737,13 @@ CommandBufferDescriptor::CommandBufferDescriptor(const WGPUCommandBufferDescript
     }
     this->label = static_cast<wgpu::StringView>(native.label);
 }
+CommandBufferDescriptor& CommandBufferDescriptor::operator=(const WGPUCommandBufferDescriptor& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->label = static_cast<wgpu::StringView>(native.label);
+    return *this;
+}
 void CommandBufferDescriptor::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     cstruct.nextInChain = this->nextInChain.getNext();
@@ -8483,6 +8770,13 @@ CommandEncoderDescriptor::CommandEncoderDescriptor(const WGPUCommandEncoderDescr
         this->nextInChain.setNext(native.nextInChain);
     }
     this->label = static_cast<wgpu::StringView>(native.label);
+}
+CommandEncoderDescriptor& CommandEncoderDescriptor::operator=(const WGPUCommandEncoderDescriptor& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->label = static_cast<wgpu::StringView>(native.label);
+    return *this;
 }
 void CommandEncoderDescriptor::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -8515,6 +8809,18 @@ CompilationMessage::CompilationMessage(const WGPUCompilationMessage& native) {
     this->linePos = static_cast<uint64_t>(native.linePos);
     this->offset = static_cast<uint64_t>(native.offset);
     this->length = static_cast<uint64_t>(native.length);
+}
+CompilationMessage& CompilationMessage::operator=(const WGPUCompilationMessage& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->message = static_cast<wgpu::StringView>(native.message);
+    this->type = static_cast<wgpu::CompilationMessageType>(native.type);
+    this->lineNum = static_cast<uint64_t>(native.lineNum);
+    this->linePos = static_cast<uint64_t>(native.linePos);
+    this->offset = static_cast<uint64_t>(native.offset);
+    this->length = static_cast<uint64_t>(native.length);
+    return *this;
 }
 void CompilationMessage::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -8588,6 +8894,13 @@ ComputePassTimestampWrites::ComputePassTimestampWrites(const WGPUComputePassTime
     this->beginningOfPassWriteIndex = static_cast<uint32_t>(native.beginningOfPassWriteIndex);
     this->endOfPassWriteIndex = static_cast<uint32_t>(native.endOfPassWriteIndex);
 }
+ComputePassTimestampWrites& ComputePassTimestampWrites::operator=(const WGPUComputePassTimestampWrites& native) {
+    this->querySet = static_cast<wgpu::QuerySet>(native.querySet);
+    if (this->querySet) this->querySet.addRef();
+    this->beginningOfPassWriteIndex = static_cast<uint32_t>(native.beginningOfPassWriteIndex);
+    this->endOfPassWriteIndex = static_cast<uint32_t>(native.endOfPassWriteIndex);
+    return *this;
+}
 void ComputePassTimestampWrites::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     cstruct.querySet = static_cast<WGPUQuerySet>(this->querySet);
@@ -8625,6 +8938,14 @@ ConstantEntry::ConstantEntry(const WGPUConstantEntry& native) {
     this->key = static_cast<wgpu::StringView>(native.key);
     this->value = static_cast<double>(native.value);
 }
+ConstantEntry& ConstantEntry::operator=(const WGPUConstantEntry& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->key = static_cast<wgpu::StringView>(native.key);
+    this->value = static_cast<double>(native.value);
+    return *this;
+}
 void ConstantEntry::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     cstruct.nextInChain = this->nextInChain.getNext();
@@ -8660,6 +8981,12 @@ Extent3D::Extent3D(const WGPUExtent3D& native) {
     this->height = static_cast<uint32_t>(native.height);
     this->depthOrArrayLayers = static_cast<uint32_t>(native.depthOrArrayLayers);
 }
+Extent3D& Extent3D::operator=(const WGPUExtent3D& native) {
+    this->width = static_cast<uint32_t>(native.width);
+    this->height = static_cast<uint32_t>(native.height);
+    this->depthOrArrayLayers = static_cast<uint32_t>(native.depthOrArrayLayers);
+    return *this;
+}
 void Extent3D::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     cstruct.width = static_cast<uint32_t>(this->width);
@@ -8693,6 +9020,10 @@ Extent3D&& Extent3D::setDepthOrArrayLayers(uint32_t value) && {
 Future::Future(const WGPUFuture& native) {
     this->id = static_cast<uint64_t>(native.id);
 }
+Future& Future::operator=(const WGPUFuture& native) {
+    this->id = static_cast<uint64_t>(native.id);
+    return *this;
+}
 void Future::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     cstruct.id = static_cast<uint64_t>(this->id);
@@ -8711,6 +9042,14 @@ InstanceCapabilities::InstanceCapabilities(const WGPUInstanceCapabilities& nativ
     }
     this->timedWaitAnyEnable = static_cast<wgpu::Bool>(native.timedWaitAnyEnable);
     this->timedWaitAnyMaxCount = static_cast<size_t>(native.timedWaitAnyMaxCount);
+}
+InstanceCapabilities& InstanceCapabilities::operator=(const WGPUInstanceCapabilities& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->timedWaitAnyEnable = static_cast<wgpu::Bool>(native.timedWaitAnyEnable);
+    this->timedWaitAnyMaxCount = static_cast<size_t>(native.timedWaitAnyMaxCount);
+    return *this;
 }
 void InstanceCapabilities::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -8769,6 +9108,43 @@ Limits::Limits(const WGPULimits& native) {
     this->maxComputeWorkgroupSizeY = static_cast<uint32_t>(native.maxComputeWorkgroupSizeY);
     this->maxComputeWorkgroupSizeZ = static_cast<uint32_t>(native.maxComputeWorkgroupSizeZ);
     this->maxComputeWorkgroupsPerDimension = static_cast<uint32_t>(native.maxComputeWorkgroupsPerDimension);
+}
+Limits& Limits::operator=(const WGPULimits& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->maxTextureDimension1D = static_cast<uint32_t>(native.maxTextureDimension1D);
+    this->maxTextureDimension2D = static_cast<uint32_t>(native.maxTextureDimension2D);
+    this->maxTextureDimension3D = static_cast<uint32_t>(native.maxTextureDimension3D);
+    this->maxTextureArrayLayers = static_cast<uint32_t>(native.maxTextureArrayLayers);
+    this->maxBindGroups = static_cast<uint32_t>(native.maxBindGroups);
+    this->maxBindGroupsPlusVertexBuffers = static_cast<uint32_t>(native.maxBindGroupsPlusVertexBuffers);
+    this->maxBindingsPerBindGroup = static_cast<uint32_t>(native.maxBindingsPerBindGroup);
+    this->maxDynamicUniformBuffersPerPipelineLayout = static_cast<uint32_t>(native.maxDynamicUniformBuffersPerPipelineLayout);
+    this->maxDynamicStorageBuffersPerPipelineLayout = static_cast<uint32_t>(native.maxDynamicStorageBuffersPerPipelineLayout);
+    this->maxSampledTexturesPerShaderStage = static_cast<uint32_t>(native.maxSampledTexturesPerShaderStage);
+    this->maxSamplersPerShaderStage = static_cast<uint32_t>(native.maxSamplersPerShaderStage);
+    this->maxStorageBuffersPerShaderStage = static_cast<uint32_t>(native.maxStorageBuffersPerShaderStage);
+    this->maxStorageTexturesPerShaderStage = static_cast<uint32_t>(native.maxStorageTexturesPerShaderStage);
+    this->maxUniformBuffersPerShaderStage = static_cast<uint32_t>(native.maxUniformBuffersPerShaderStage);
+    this->maxUniformBufferBindingSize = static_cast<uint64_t>(native.maxUniformBufferBindingSize);
+    this->maxStorageBufferBindingSize = static_cast<uint64_t>(native.maxStorageBufferBindingSize);
+    this->minUniformBufferOffsetAlignment = static_cast<uint32_t>(native.minUniformBufferOffsetAlignment);
+    this->minStorageBufferOffsetAlignment = static_cast<uint32_t>(native.minStorageBufferOffsetAlignment);
+    this->maxVertexBuffers = static_cast<uint32_t>(native.maxVertexBuffers);
+    this->maxBufferSize = static_cast<uint64_t>(native.maxBufferSize);
+    this->maxVertexAttributes = static_cast<uint32_t>(native.maxVertexAttributes);
+    this->maxVertexBufferArrayStride = static_cast<uint32_t>(native.maxVertexBufferArrayStride);
+    this->maxInterStageShaderVariables = static_cast<uint32_t>(native.maxInterStageShaderVariables);
+    this->maxColorAttachments = static_cast<uint32_t>(native.maxColorAttachments);
+    this->maxColorAttachmentBytesPerSample = static_cast<uint32_t>(native.maxColorAttachmentBytesPerSample);
+    this->maxComputeWorkgroupStorageSize = static_cast<uint32_t>(native.maxComputeWorkgroupStorageSize);
+    this->maxComputeInvocationsPerWorkgroup = static_cast<uint32_t>(native.maxComputeInvocationsPerWorkgroup);
+    this->maxComputeWorkgroupSizeX = static_cast<uint32_t>(native.maxComputeWorkgroupSizeX);
+    this->maxComputeWorkgroupSizeY = static_cast<uint32_t>(native.maxComputeWorkgroupSizeY);
+    this->maxComputeWorkgroupSizeZ = static_cast<uint32_t>(native.maxComputeWorkgroupSizeZ);
+    this->maxComputeWorkgroupsPerDimension = static_cast<uint32_t>(native.maxComputeWorkgroupsPerDimension);
+    return *this;
 }
 void Limits::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -9061,6 +9437,15 @@ MultisampleState::MultisampleState(const WGPUMultisampleState& native) {
     this->mask = static_cast<uint32_t>(native.mask);
     this->alphaToCoverageEnabled = static_cast<wgpu::Bool>(native.alphaToCoverageEnabled);
 }
+MultisampleState& MultisampleState::operator=(const WGPUMultisampleState& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->count = static_cast<uint32_t>(native.count);
+    this->mask = static_cast<uint32_t>(native.mask);
+    this->alphaToCoverageEnabled = static_cast<wgpu::Bool>(native.alphaToCoverageEnabled);
+    return *this;
+}
 void MultisampleState::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     cstruct.nextInChain = this->nextInChain.getNext();
@@ -9096,6 +9481,12 @@ Origin3D::Origin3D(const WGPUOrigin3D& native) {
     this->x = static_cast<uint32_t>(native.x);
     this->y = static_cast<uint32_t>(native.y);
     this->z = static_cast<uint32_t>(native.z);
+}
+Origin3D& Origin3D::operator=(const WGPUOrigin3D& native) {
+    this->x = static_cast<uint32_t>(native.x);
+    this->y = static_cast<uint32_t>(native.y);
+    this->z = static_cast<uint32_t>(native.z);
+    return *this;
 }
 void Origin3D::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -9135,6 +9526,15 @@ PipelineLayoutDescriptor::PipelineLayoutDescriptor(const WGPUPipelineLayoutDescr
     this->bindGroupLayouts = std::span(native.bindGroupLayouts, native.bindGroupLayoutCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::BindGroupLayout>(e); }) | std::ranges::to<SmallVec<wgpu::BindGroupLayout>>();
     for (auto& e : this->bindGroupLayouts) { e.addRef(); }
 }
+PipelineLayoutDescriptor& PipelineLayoutDescriptor::operator=(const WGPUPipelineLayoutDescriptor& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->label = static_cast<wgpu::StringView>(native.label);
+    this->bindGroupLayouts = std::span(native.bindGroupLayouts, native.bindGroupLayoutCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::BindGroupLayout>(e); }) | std::ranges::to<SmallVec<wgpu::BindGroupLayout>>();
+    for (auto& e : this->bindGroupLayouts) { e.addRef(); }
+    return *this;
+}
 void PipelineLayoutDescriptor::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     cstruct.nextInChain = this->nextInChain.getNext();
@@ -9168,6 +9568,17 @@ PrimitiveState::PrimitiveState(const WGPUPrimitiveState& native) {
     this->frontFace = static_cast<wgpu::FrontFace>(native.frontFace);
     this->cullMode = static_cast<wgpu::CullMode>(native.cullMode);
     this->unclippedDepth = static_cast<wgpu::Bool>(native.unclippedDepth);
+}
+PrimitiveState& PrimitiveState::operator=(const WGPUPrimitiveState& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->topology = static_cast<wgpu::PrimitiveTopology>(native.topology);
+    this->stripIndexFormat = static_cast<wgpu::IndexFormat>(native.stripIndexFormat);
+    this->frontFace = static_cast<wgpu::FrontFace>(native.frontFace);
+    this->cullMode = static_cast<wgpu::CullMode>(native.cullMode);
+    this->unclippedDepth = static_cast<wgpu::Bool>(native.unclippedDepth);
+    return *this;
 }
 void PrimitiveState::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -9226,6 +9637,15 @@ QuerySetDescriptor::QuerySetDescriptor(const WGPUQuerySetDescriptor& native) {
     this->type = static_cast<wgpu::QueryType>(native.type);
     this->count = static_cast<uint32_t>(native.count);
 }
+QuerySetDescriptor& QuerySetDescriptor::operator=(const WGPUQuerySetDescriptor& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->label = static_cast<wgpu::StringView>(native.label);
+    this->type = static_cast<wgpu::QueryType>(native.type);
+    this->count = static_cast<uint32_t>(native.count);
+    return *this;
+}
 void QuerySetDescriptor::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     cstruct.nextInChain = this->nextInChain.getNext();
@@ -9271,6 +9691,13 @@ QueueDescriptor::QueueDescriptor(const WGPUQueueDescriptor& native) {
     }
     this->label = static_cast<wgpu::StringView>(native.label);
 }
+QueueDescriptor& QueueDescriptor::operator=(const WGPUQueueDescriptor& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->label = static_cast<wgpu::StringView>(native.label);
+    return *this;
+}
 void QueueDescriptor::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     cstruct.nextInChain = this->nextInChain.getNext();
@@ -9297,6 +9724,13 @@ RenderBundleDescriptor::RenderBundleDescriptor(const WGPURenderBundleDescriptor&
         this->nextInChain.setNext(native.nextInChain);
     }
     this->label = static_cast<wgpu::StringView>(native.label);
+}
+RenderBundleDescriptor& RenderBundleDescriptor::operator=(const WGPURenderBundleDescriptor& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->label = static_cast<wgpu::StringView>(native.label);
+    return *this;
 }
 void RenderBundleDescriptor::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -9329,6 +9763,18 @@ RenderBundleEncoderDescriptor::RenderBundleEncoderDescriptor(const WGPURenderBun
     this->sampleCount = static_cast<uint32_t>(native.sampleCount);
     this->depthReadOnly = static_cast<wgpu::Bool>(native.depthReadOnly);
     this->stencilReadOnly = static_cast<wgpu::Bool>(native.stencilReadOnly);
+}
+RenderBundleEncoderDescriptor& RenderBundleEncoderDescriptor::operator=(const WGPURenderBundleEncoderDescriptor& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->label = static_cast<wgpu::StringView>(native.label);
+    this->colorFormats = std::span(native.colorFormats, native.colorFormatCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureFormat>(e); }) | std::ranges::to<SmallVec<wgpu::TextureFormat>>();
+    this->depthStencilFormat = static_cast<wgpu::TextureFormat>(native.depthStencilFormat);
+    this->sampleCount = static_cast<uint32_t>(native.sampleCount);
+    this->depthReadOnly = static_cast<wgpu::Bool>(native.depthReadOnly);
+    this->stencilReadOnly = static_cast<wgpu::Bool>(native.stencilReadOnly);
+    return *this;
 }
 void RenderBundleEncoderDescriptor::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -9400,6 +9846,19 @@ RenderPassDepthStencilAttachment::RenderPassDepthStencilAttachment(const WGPURen
     this->stencilStoreOp = static_cast<wgpu::StoreOp>(native.stencilStoreOp);
     this->stencilClearValue = static_cast<uint32_t>(native.stencilClearValue);
     this->stencilReadOnly = static_cast<wgpu::Bool>(native.stencilReadOnly);
+}
+RenderPassDepthStencilAttachment& RenderPassDepthStencilAttachment::operator=(const WGPURenderPassDepthStencilAttachment& native) {
+    this->view = static_cast<wgpu::TextureView>(native.view);
+    if (this->view) this->view.addRef();
+    this->depthLoadOp = static_cast<wgpu::LoadOp>(native.depthLoadOp);
+    this->depthStoreOp = static_cast<wgpu::StoreOp>(native.depthStoreOp);
+    this->depthClearValue = static_cast<float>(native.depthClearValue);
+    this->depthReadOnly = static_cast<wgpu::Bool>(native.depthReadOnly);
+    this->stencilLoadOp = static_cast<wgpu::LoadOp>(native.stencilLoadOp);
+    this->stencilStoreOp = static_cast<wgpu::StoreOp>(native.stencilStoreOp);
+    this->stencilClearValue = static_cast<uint32_t>(native.stencilClearValue);
+    this->stencilReadOnly = static_cast<wgpu::Bool>(native.stencilReadOnly);
+    return *this;
 }
 void RenderPassDepthStencilAttachment::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -9489,6 +9948,11 @@ RenderPassMaxDrawCount::RenderPassMaxDrawCount(const WGPURenderPassMaxDrawCount&
     this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
     this->maxDrawCount = static_cast<uint64_t>(native.maxDrawCount);
 }
+RenderPassMaxDrawCount& RenderPassMaxDrawCount::operator=(const WGPURenderPassMaxDrawCount& native) {
+    this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
+    this->maxDrawCount = static_cast<uint64_t>(native.maxDrawCount);
+    return *this;
+}
 void RenderPassMaxDrawCount::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     this->chain.to_cstruct(&cstruct.chain);
@@ -9507,6 +9971,13 @@ RenderPassTimestampWrites::RenderPassTimestampWrites(const WGPURenderPassTimesta
     if (this->querySet) this->querySet.addRef();
     this->beginningOfPassWriteIndex = static_cast<uint32_t>(native.beginningOfPassWriteIndex);
     this->endOfPassWriteIndex = static_cast<uint32_t>(native.endOfPassWriteIndex);
+}
+RenderPassTimestampWrites& RenderPassTimestampWrites::operator=(const WGPURenderPassTimestampWrites& native) {
+    this->querySet = static_cast<wgpu::QuerySet>(native.querySet);
+    if (this->querySet) this->querySet.addRef();
+    this->beginningOfPassWriteIndex = static_cast<uint32_t>(native.beginningOfPassWriteIndex);
+    this->endOfPassWriteIndex = static_cast<uint32_t>(native.endOfPassWriteIndex);
+    return *this;
 }
 void RenderPassTimestampWrites::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -9548,6 +10019,18 @@ RequestAdapterOptions::RequestAdapterOptions(const WGPURequestAdapterOptions& na
     this->backendType = static_cast<wgpu::BackendType>(native.backendType);
     this->compatibleSurface = static_cast<wgpu::Surface>(native.compatibleSurface);
     if (this->compatibleSurface) this->compatibleSurface.addRef();
+}
+RequestAdapterOptions& RequestAdapterOptions::operator=(const WGPURequestAdapterOptions& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->featureLevel = static_cast<wgpu::FeatureLevel>(native.featureLevel);
+    this->powerPreference = static_cast<wgpu::PowerPreference>(native.powerPreference);
+    this->forceFallbackAdapter = static_cast<wgpu::Bool>(native.forceFallbackAdapter);
+    this->backendType = static_cast<wgpu::BackendType>(native.backendType);
+    this->compatibleSurface = static_cast<wgpu::Surface>(native.compatibleSurface);
+    if (this->compatibleSurface) this->compatibleSurface.addRef();
+    return *this;
 }
 void RequestAdapterOptions::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -9604,6 +10087,13 @@ SamplerBindingLayout::SamplerBindingLayout(const WGPUSamplerBindingLayout& nativ
     }
     this->type = static_cast<wgpu::SamplerBindingType>(native.type);
 }
+SamplerBindingLayout& SamplerBindingLayout::operator=(const WGPUSamplerBindingLayout& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->type = static_cast<wgpu::SamplerBindingType>(native.type);
+    return *this;
+}
 void SamplerBindingLayout::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     cstruct.nextInChain = this->nextInChain.getNext();
@@ -9632,6 +10122,23 @@ SamplerDescriptor::SamplerDescriptor(const WGPUSamplerDescriptor& native) {
     this->lodMaxClamp = static_cast<float>(native.lodMaxClamp);
     this->compare = static_cast<wgpu::CompareFunction>(native.compare);
     this->maxAnisotropy = static_cast<uint16_t>(native.maxAnisotropy);
+}
+SamplerDescriptor& SamplerDescriptor::operator=(const WGPUSamplerDescriptor& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->label = static_cast<wgpu::StringView>(native.label);
+    this->addressModeU = static_cast<wgpu::AddressMode>(native.addressModeU);
+    this->addressModeV = static_cast<wgpu::AddressMode>(native.addressModeV);
+    this->addressModeW = static_cast<wgpu::AddressMode>(native.addressModeW);
+    this->magFilter = static_cast<wgpu::FilterMode>(native.magFilter);
+    this->minFilter = static_cast<wgpu::FilterMode>(native.minFilter);
+    this->mipmapFilter = static_cast<wgpu::MipmapFilterMode>(native.mipmapFilter);
+    this->lodMinClamp = static_cast<float>(native.lodMinClamp);
+    this->lodMaxClamp = static_cast<float>(native.lodMaxClamp);
+    this->compare = static_cast<wgpu::CompareFunction>(native.compare);
+    this->maxAnisotropy = static_cast<uint16_t>(native.maxAnisotropy);
+    return *this;
 }
 void SamplerDescriptor::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -9750,6 +10257,13 @@ ShaderModuleDescriptor::ShaderModuleDescriptor(const WGPUShaderModuleDescriptor&
     }
     this->label = static_cast<wgpu::StringView>(native.label);
 }
+ShaderModuleDescriptor& ShaderModuleDescriptor::operator=(const WGPUShaderModuleDescriptor& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->label = static_cast<wgpu::StringView>(native.label);
+    return *this;
+}
 void ShaderModuleDescriptor::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     cstruct.nextInChain = this->nextInChain.getNext();
@@ -9775,6 +10289,12 @@ ShaderSourceSPIRV::ShaderSourceSPIRV(const WGPUShaderSourceSPIRV& native) {
     this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
     this->codeSize = static_cast<uint32_t>(native.codeSize);
     this->code = static_cast<uint32_t const*>(native.code);
+}
+ShaderSourceSPIRV& ShaderSourceSPIRV::operator=(const WGPUShaderSourceSPIRV& native) {
+    this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
+    this->codeSize = static_cast<uint32_t>(native.codeSize);
+    this->code = static_cast<uint32_t const*>(native.code);
+    return *this;
 }
 void ShaderSourceSPIRV::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -9802,6 +10322,11 @@ ShaderSourceWGSL::ShaderSourceWGSL(const WGPUShaderSourceWGSL& native) {
     this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
     this->code = static_cast<wgpu::StringView>(native.code);
 }
+ShaderSourceWGSL& ShaderSourceWGSL::operator=(const WGPUShaderSourceWGSL& native) {
+    this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
+    this->code = static_cast<wgpu::StringView>(native.code);
+    return *this;
+}
 void ShaderSourceWGSL::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     this->chain.to_cstruct(&cstruct.chain);
@@ -9828,6 +10353,13 @@ StencilFaceState::StencilFaceState(const WGPUStencilFaceState& native) {
     this->failOp = static_cast<wgpu::StencilOperation>(native.failOp);
     this->depthFailOp = static_cast<wgpu::StencilOperation>(native.depthFailOp);
     this->passOp = static_cast<wgpu::StencilOperation>(native.passOp);
+}
+StencilFaceState& StencilFaceState::operator=(const WGPUStencilFaceState& native) {
+    this->compare = static_cast<wgpu::CompareFunction>(native.compare);
+    this->failOp = static_cast<wgpu::StencilOperation>(native.failOp);
+    this->depthFailOp = static_cast<wgpu::StencilOperation>(native.depthFailOp);
+    this->passOp = static_cast<wgpu::StencilOperation>(native.passOp);
+    return *this;
 }
 void StencilFaceState::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -9876,6 +10408,15 @@ StorageTextureBindingLayout::StorageTextureBindingLayout(const WGPUStorageTextur
     this->format = static_cast<wgpu::TextureFormat>(native.format);
     this->viewDimension = static_cast<wgpu::TextureViewDimension>(native.viewDimension);
 }
+StorageTextureBindingLayout& StorageTextureBindingLayout::operator=(const WGPUStorageTextureBindingLayout& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->access = static_cast<wgpu::StorageTextureAccess>(native.access);
+    this->format = static_cast<wgpu::TextureFormat>(native.format);
+    this->viewDimension = static_cast<wgpu::TextureViewDimension>(native.viewDimension);
+    return *this;
+}
 void StorageTextureBindingLayout::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     cstruct.nextInChain = this->nextInChain.getNext();
@@ -9910,6 +10451,10 @@ StorageTextureBindingLayout&& StorageTextureBindingLayout::setViewDimension(wgpu
 SupportedFeatures::SupportedFeatures(const WGPUSupportedFeatures& native) {
     this->features = std::span(native.features, native.featureCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::FeatureName>(e); }) | std::ranges::to<SmallVec<wgpu::FeatureName>>();
 }
+SupportedFeatures& SupportedFeatures::operator=(const WGPUSupportedFeatures& native) {
+    this->features = std::span(native.features, native.featureCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::FeatureName>(e); }) | std::ranges::to<SmallVec<wgpu::FeatureName>>();
+    return *this;
+}
 void SupportedFeatures::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     cstruct.features = reinterpret_cast<const WGPUFeatureName*>(this->features.data());
@@ -9917,6 +10462,10 @@ void SupportedFeatures::to_cstruct(CStruct* out) const {
 }
 SupportedWGSLLanguageFeatures::SupportedWGSLLanguageFeatures(const WGPUSupportedWGSLLanguageFeatures& native) {
     this->features = std::span(native.features, native.featureCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::WGSLLanguageFeatureName>(e); }) | std::ranges::to<SmallVec<wgpu::WGSLLanguageFeatureName>>();
+}
+SupportedWGSLLanguageFeatures& SupportedWGSLLanguageFeatures::operator=(const WGPUSupportedWGSLLanguageFeatures& native) {
+    this->features = std::span(native.features, native.featureCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::WGSLLanguageFeatureName>(e); }) | std::ranges::to<SmallVec<wgpu::WGSLLanguageFeatureName>>();
+    return *this;
 }
 void SupportedWGSLLanguageFeatures::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -9931,6 +10480,16 @@ SurfaceCapabilities::SurfaceCapabilities(const WGPUSurfaceCapabilities& native) 
     this->formats = std::span(native.formats, native.formatCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureFormat>(e); }) | std::ranges::to<SmallVec<wgpu::TextureFormat>>();
     this->presentModes = std::span(native.presentModes, native.presentModeCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::PresentMode>(e); }) | std::ranges::to<SmallVec<wgpu::PresentMode>>();
     this->alphaModes = std::span(native.alphaModes, native.alphaModeCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::CompositeAlphaMode>(e); }) | std::ranges::to<SmallVec<wgpu::CompositeAlphaMode>>();
+}
+SurfaceCapabilities& SurfaceCapabilities::operator=(const WGPUSurfaceCapabilities& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->usages = static_cast<wgpu::TextureUsage>(native.usages);
+    this->formats = std::span(native.formats, native.formatCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureFormat>(e); }) | std::ranges::to<SmallVec<wgpu::TextureFormat>>();
+    this->presentModes = std::span(native.presentModes, native.presentModeCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::PresentMode>(e); }) | std::ranges::to<SmallVec<wgpu::PresentMode>>();
+    this->alphaModes = std::span(native.alphaModes, native.alphaModeCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::CompositeAlphaMode>(e); }) | std::ranges::to<SmallVec<wgpu::CompositeAlphaMode>>();
+    return *this;
 }
 void SurfaceCapabilities::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -9964,6 +10523,21 @@ SurfaceConfiguration::SurfaceConfiguration(const WGPUSurfaceConfiguration& nativ
     this->viewFormats = std::span(native.viewFormats, native.viewFormatCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureFormat>(e); }) | std::ranges::to<SmallVec<wgpu::TextureFormat>>();
     this->alphaMode = static_cast<wgpu::CompositeAlphaMode>(native.alphaMode);
     this->presentMode = static_cast<wgpu::PresentMode>(native.presentMode);
+}
+SurfaceConfiguration& SurfaceConfiguration::operator=(const WGPUSurfaceConfiguration& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->device = static_cast<wgpu::Device>(native.device);
+    if (this->device) this->device.addRef();
+    this->format = static_cast<wgpu::TextureFormat>(native.format);
+    this->usage = static_cast<wgpu::TextureUsage>(native.usage);
+    this->width = static_cast<uint32_t>(native.width);
+    this->height = static_cast<uint32_t>(native.height);
+    this->viewFormats = std::span(native.viewFormats, native.viewFormatCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureFormat>(e); }) | std::ranges::to<SmallVec<wgpu::TextureFormat>>();
+    this->alphaMode = static_cast<wgpu::CompositeAlphaMode>(native.alphaMode);
+    this->presentMode = static_cast<wgpu::PresentMode>(native.presentMode);
+    return *this;
 }
 void SurfaceConfiguration::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -10040,6 +10614,13 @@ SurfaceDescriptor::SurfaceDescriptor(const WGPUSurfaceDescriptor& native) {
     }
     this->label = static_cast<wgpu::StringView>(native.label);
 }
+SurfaceDescriptor& SurfaceDescriptor::operator=(const WGPUSurfaceDescriptor& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->label = static_cast<wgpu::StringView>(native.label);
+    return *this;
+}
 void SurfaceDescriptor::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     cstruct.nextInChain = this->nextInChain.getNext();
@@ -10065,6 +10646,11 @@ SurfaceSourceAndroidNativeWindow::SurfaceSourceAndroidNativeWindow(const WGPUSur
     this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
     this->window = static_cast<void*>(native.window);
 }
+SurfaceSourceAndroidNativeWindow& SurfaceSourceAndroidNativeWindow::operator=(const WGPUSurfaceSourceAndroidNativeWindow& native) {
+    this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
+    this->window = static_cast<void*>(native.window);
+    return *this;
+}
 void SurfaceSourceAndroidNativeWindow::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     this->chain.to_cstruct(&cstruct.chain);
@@ -10081,6 +10667,11 @@ SurfaceSourceAndroidNativeWindow&& SurfaceSourceAndroidNativeWindow::setWindow(v
 SurfaceSourceMetalLayer::SurfaceSourceMetalLayer(const WGPUSurfaceSourceMetalLayer& native) {
     this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
     this->layer = static_cast<void*>(native.layer);
+}
+SurfaceSourceMetalLayer& SurfaceSourceMetalLayer::operator=(const WGPUSurfaceSourceMetalLayer& native) {
+    this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
+    this->layer = static_cast<void*>(native.layer);
+    return *this;
 }
 void SurfaceSourceMetalLayer::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -10099,6 +10690,12 @@ SurfaceSourceWaylandSurface::SurfaceSourceWaylandSurface(const WGPUSurfaceSource
     this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
     this->display = static_cast<void*>(native.display);
     this->surface = static_cast<void*>(native.surface);
+}
+SurfaceSourceWaylandSurface& SurfaceSourceWaylandSurface::operator=(const WGPUSurfaceSourceWaylandSurface& native) {
+    this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
+    this->display = static_cast<void*>(native.display);
+    this->surface = static_cast<void*>(native.surface);
+    return *this;
 }
 void SurfaceSourceWaylandSurface::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -10127,6 +10724,12 @@ SurfaceSourceWindowsHWND::SurfaceSourceWindowsHWND(const WGPUSurfaceSourceWindow
     this->hinstance = static_cast<void*>(native.hinstance);
     this->hwnd = static_cast<void*>(native.hwnd);
 }
+SurfaceSourceWindowsHWND& SurfaceSourceWindowsHWND::operator=(const WGPUSurfaceSourceWindowsHWND& native) {
+    this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
+    this->hinstance = static_cast<void*>(native.hinstance);
+    this->hwnd = static_cast<void*>(native.hwnd);
+    return *this;
+}
 void SurfaceSourceWindowsHWND::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     this->chain.to_cstruct(&cstruct.chain);
@@ -10154,6 +10757,12 @@ SurfaceSourceXCBWindow::SurfaceSourceXCBWindow(const WGPUSurfaceSourceXCBWindow&
     this->connection = static_cast<void*>(native.connection);
     this->window = static_cast<uint32_t>(native.window);
 }
+SurfaceSourceXCBWindow& SurfaceSourceXCBWindow::operator=(const WGPUSurfaceSourceXCBWindow& native) {
+    this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
+    this->connection = static_cast<void*>(native.connection);
+    this->window = static_cast<uint32_t>(native.window);
+    return *this;
+}
 void SurfaceSourceXCBWindow::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     this->chain.to_cstruct(&cstruct.chain);
@@ -10180,6 +10789,12 @@ SurfaceSourceXlibWindow::SurfaceSourceXlibWindow(const WGPUSurfaceSourceXlibWind
     this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
     this->display = static_cast<void*>(native.display);
     this->window = static_cast<uint64_t>(native.window);
+}
+SurfaceSourceXlibWindow& SurfaceSourceXlibWindow::operator=(const WGPUSurfaceSourceXlibWindow& native) {
+    this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
+    this->display = static_cast<void*>(native.display);
+    this->window = static_cast<uint64_t>(native.window);
+    return *this;
 }
 void SurfaceSourceXlibWindow::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -10210,6 +10825,14 @@ SurfaceTexture::SurfaceTexture(const WGPUSurfaceTexture& native) {
     this->texture = static_cast<wgpu::Texture>(native.texture);
     this->status = static_cast<wgpu::SurfaceGetCurrentTextureStatus>(native.status);
 }
+SurfaceTexture& SurfaceTexture::operator=(const WGPUSurfaceTexture& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->texture = static_cast<wgpu::Texture>(native.texture);
+    this->status = static_cast<wgpu::SurfaceGetCurrentTextureStatus>(native.status);
+    return *this;
+}
 void SurfaceTexture::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     cstruct.nextInChain = this->nextInChain.getNext();
@@ -10236,6 +10859,12 @@ TexelCopyBufferLayout::TexelCopyBufferLayout(const WGPUTexelCopyBufferLayout& na
     this->offset = static_cast<uint64_t>(native.offset);
     this->bytesPerRow = static_cast<uint32_t>(native.bytesPerRow);
     this->rowsPerImage = static_cast<uint32_t>(native.rowsPerImage);
+}
+TexelCopyBufferLayout& TexelCopyBufferLayout::operator=(const WGPUTexelCopyBufferLayout& native) {
+    this->offset = static_cast<uint64_t>(native.offset);
+    this->bytesPerRow = static_cast<uint32_t>(native.bytesPerRow);
+    this->rowsPerImage = static_cast<uint32_t>(native.rowsPerImage);
+    return *this;
 }
 void TexelCopyBufferLayout::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -10274,6 +10903,15 @@ TextureBindingLayout::TextureBindingLayout(const WGPUTextureBindingLayout& nativ
     this->sampleType = static_cast<wgpu::TextureSampleType>(native.sampleType);
     this->viewDimension = static_cast<wgpu::TextureViewDimension>(native.viewDimension);
     this->multisampled = static_cast<wgpu::Bool>(native.multisampled);
+}
+TextureBindingLayout& TextureBindingLayout::operator=(const WGPUTextureBindingLayout& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->sampleType = static_cast<wgpu::TextureSampleType>(native.sampleType);
+    this->viewDimension = static_cast<wgpu::TextureViewDimension>(native.viewDimension);
+    this->multisampled = static_cast<wgpu::Bool>(native.multisampled);
+    return *this;
 }
 void TextureBindingLayout::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -10319,6 +10957,21 @@ TextureViewDescriptor::TextureViewDescriptor(const WGPUTextureViewDescriptor& na
     this->arrayLayerCount = static_cast<uint32_t>(native.arrayLayerCount);
     this->aspect = static_cast<wgpu::TextureAspect>(native.aspect);
     this->usage = static_cast<wgpu::TextureUsage>(native.usage);
+}
+TextureViewDescriptor& TextureViewDescriptor::operator=(const WGPUTextureViewDescriptor& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->label = static_cast<wgpu::StringView>(native.label);
+    this->format = static_cast<wgpu::TextureFormat>(native.format);
+    this->dimension = static_cast<wgpu::TextureViewDimension>(native.dimension);
+    this->baseMipLevel = static_cast<uint32_t>(native.baseMipLevel);
+    this->mipLevelCount = static_cast<uint32_t>(native.mipLevelCount);
+    this->baseArrayLayer = static_cast<uint32_t>(native.baseArrayLayer);
+    this->arrayLayerCount = static_cast<uint32_t>(native.arrayLayerCount);
+    this->aspect = static_cast<wgpu::TextureAspect>(native.aspect);
+    this->usage = static_cast<wgpu::TextureUsage>(native.usage);
+    return *this;
 }
 void TextureViewDescriptor::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -10418,6 +11071,12 @@ VertexAttribute::VertexAttribute(const WGPUVertexAttribute& native) {
     this->offset = static_cast<uint64_t>(native.offset);
     this->shaderLocation = static_cast<uint32_t>(native.shaderLocation);
 }
+VertexAttribute& VertexAttribute::operator=(const WGPUVertexAttribute& native) {
+    this->format = static_cast<wgpu::VertexFormat>(native.format);
+    this->offset = static_cast<uint64_t>(native.offset);
+    this->shaderLocation = static_cast<uint32_t>(native.shaderLocation);
+    return *this;
+}
 void VertexAttribute::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     cstruct.format = static_cast<WGPUVertexFormat>(this->format);
@@ -10456,6 +11115,16 @@ BindGroupDescriptor::BindGroupDescriptor(const WGPUBindGroupDescriptor& native) 
     this->layout = static_cast<wgpu::BindGroupLayout>(native.layout);
     if (this->layout) this->layout.addRef();
     this->entries = std::span(native.entries, native.entryCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::BindGroupEntry>(e); }) | std::ranges::to<SmallVec<wgpu::BindGroupEntry>>();
+}
+BindGroupDescriptor& BindGroupDescriptor::operator=(const WGPUBindGroupDescriptor& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->label = static_cast<wgpu::StringView>(native.label);
+    this->layout = static_cast<wgpu::BindGroupLayout>(native.layout);
+    if (this->layout) this->layout.addRef();
+    this->entries = std::span(native.entries, native.entryCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::BindGroupEntry>(e); }) | std::ranges::to<SmallVec<wgpu::BindGroupEntry>>();
+    return *this;
 }
 void BindGroupDescriptor::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -10503,6 +11172,18 @@ BindGroupLayoutEntry::BindGroupLayoutEntry(const WGPUBindGroupLayoutEntry& nativ
     this->sampler = static_cast<wgpu::SamplerBindingLayout>(native.sampler);
     this->texture = static_cast<wgpu::TextureBindingLayout>(native.texture);
     this->storageTexture = static_cast<wgpu::StorageTextureBindingLayout>(native.storageTexture);
+}
+BindGroupLayoutEntry& BindGroupLayoutEntry::operator=(const WGPUBindGroupLayoutEntry& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->binding = static_cast<uint32_t>(native.binding);
+    this->visibility = static_cast<wgpu::ShaderStage>(native.visibility);
+    this->buffer = static_cast<wgpu::BufferBindingLayout>(native.buffer);
+    this->sampler = static_cast<wgpu::SamplerBindingLayout>(native.sampler);
+    this->texture = static_cast<wgpu::TextureBindingLayout>(native.texture);
+    this->storageTexture = static_cast<wgpu::StorageTextureBindingLayout>(native.storageTexture);
+    return *this;
 }
 void BindGroupLayoutEntry::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -10598,6 +11279,11 @@ BlendState::BlendState(const WGPUBlendState& native) {
     this->color = static_cast<wgpu::BlendComponent>(native.color);
     this->alpha = static_cast<wgpu::BlendComponent>(native.alpha);
 }
+BlendState& BlendState::operator=(const WGPUBlendState& native) {
+    this->color = static_cast<wgpu::BlendComponent>(native.color);
+    this->alpha = static_cast<wgpu::BlendComponent>(native.alpha);
+    return *this;
+}
 void BlendState::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     this->color.to_cstruct(&cstruct.color);
@@ -10641,6 +11327,13 @@ CompilationInfo::CompilationInfo(const WGPUCompilationInfo& native) {
     }
     this->messages = std::span(native.messages, native.messageCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::CompilationMessage>(e); }) | std::ranges::to<SmallVec<wgpu::CompilationMessage>>();
 }
+CompilationInfo& CompilationInfo::operator=(const WGPUCompilationInfo& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->messages = std::span(native.messages, native.messageCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::CompilationMessage>(e); }) | std::ranges::to<SmallVec<wgpu::CompilationMessage>>();
+    return *this;
+}
 void CompilationInfo::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     cstruct.nextInChain = this->nextInChain.getNext();
@@ -10661,6 +11354,18 @@ ComputePassDescriptor::ComputePassDescriptor(const WGPUComputePassDescriptor& na
     } else {
         this->timestampWrites.reset();
     }
+}
+ComputePassDescriptor& ComputePassDescriptor::operator=(const WGPUComputePassDescriptor& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->label = static_cast<wgpu::StringView>(native.label);
+    if (native.timestampWrites != nullptr) {
+        this->timestampWrites = static_cast<wgpu::ComputePassTimestampWrites>(*(native.timestampWrites));
+    } else {
+        this->timestampWrites.reset();
+    }
+    return *this;
 }
 void ComputePassDescriptor::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -10718,6 +11423,22 @@ DepthStencilState::DepthStencilState(const WGPUDepthStencilState& native) {
     this->depthBias = static_cast<int32_t>(native.depthBias);
     this->depthBiasSlopeScale = static_cast<float>(native.depthBiasSlopeScale);
     this->depthBiasClamp = static_cast<float>(native.depthBiasClamp);
+}
+DepthStencilState& DepthStencilState::operator=(const WGPUDepthStencilState& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->format = static_cast<wgpu::TextureFormat>(native.format);
+    this->depthWriteEnabled = static_cast<wgpu::OptionalBool>(native.depthWriteEnabled);
+    this->depthCompare = static_cast<wgpu::CompareFunction>(native.depthCompare);
+    this->stencilFront = static_cast<wgpu::StencilFaceState>(native.stencilFront);
+    this->stencilBack = static_cast<wgpu::StencilFaceState>(native.stencilBack);
+    this->stencilReadMask = static_cast<uint32_t>(native.stencilReadMask);
+    this->stencilWriteMask = static_cast<uint32_t>(native.stencilWriteMask);
+    this->depthBias = static_cast<int32_t>(native.depthBias);
+    this->depthBiasSlopeScale = static_cast<float>(native.depthBiasSlopeScale);
+    this->depthBiasClamp = static_cast<float>(native.depthBiasClamp);
+    return *this;
 }
 void DepthStencilState::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -10844,6 +11565,22 @@ DeviceDescriptor::DeviceDescriptor(const WGPUDeviceDescriptor& native) {
     this->deviceLostCallbackInfo = static_cast<wgpu::DeviceLostCallbackInfo>(native.deviceLostCallbackInfo);
     this->uncapturedErrorCallbackInfo = static_cast<wgpu::UncapturedErrorCallbackInfo>(native.uncapturedErrorCallbackInfo);
 }
+DeviceDescriptor& DeviceDescriptor::operator=(const WGPUDeviceDescriptor& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->label = static_cast<wgpu::StringView>(native.label);
+    this->requiredFeatures = std::span(native.requiredFeatures, native.requiredFeatureCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::FeatureName>(e); }) | std::ranges::to<SmallVec<wgpu::FeatureName>>();
+    if (native.requiredLimits != nullptr) {
+        this->requiredLimits = static_cast<wgpu::Limits>(*(native.requiredLimits));
+    } else {
+        this->requiredLimits.reset();
+    }
+    this->defaultQueue = static_cast<wgpu::QueueDescriptor>(native.defaultQueue);
+    this->deviceLostCallbackInfo = static_cast<wgpu::DeviceLostCallbackInfo>(native.deviceLostCallbackInfo);
+    this->uncapturedErrorCallbackInfo = static_cast<wgpu::UncapturedErrorCallbackInfo>(native.uncapturedErrorCallbackInfo);
+    return *this;
+}
 void DeviceDescriptor::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     cstruct.nextInChain = this->nextInChain.getNext();
@@ -10944,6 +11681,11 @@ FutureWaitInfo::FutureWaitInfo(const WGPUFutureWaitInfo& native) {
     this->future = static_cast<wgpu::Future>(native.future);
     this->completed = static_cast<wgpu::Bool>(native.completed);
 }
+FutureWaitInfo& FutureWaitInfo::operator=(const WGPUFutureWaitInfo& native) {
+    this->future = static_cast<wgpu::Future>(native.future);
+    this->completed = static_cast<wgpu::Bool>(native.completed);
+    return *this;
+}
 void FutureWaitInfo::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     this->future.to_cstruct(&cstruct.future);
@@ -10979,6 +11721,13 @@ InstanceDescriptor::InstanceDescriptor(const WGPUInstanceDescriptor& native) {
     }
     this->features = static_cast<wgpu::InstanceCapabilities>(native.features);
 }
+InstanceDescriptor& InstanceDescriptor::operator=(const WGPUInstanceDescriptor& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->features = static_cast<wgpu::InstanceCapabilities>(native.features);
+    return *this;
+}
 void InstanceDescriptor::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     cstruct.nextInChain = this->nextInChain.getNext();
@@ -11008,6 +11757,16 @@ ProgrammableStageDescriptor::ProgrammableStageDescriptor(const WGPUProgrammableS
     if (this->module) this->module.addRef();
     this->entryPoint = static_cast<wgpu::StringView>(native.entryPoint);
     this->constants = std::span(native.constants, native.constantCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::ConstantEntry>(e); }) | std::ranges::to<SmallVec<wgpu::ConstantEntry>>();
+}
+ProgrammableStageDescriptor& ProgrammableStageDescriptor::operator=(const WGPUProgrammableStageDescriptor& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->module = static_cast<wgpu::ShaderModule>(native.module);
+    if (this->module) this->module.addRef();
+    this->entryPoint = static_cast<wgpu::StringView>(native.entryPoint);
+    this->constants = std::span(native.constants, native.constantCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::ConstantEntry>(e); }) | std::ranges::to<SmallVec<wgpu::ConstantEntry>>();
+    return *this;
 }
 void ProgrammableStageDescriptor::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -11057,6 +11816,20 @@ RenderPassColorAttachment::RenderPassColorAttachment(const WGPURenderPassColorAt
     this->loadOp = static_cast<wgpu::LoadOp>(native.loadOp);
     this->storeOp = static_cast<wgpu::StoreOp>(native.storeOp);
     this->clearValue = static_cast<wgpu::Color>(native.clearValue);
+}
+RenderPassColorAttachment& RenderPassColorAttachment::operator=(const WGPURenderPassColorAttachment& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->view = static_cast<wgpu::TextureView>(native.view);
+    if (this->view) this->view.addRef();
+    this->depthSlice = static_cast<uint32_t>(native.depthSlice);
+    this->resolveTarget = static_cast<wgpu::TextureView>(native.resolveTarget);
+    if (this->resolveTarget) this->resolveTarget.addRef();
+    this->loadOp = static_cast<wgpu::LoadOp>(native.loadOp);
+    this->storeOp = static_cast<wgpu::StoreOp>(native.storeOp);
+    this->clearValue = static_cast<wgpu::Color>(native.clearValue);
+    return *this;
 }
 void RenderPassColorAttachment::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -11129,6 +11902,12 @@ TexelCopyBufferInfo::TexelCopyBufferInfo(const WGPUTexelCopyBufferInfo& native) 
     this->buffer = static_cast<wgpu::Buffer>(native.buffer);
     if (this->buffer) this->buffer.addRef();
 }
+TexelCopyBufferInfo& TexelCopyBufferInfo::operator=(const WGPUTexelCopyBufferInfo& native) {
+    this->layout = static_cast<wgpu::TexelCopyBufferLayout>(native.layout);
+    this->buffer = static_cast<wgpu::Buffer>(native.buffer);
+    if (this->buffer) this->buffer.addRef();
+    return *this;
+}
 void TexelCopyBufferInfo::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     this->layout.to_cstruct(&cstruct.layout);
@@ -11164,6 +11943,14 @@ TexelCopyTextureInfo::TexelCopyTextureInfo(const WGPUTexelCopyTextureInfo& nativ
     this->mipLevel = static_cast<uint32_t>(native.mipLevel);
     this->origin = static_cast<wgpu::Origin3D>(native.origin);
     this->aspect = static_cast<wgpu::TextureAspect>(native.aspect);
+}
+TexelCopyTextureInfo& TexelCopyTextureInfo::operator=(const WGPUTexelCopyTextureInfo& native) {
+    this->texture = static_cast<wgpu::Texture>(native.texture);
+    if (this->texture) this->texture.addRef();
+    this->mipLevel = static_cast<uint32_t>(native.mipLevel);
+    this->origin = static_cast<wgpu::Origin3D>(native.origin);
+    this->aspect = static_cast<wgpu::TextureAspect>(native.aspect);
+    return *this;
 }
 void TexelCopyTextureInfo::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -11224,6 +12011,20 @@ TextureDescriptor::TextureDescriptor(const WGPUTextureDescriptor& native) {
     this->mipLevelCount = static_cast<uint32_t>(native.mipLevelCount);
     this->sampleCount = static_cast<uint32_t>(native.sampleCount);
     this->viewFormats = std::span(native.viewFormats, native.viewFormatCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureFormat>(e); }) | std::ranges::to<SmallVec<wgpu::TextureFormat>>();
+}
+TextureDescriptor& TextureDescriptor::operator=(const WGPUTextureDescriptor& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->label = static_cast<wgpu::StringView>(native.label);
+    this->usage = static_cast<wgpu::TextureUsage>(native.usage);
+    this->dimension = static_cast<wgpu::TextureDimension>(native.dimension);
+    this->size = static_cast<wgpu::Extent3D>(native.size);
+    this->format = static_cast<wgpu::TextureFormat>(native.format);
+    this->mipLevelCount = static_cast<uint32_t>(native.mipLevelCount);
+    this->sampleCount = static_cast<uint32_t>(native.sampleCount);
+    this->viewFormats = std::span(native.viewFormats, native.viewFormatCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureFormat>(e); }) | std::ranges::to<SmallVec<wgpu::TextureFormat>>();
+    return *this;
 }
 void TextureDescriptor::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -11315,6 +12116,12 @@ VertexBufferLayout::VertexBufferLayout(const WGPUVertexBufferLayout& native) {
     this->arrayStride = static_cast<uint64_t>(native.arrayStride);
     this->attributes = std::span(native.attributes, native.attributeCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::VertexAttribute>(e); }) | std::ranges::to<SmallVec<wgpu::VertexAttribute>>();
 }
+VertexBufferLayout& VertexBufferLayout::operator=(const WGPUVertexBufferLayout& native) {
+    this->stepMode = static_cast<wgpu::VertexStepMode>(native.stepMode);
+    this->arrayStride = static_cast<uint64_t>(native.arrayStride);
+    this->attributes = std::span(native.attributes, native.attributeCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::VertexAttribute>(e); }) | std::ranges::to<SmallVec<wgpu::VertexAttribute>>();
+    return *this;
+}
 void VertexBufferLayout::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     cstruct.stepMode = static_cast<WGPUVertexStepMode>(this->stepMode);
@@ -11344,6 +12151,14 @@ BindGroupLayoutDescriptor::BindGroupLayoutDescriptor(const WGPUBindGroupLayoutDe
     }
     this->label = static_cast<wgpu::StringView>(native.label);
     this->entries = std::span(native.entries, native.entryCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::BindGroupLayoutEntry>(e); }) | std::ranges::to<SmallVec<wgpu::BindGroupLayoutEntry>>();
+}
+BindGroupLayoutDescriptor& BindGroupLayoutDescriptor::operator=(const WGPUBindGroupLayoutDescriptor& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->label = static_cast<wgpu::StringView>(native.label);
+    this->entries = std::span(native.entries, native.entryCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::BindGroupLayoutEntry>(e); }) | std::ranges::to<SmallVec<wgpu::BindGroupLayoutEntry>>();
+    return *this;
 }
 void BindGroupLayoutDescriptor::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -11383,6 +12198,19 @@ ColorTargetState::ColorTargetState(const WGPUColorTargetState& native) {
         this->blend.reset();
     }
     this->writeMask = static_cast<wgpu::ColorWriteMask>(native.writeMask);
+}
+ColorTargetState& ColorTargetState::operator=(const WGPUColorTargetState& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->format = static_cast<wgpu::TextureFormat>(native.format);
+    if (native.blend != nullptr) {
+        this->blend = static_cast<wgpu::BlendState>(*(native.blend));
+    } else {
+        this->blend.reset();
+    }
+    this->writeMask = static_cast<wgpu::ColorWriteMask>(native.writeMask);
+    return *this;
 }
 void ColorTargetState::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -11435,6 +12263,16 @@ ComputePipelineDescriptor::ComputePipelineDescriptor(const WGPUComputePipelineDe
     this->layout = static_cast<wgpu::PipelineLayout>(native.layout);
     if (this->layout) this->layout.addRef();
     this->compute = static_cast<wgpu::ProgrammableStageDescriptor>(native.compute);
+}
+ComputePipelineDescriptor& ComputePipelineDescriptor::operator=(const WGPUComputePipelineDescriptor& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->label = static_cast<wgpu::StringView>(native.label);
+    this->layout = static_cast<wgpu::PipelineLayout>(native.layout);
+    if (this->layout) this->layout.addRef();
+    this->compute = static_cast<wgpu::ProgrammableStageDescriptor>(native.compute);
+    return *this;
 }
 void ComputePipelineDescriptor::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -11502,6 +12340,26 @@ RenderPassDescriptor::RenderPassDescriptor(const WGPURenderPassDescriptor& nativ
     } else {
         this->timestampWrites.reset();
     }
+}
+RenderPassDescriptor& RenderPassDescriptor::operator=(const WGPURenderPassDescriptor& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->label = static_cast<wgpu::StringView>(native.label);
+    this->colorAttachments = std::span(native.colorAttachments, native.colorAttachmentCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::RenderPassColorAttachment>(e); }) | std::ranges::to<SmallVec<wgpu::RenderPassColorAttachment>>();
+    if (native.depthStencilAttachment != nullptr) {
+        this->depthStencilAttachment = static_cast<wgpu::RenderPassDepthStencilAttachment>(*(native.depthStencilAttachment));
+    } else {
+        this->depthStencilAttachment.reset();
+    }
+    this->occlusionQuerySet = static_cast<wgpu::QuerySet>(native.occlusionQuerySet);
+    if (this->occlusionQuerySet) this->occlusionQuerySet.addRef();
+    if (native.timestampWrites != nullptr) {
+        this->timestampWrites = static_cast<wgpu::RenderPassTimestampWrites>(*(native.timestampWrites));
+    } else {
+        this->timestampWrites.reset();
+    }
+    return *this;
 }
 void RenderPassDescriptor::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -11591,6 +12449,17 @@ VertexState::VertexState(const WGPUVertexState& native) {
     this->constants = std::span(native.constants, native.constantCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::ConstantEntry>(e); }) | std::ranges::to<SmallVec<wgpu::ConstantEntry>>();
     this->buffers = std::span(native.buffers, native.bufferCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::VertexBufferLayout>(e); }) | std::ranges::to<SmallVec<wgpu::VertexBufferLayout>>();
 }
+VertexState& VertexState::operator=(const WGPUVertexState& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->module = static_cast<wgpu::ShaderModule>(native.module);
+    if (this->module) this->module.addRef();
+    this->entryPoint = static_cast<wgpu::StringView>(native.entryPoint);
+    this->constants = std::span(native.constants, native.constantCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::ConstantEntry>(e); }) | std::ranges::to<SmallVec<wgpu::ConstantEntry>>();
+    this->buffers = std::span(native.buffers, native.bufferCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::VertexBufferLayout>(e); }) | std::ranges::to<SmallVec<wgpu::VertexBufferLayout>>();
+    return *this;
+}
 void VertexState::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     cstruct.nextInChain = this->nextInChain.getNext();
@@ -11642,6 +12511,17 @@ FragmentState::FragmentState(const WGPUFragmentState& native) {
     this->entryPoint = static_cast<wgpu::StringView>(native.entryPoint);
     this->constants = std::span(native.constants, native.constantCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::ConstantEntry>(e); }) | std::ranges::to<SmallVec<wgpu::ConstantEntry>>();
     this->targets = std::span(native.targets, native.targetCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::ColorTargetState>(e); }) | std::ranges::to<SmallVec<wgpu::ColorTargetState>>();
+}
+FragmentState& FragmentState::operator=(const WGPUFragmentState& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->module = static_cast<wgpu::ShaderModule>(native.module);
+    if (this->module) this->module.addRef();
+    this->entryPoint = static_cast<wgpu::StringView>(native.entryPoint);
+    this->constants = std::span(native.constants, native.constantCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::ConstantEntry>(e); }) | std::ranges::to<SmallVec<wgpu::ConstantEntry>>();
+    this->targets = std::span(native.targets, native.targetCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::ColorTargetState>(e); }) | std::ranges::to<SmallVec<wgpu::ColorTargetState>>();
+    return *this;
 }
 void FragmentState::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -11705,6 +12585,28 @@ RenderPipelineDescriptor::RenderPipelineDescriptor(const WGPURenderPipelineDescr
     } else {
         this->fragment.reset();
     }
+}
+RenderPipelineDescriptor& RenderPipelineDescriptor::operator=(const WGPURenderPipelineDescriptor& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->label = static_cast<wgpu::StringView>(native.label);
+    this->layout = static_cast<wgpu::PipelineLayout>(native.layout);
+    if (this->layout) this->layout.addRef();
+    this->vertex = static_cast<wgpu::VertexState>(native.vertex);
+    this->primitive = static_cast<wgpu::PrimitiveState>(native.primitive);
+    if (native.depthStencil != nullptr) {
+        this->depthStencil = static_cast<wgpu::DepthStencilState>(*(native.depthStencil));
+    } else {
+        this->depthStencil.reset();
+    }
+    this->multisample = static_cast<wgpu::MultisampleState>(native.multisample);
+    if (native.fragment != nullptr) {
+        this->fragment = static_cast<wgpu::FragmentState>(*(native.fragment));
+    } else {
+        this->fragment.reset();
+    }
+    return *this;
 }
 void RenderPipelineDescriptor::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -11841,6 +12743,16 @@ InstanceExtras::InstanceExtras(const WGPUInstanceExtras& native) {
     this->dxilPath = static_cast<wgpu::StringView>(native.dxilPath);
     this->dxcPath = static_cast<wgpu::StringView>(native.dxcPath);
 }
+InstanceExtras& InstanceExtras::operator=(const WGPUInstanceExtras& native) {
+    this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
+    this->backends = static_cast<wgpu::InstanceBackend>(native.backends);
+    this->flags = static_cast<wgpu::InstanceFlag>(native.flags);
+    this->dx12ShaderCompiler = static_cast<wgpu::Dx12Compiler>(native.dx12ShaderCompiler);
+    this->gles3MinorVersion = static_cast<wgpu::Gles3MinorVersion>(native.gles3MinorVersion);
+    this->dxilPath = static_cast<wgpu::StringView>(native.dxilPath);
+    this->dxcPath = static_cast<wgpu::StringView>(native.dxcPath);
+    return *this;
+}
 void InstanceExtras::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     this->chain.to_cstruct(&cstruct.chain);
@@ -11919,6 +12831,11 @@ DeviceExtras::DeviceExtras(const WGPUDeviceExtras& native) {
     this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
     this->tracePath = static_cast<wgpu::StringView>(native.tracePath);
 }
+DeviceExtras& DeviceExtras::operator=(const WGPUDeviceExtras& native) {
+    this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
+    this->tracePath = static_cast<wgpu::StringView>(native.tracePath);
+    return *this;
+}
 void DeviceExtras::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     this->chain.to_cstruct(&cstruct.chain);
@@ -11944,6 +12861,12 @@ NativeLimits::NativeLimits(const WGPUNativeLimits& native) {
     this->chain = static_cast<wgpu::ChainedStructOut>(native.chain);
     this->maxPushConstantSize = static_cast<uint32_t>(native.maxPushConstantSize);
     this->maxNonSamplerBindings = static_cast<uint32_t>(native.maxNonSamplerBindings);
+}
+NativeLimits& NativeLimits::operator=(const WGPUNativeLimits& native) {
+    this->chain = static_cast<wgpu::ChainedStructOut>(native.chain);
+    this->maxPushConstantSize = static_cast<uint32_t>(native.maxPushConstantSize);
+    this->maxNonSamplerBindings = static_cast<uint32_t>(native.maxNonSamplerBindings);
+    return *this;
 }
 void NativeLimits::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -11988,6 +12911,12 @@ PushConstantRange::PushConstantRange(const WGPUPushConstantRange& native) {
     this->start = static_cast<uint32_t>(native.start);
     this->end = static_cast<uint32_t>(native.end);
 }
+PushConstantRange& PushConstantRange::operator=(const WGPUPushConstantRange& native) {
+    this->stages = static_cast<wgpu::ShaderStage>(native.stages);
+    this->start = static_cast<uint32_t>(native.start);
+    this->end = static_cast<uint32_t>(native.end);
+    return *this;
+}
 void PushConstantRange::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     cstruct.stages = static_cast<WGPUShaderStage>(this->stages);
@@ -12022,6 +12951,11 @@ PipelineLayoutExtras::PipelineLayoutExtras(const WGPUPipelineLayoutExtras& nativ
     this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
     this->pushConstantRanges = std::span(native.pushConstantRanges, native.pushConstantRangeCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::PushConstantRange>(e); }) | std::ranges::to<SmallVec<wgpu::PushConstantRange>>();
 }
+PipelineLayoutExtras& PipelineLayoutExtras::operator=(const WGPUPipelineLayoutExtras& native) {
+    this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
+    this->pushConstantRanges = std::span(native.pushConstantRanges, native.pushConstantRangeCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::PushConstantRange>(e); }) | std::ranges::to<SmallVec<wgpu::PushConstantRange>>();
+    return *this;
+}
 void PipelineLayoutExtras::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     this->chain.to_cstruct(&cstruct.chain);
@@ -12031,6 +12965,11 @@ void PipelineLayoutExtras::to_cstruct(CStruct* out) const {
 ShaderDefine::ShaderDefine(const WGPUShaderDefine& native) {
     this->name = static_cast<wgpu::StringView>(native.name);
     this->value = static_cast<wgpu::StringView>(native.value);
+}
+ShaderDefine& ShaderDefine::operator=(const WGPUShaderDefine& native) {
+    this->name = static_cast<wgpu::StringView>(native.name);
+    this->value = static_cast<wgpu::StringView>(native.value);
+    return *this;
 }
 void ShaderDefine::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -12075,6 +13014,13 @@ ShaderModuleGLSLDescriptor::ShaderModuleGLSLDescriptor(const WGPUShaderModuleGLS
     this->code = static_cast<wgpu::StringView>(native.code);
     this->defines = std::span(native.defines, native.defineCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::ShaderDefine>(e); }) | std::ranges::to<SmallVec<wgpu::ShaderDefine>>();
 }
+ShaderModuleGLSLDescriptor& ShaderModuleGLSLDescriptor::operator=(const WGPUShaderModuleGLSLDescriptor& native) {
+    this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
+    this->stage = static_cast<wgpu::ShaderStage>(native.stage);
+    this->code = static_cast<wgpu::StringView>(native.code);
+    this->defines = std::span(native.defines, native.defineCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::ShaderDefine>(e); }) | std::ranges::to<SmallVec<wgpu::ShaderDefine>>();
+    return *this;
+}
 void ShaderModuleGLSLDescriptor::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     this->chain.to_cstruct(&cstruct.chain);
@@ -12111,6 +13057,12 @@ ShaderModuleDescriptorSpirV::ShaderModuleDescriptorSpirV(const WGPUShaderModuleD
     this->label = static_cast<wgpu::StringView>(native.label);
     this->sourceSize = static_cast<uint32_t>(native.sourceSize);
     this->source = static_cast<uint32_t const*>(native.source);
+}
+ShaderModuleDescriptorSpirV& ShaderModuleDescriptorSpirV::operator=(const WGPUShaderModuleDescriptorSpirV& native) {
+    this->label = static_cast<wgpu::StringView>(native.label);
+    this->sourceSize = static_cast<uint32_t>(native.sourceSize);
+    this->source = static_cast<uint32_t const*>(native.source);
+    return *this;
 }
 void ShaderModuleDescriptorSpirV::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -12155,6 +13107,13 @@ RegistryReport::RegistryReport(const WGPURegistryReport& native) {
     this->numKeptFromUser = static_cast<size_t>(native.numKeptFromUser);
     this->numReleasedFromUser = static_cast<size_t>(native.numReleasedFromUser);
     this->elementSize = static_cast<size_t>(native.elementSize);
+}
+RegistryReport& RegistryReport::operator=(const WGPURegistryReport& native) {
+    this->numAllocated = static_cast<size_t>(native.numAllocated);
+    this->numKeptFromUser = static_cast<size_t>(native.numKeptFromUser);
+    this->numReleasedFromUser = static_cast<size_t>(native.numReleasedFromUser);
+    this->elementSize = static_cast<size_t>(native.elementSize);
+    return *this;
 }
 void RegistryReport::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -12213,6 +13172,26 @@ HubReport::HubReport(const WGPUHubReport& native) {
     this->textures = static_cast<wgpu::RegistryReport>(native.textures);
     this->textureViews = static_cast<wgpu::RegistryReport>(native.textureViews);
     this->samplers = static_cast<wgpu::RegistryReport>(native.samplers);
+}
+HubReport& HubReport::operator=(const WGPUHubReport& native) {
+    this->adapters = static_cast<wgpu::RegistryReport>(native.adapters);
+    this->devices = static_cast<wgpu::RegistryReport>(native.devices);
+    this->queues = static_cast<wgpu::RegistryReport>(native.queues);
+    this->pipelineLayouts = static_cast<wgpu::RegistryReport>(native.pipelineLayouts);
+    this->shaderModules = static_cast<wgpu::RegistryReport>(native.shaderModules);
+    this->bindGroupLayouts = static_cast<wgpu::RegistryReport>(native.bindGroupLayouts);
+    this->bindGroups = static_cast<wgpu::RegistryReport>(native.bindGroups);
+    this->commandBuffers = static_cast<wgpu::RegistryReport>(native.commandBuffers);
+    this->renderBundles = static_cast<wgpu::RegistryReport>(native.renderBundles);
+    this->renderPipelines = static_cast<wgpu::RegistryReport>(native.renderPipelines);
+    this->computePipelines = static_cast<wgpu::RegistryReport>(native.computePipelines);
+    this->pipelineCaches = static_cast<wgpu::RegistryReport>(native.pipelineCaches);
+    this->querySets = static_cast<wgpu::RegistryReport>(native.querySets);
+    this->buffers = static_cast<wgpu::RegistryReport>(native.buffers);
+    this->textures = static_cast<wgpu::RegistryReport>(native.textures);
+    this->textureViews = static_cast<wgpu::RegistryReport>(native.textureViews);
+    this->samplers = static_cast<wgpu::RegistryReport>(native.samplers);
+    return *this;
 }
 void HubReport::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -12510,6 +13489,11 @@ GlobalReport::GlobalReport(const WGPUGlobalReport& native) {
     this->surfaces = static_cast<wgpu::RegistryReport>(native.surfaces);
     this->hub = static_cast<wgpu::HubReport>(native.hub);
 }
+GlobalReport& GlobalReport::operator=(const WGPUGlobalReport& native) {
+    this->surfaces = static_cast<wgpu::RegistryReport>(native.surfaces);
+    this->hub = static_cast<wgpu::HubReport>(native.hub);
+    return *this;
+}
 void GlobalReport::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     this->surfaces.to_cstruct(&cstruct.surfaces);
@@ -12553,6 +13537,13 @@ InstanceEnumerateAdapterOptions::InstanceEnumerateAdapterOptions(const WGPUInsta
     }
     this->backends = static_cast<wgpu::InstanceBackend>(native.backends);
 }
+InstanceEnumerateAdapterOptions& InstanceEnumerateAdapterOptions::operator=(const WGPUInstanceEnumerateAdapterOptions& native) {
+    if (native.nextInChain != this->nextInChain.getNext()) {
+        this->nextInChain.setNext(native.nextInChain);
+    }
+    this->backends = static_cast<wgpu::InstanceBackend>(native.backends);
+    return *this;
+}
 void InstanceEnumerateAdapterOptions::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     cstruct.nextInChain = this->nextInChain.getNext();
@@ -12575,6 +13566,16 @@ BindGroupEntryExtras::BindGroupEntryExtras(const WGPUBindGroupEntryExtras& nativ
     this->textureViews = std::span(native.textureViews, native.textureViewCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureView>(e); }) | std::ranges::to<SmallVec<wgpu::TextureView>>();
     for (auto& e : this->textureViews) { e.addRef(); }
 }
+BindGroupEntryExtras& BindGroupEntryExtras::operator=(const WGPUBindGroupEntryExtras& native) {
+    this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
+    this->buffers = std::span(native.buffers, native.bufferCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::Buffer>(e); }) | std::ranges::to<SmallVec<wgpu::Buffer>>();
+    for (auto& e : this->buffers) { e.addRef(); }
+    this->samplers = std::span(native.samplers, native.samplerCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::Sampler>(e); }) | std::ranges::to<SmallVec<wgpu::Sampler>>();
+    for (auto& e : this->samplers) { e.addRef(); }
+    this->textureViews = std::span(native.textureViews, native.textureViewCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::TextureView>(e); }) | std::ranges::to<SmallVec<wgpu::TextureView>>();
+    for (auto& e : this->textureViews) { e.addRef(); }
+    return *this;
+}
 void BindGroupEntryExtras::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     this->chain.to_cstruct(&cstruct.chain);
@@ -12591,6 +13592,11 @@ void BindGroupEntryExtras::to_cstruct(CStruct* out) const {
 BindGroupLayoutEntryExtras::BindGroupLayoutEntryExtras(const WGPUBindGroupLayoutEntryExtras& native) {
     this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
     this->count = static_cast<uint32_t>(native.count);
+}
+BindGroupLayoutEntryExtras& BindGroupLayoutEntryExtras::operator=(const WGPUBindGroupLayoutEntryExtras& native) {
+    this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
+    this->count = static_cast<uint32_t>(native.count);
+    return *this;
 }
 void BindGroupLayoutEntryExtras::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -12609,6 +13615,11 @@ QuerySetDescriptorExtras::QuerySetDescriptorExtras(const WGPUQuerySetDescriptorE
     this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
     this->pipelineStatistics = std::span(native.pipelineStatistics, native.pipelineStatisticCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::PipelineStatisticName>(e); }) | std::ranges::to<SmallVec<wgpu::PipelineStatisticName>>();
 }
+QuerySetDescriptorExtras& QuerySetDescriptorExtras::operator=(const WGPUQuerySetDescriptorExtras& native) {
+    this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
+    this->pipelineStatistics = std::span(native.pipelineStatistics, native.pipelineStatisticCount) | std::views::transform([](auto&& e) { return static_cast<wgpu::PipelineStatisticName>(e); }) | std::ranges::to<SmallVec<wgpu::PipelineStatisticName>>();
+    return *this;
+}
 void QuerySetDescriptorExtras::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
     this->chain.to_cstruct(&cstruct.chain);
@@ -12618,6 +13629,11 @@ void QuerySetDescriptorExtras::to_cstruct(CStruct* out) const {
 SurfaceConfigurationExtras::SurfaceConfigurationExtras(const WGPUSurfaceConfigurationExtras& native) {
     this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
     this->desiredMaximumFrameLatency = static_cast<uint32_t>(native.desiredMaximumFrameLatency);
+}
+SurfaceConfigurationExtras& SurfaceConfigurationExtras::operator=(const WGPUSurfaceConfigurationExtras& native) {
+    this->chain = static_cast<wgpu::ChainedStruct>(native.chain);
+    this->desiredMaximumFrameLatency = static_cast<uint32_t>(native.desiredMaximumFrameLatency);
+    return *this;
 }
 void SurfaceConfigurationExtras::to_cstruct(CStruct* out) const {
     auto& cstruct = *out;
@@ -12639,14 +13655,14 @@ void Adapter::getFeatures(wgpu::SupportedFeatures* features) const {
     wgpu::SupportedFeatures::CStruct features_cstruct;
     features->to_cstruct(&features_cstruct);
     wgpuAdapterGetFeatures(m_raw, &features_cstruct);
-    *features = static_cast<wgpu::SupportedFeatures>(features_cstruct);
+    *features = features_cstruct;
     wgpuSupportedFeaturesFreeMembers(features_cstruct);
 }
 wgpu::Status Adapter::getInfo(wgpu::AdapterInfo* info) const {
     wgpu::AdapterInfo::CStruct info_cstruct;
     info->to_cstruct(&info_cstruct);
     wgpu::Status res = static_cast<wgpu::Status>(wgpuAdapterGetInfo(m_raw, &info_cstruct));
-    *info = static_cast<wgpu::AdapterInfo>(info_cstruct);
+    *info = info_cstruct;
     wgpuAdapterInfoFreeMembers(info_cstruct);
     return res;
 }
@@ -12654,7 +13670,7 @@ wgpu::Status Adapter::getLimits(wgpu::Limits* limits) const {
     wgpu::Limits::CStruct limits_cstruct;
     limits->to_cstruct(&limits_cstruct);
     wgpu::Status res = static_cast<wgpu::Status>(wgpuAdapterGetLimits(m_raw, &limits_cstruct));
-    *limits = static_cast<wgpu::Limits>(limits_cstruct);
+    *limits = limits_cstruct;
     return res;
 }
 wgpu::Bool Adapter::hasFeature(wgpu::FeatureName feature) const {
@@ -13026,14 +14042,14 @@ void Device::getFeatures(wgpu::SupportedFeatures* features) const {
     wgpu::SupportedFeatures::CStruct features_cstruct;
     features->to_cstruct(&features_cstruct);
     wgpuDeviceGetFeatures(m_raw, &features_cstruct);
-    *features = static_cast<wgpu::SupportedFeatures>(features_cstruct);
+    *features = features_cstruct;
     wgpuSupportedFeaturesFreeMembers(features_cstruct);
 }
 wgpu::Status Device::getLimits(wgpu::Limits* limits) const {
     wgpu::Limits::CStruct limits_cstruct;
     limits->to_cstruct(&limits_cstruct);
     wgpu::Status res = static_cast<wgpu::Status>(wgpuDeviceGetLimits(m_raw, &limits_cstruct));
-    *limits = static_cast<wgpu::Limits>(limits_cstruct);
+    *limits = limits_cstruct;
     return res;
 }
 wgpu::Future Device::getLostFuture() const {
@@ -13092,7 +14108,7 @@ wgpu::Status Instance::getWGSLLanguageFeatures(wgpu::SupportedWGSLLanguageFeatur
     wgpu::SupportedWGSLLanguageFeatures::CStruct features_cstruct;
     features->to_cstruct(&features_cstruct);
     wgpu::Status res = static_cast<wgpu::Status>(wgpuInstanceGetWGSLLanguageFeatures(m_raw, &features_cstruct));
-    *features = static_cast<wgpu::SupportedWGSLLanguageFeatures>(features_cstruct);
+    *features = features_cstruct;
     wgpuSupportedWGSLLanguageFeaturesFreeMembers(features_cstruct);
     return res;
 }
@@ -13121,7 +14137,7 @@ wgpu::WaitStatus Instance::waitAny(size_t futureCount, wgpu::FutureWaitInfo* fut
     wgpu::FutureWaitInfo::CStruct futures_cstruct;
     futures->to_cstruct(&futures_cstruct);
     wgpu::WaitStatus res = static_cast<wgpu::WaitStatus>(wgpuInstanceWaitAny(m_raw, futureCount, &futures_cstruct, timeoutNS));
-    *futures = static_cast<wgpu::FutureWaitInfo>(futures_cstruct);
+    *futures = futures_cstruct;
     return res;
 }
 wgpu::WaitStatus Instance::waitAny(size_t futureCount, uint64_t timeoutNS) const {
@@ -13456,7 +14472,7 @@ wgpu::Status Surface::getCapabilities(wgpu::Adapter const& adapter, wgpu::Surfac
     wgpu::SurfaceCapabilities::CStruct capabilities_cstruct;
     capabilities->to_cstruct(&capabilities_cstruct);
     wgpu::Status res = static_cast<wgpu::Status>(wgpuSurfaceGetCapabilities(m_raw, adapter.raw(), &capabilities_cstruct));
-    *capabilities = static_cast<wgpu::SurfaceCapabilities>(capabilities_cstruct);
+    *capabilities = capabilities_cstruct;
     wgpuSurfaceCapabilitiesFreeMembers(capabilities_cstruct);
     return res;
 }
@@ -13464,7 +14480,7 @@ void Surface::getCurrentTexture(wgpu::SurfaceTexture* surfaceTexture) const {
     wgpu::SurfaceTexture::CStruct surfaceTexture_cstruct;
     surfaceTexture->to_cstruct(&surfaceTexture_cstruct);
     wgpuSurfaceGetCurrentTexture(m_raw, &surfaceTexture_cstruct);
-    *surfaceTexture = static_cast<wgpu::SurfaceTexture>(surfaceTexture_cstruct);
+    *surfaceTexture = surfaceTexture_cstruct;
 }
 wgpu::Status Surface::present() const {
     wgpu::Status res = static_cast<wgpu::Status>(wgpuSurfacePresent(m_raw));
@@ -14179,14 +15195,14 @@ wgpu::Status getInstanceCapabilities(wgpu::InstanceCapabilities* capabilities) {
     wgpu::InstanceCapabilities::CStruct capabilities_cstruct;
     capabilities->to_cstruct(&capabilities_cstruct);
     wgpu::Status res = static_cast<wgpu::Status>(wgpuGetInstanceCapabilities(&capabilities_cstruct));
-    *capabilities = static_cast<wgpu::InstanceCapabilities>(capabilities_cstruct);
+    *capabilities = capabilities_cstruct;
     return res;
 }
 void generateReport(wgpu::Instance const& instance, wgpu::GlobalReport* report) {
     wgpu::GlobalReport::CStruct report_cstruct;
     report->to_cstruct(&report_cstruct);
     wgpuGenerateReport(instance.raw(), &report_cstruct);
-    *report = static_cast<wgpu::GlobalReport>(report_cstruct);
+    *report = report_cstruct;
 }
 void setLogCallback(wgpu::LogCallback callback, void* userdata) {
     WGPULogCallback callback_native = nullptr;

@@ -849,6 +849,7 @@ struct {0} {{
         {2}
     }};
     {0}(const WGPU{0}& native);
+    {0}& operator=(const WGPU{0}& native);
     {0}() {{{1}}};
     void to_cstruct(CStruct* out) const;
     {3}
@@ -876,6 +877,7 @@ struct {0} {{
 struct {0} {{
     using CStruct = WGPU{0};
     {0}(const WGPU{0}& native);
+    {0}& operator=(const WGPU{0}& native);
     {0}() {{{1}}};
     void to_cstruct(CStruct* out) const;
     {3}
@@ -910,6 +912,15 @@ struct {0} {{
                         name,
                         fields | std::views::transform([](const StructFieldCpp& f) { return f.assign_from_native; }) |
                             std::views::join_with(std::string("\n")) | std::ranges::to<std::string>());
+        std::string assign_native_impl =
+            std::format(R"(
+{0}& {0}::operator=(const WGPU{0}& native) {{
+{1}
+    return *this;
+}})",
+                        name,
+                        fields | std::views::transform([](const StructFieldCpp& f) { return f.assign_from_native; }) |
+                            std::views::join_with(std::string("\n")) | std::ranges::to<std::string>());
         std::string to_cstruct_impl =
             std::format(R"(
 {0}::to_cstruct(CStruct* out) const {{
@@ -920,7 +931,7 @@ struct {0} {{
                         fields | std::views::transform([](const StructFieldCpp& f) { return f.assign_to_cstruct; }) |
                             std::views::join_with(std::string("\n")) | std::ranges::to<std::string>());
         std::string methods = methods_impl | std::views::join_with(std::string("\n")) | std::ranges::to<std::string>();
-        return from_native_impl + "\n" + to_cstruct_impl + "\n" + methods;
+        return from_native_impl + "\n" + assign_native_impl + "\n" + to_cstruct_impl + "\n" + methods;
     }
 };
 
@@ -1809,7 +1820,7 @@ template <typename T>
                     if (!param.is_const) {
                         write_back = std::format(
                             R"(
-    if ({0}) *{0} = static_cast<{1}>({0}_cstruct);)",
+    if ({0}) *{0} = {0}_cstruct;)",
                             param.name, param.type);
                         if (has_free_members) {
                             write_back += std::format(R"(
@@ -1839,7 +1850,7 @@ template <typename T>
                     assign    = std::format("&{0}_cstruct", param.name);
                     if (!param.is_const) {
                         write_back = std::format(R"(
-    *{0} = static_cast<{1}>({0}_cstruct);)",
+    *{0} = {0}_cstruct;)",
                                                  param.name, param.type);
                         if (has_free_members) {
                             write_back += std::format(R"(
