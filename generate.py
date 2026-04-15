@@ -1363,6 +1363,45 @@ def produce_webgpu_cpp(api: WebGpuApi) -> WebGpuApiCpp:
 		struct_api = pstruct_api
 		struct_cpp = StructApiCpp(name=struct_api.name)
 
+		# Special case: StringView becomes an owned-string type.
+		# We don't need C-ABI layout; to_cstruct / from-native handle the
+		# conversion through the WGPUStringView CStruct as the middle layer.
+		if struct_api.name == "StringView":
+			struct_cpp.binary_compatible = False
+			struct_cpp.fields.append(StructFieldCpp(
+				type="std::string",
+				name="owned_",
+				assign_from_native=(
+					"\n    if (native.length == WGPU_STRLEN) {\n"
+					"        this->owned_ = (native.data ? std::string(native.data) : std::string());\n"
+					"    } else if (native.data) {\n"
+					"        this->owned_ = std::string(native.data, native.length);\n"
+					"    }\n"
+				),
+				assign_to_cstruct=(
+					"\n    cstruct.data = this->owned_.data();\n"
+					"    cstruct.length = this->owned_.size();"
+				),
+			))
+			# setData / setLength – keep same signatures as the C-derived API
+			for ret_ref, suffix, ret in [("StringView&", "&", "*this"), ("StringView&&", "&&", "std::move(*this)")]:
+				struct_cpp.methods_decl.append(f"\n    {ret_ref} setData(char const* value) {suffix};")
+				struct_cpp.methods_impl.append(
+					f"\n{ret_ref} StringView::setData(char const* value) {suffix} {{\n"
+					f"    this->owned_ = value ? std::string(value) : std::string();\n"
+					f"    return {ret};\n"
+					f"}}"
+				)
+				struct_cpp.methods_decl.append(f"\n    {ret_ref} setLength(size_t value) {suffix};")
+				struct_cpp.methods_impl.append(
+					f"\n{ret_ref} StringView::setLength(size_t value) {suffix} {{\n"
+					f"    this->owned_.resize(value);\n"
+					f"    return {ret};\n"
+					f"}}"
+				)
+			struct_cpp_map["StringView"] = struct_cpp
+			return struct_cpp
+
 		for init_macro in api.init_macros:
 			if struct_api.name == init_macro.type:
 				struct_cpp.init_macro = init_macro.macro

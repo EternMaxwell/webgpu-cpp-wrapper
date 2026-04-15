@@ -13,6 +13,7 @@
 #include <memory>
 #include <new>
 #include <initializer_list>
+#include <string>
 #include <string_view>
 #include <span>
 #include <optional>
@@ -24,11 +25,13 @@ export module webgpu;
 
 {{begin_inject}}
 typename StringView:
-    StringView(const std::string_view& sv) : data(sv.data()), length(sv.size()) {}
-    StringView(const char* str) : data(str), length(WGPU_STRLEN) {}
-    operator std::string_view() const {
-        return length == WGPU_STRLEN ? std::string_view(data) : std::string_view(data, length);
-    }
+    StringView(const std::string_view& sv) : owned_(sv) {}
+    StringView(const char* str) : owned_(str ? str : "") {}
+    StringView(const StringView&) = default;
+    StringView(StringView&&) = default;
+    StringView& operator=(const StringView&) = default;
+    StringView& operator=(StringView&&) = default;
+    operator std::string_view() const { return std::string_view(owned_); }
 typename Instance:
     WEBGPU_CPP_NAMESPACE::Adapter requestAdapter(const RequestAdapterOptions& options) const;
 typename Adapter:
