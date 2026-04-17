@@ -929,6 +929,9 @@ def parse_params(params_str: str) -> List[FuncParamApi]:
 		typ = " ".join(type_tokens)
 		is_pointer = False
 		is_const = False
+		if name.startswith("*"):
+			name = name[1:]
+			is_pointer = True
 		if "*" in typ:
 			is_pointer = True
 			typ = typ.replace("*", "", 1)
@@ -952,6 +955,7 @@ def parse_params(params_str: str) -> List[FuncParamApi]:
 
 def parse_func(name: str, return_type: str, params_str: str) -> FuncApi:
 	nullable = False
+	return_type = return_type.strip()
 	if "WGPU_NULLABLE" in return_type:
 		return_type = return_type.replace("WGPU_NULLABLE", "").strip()
 		nullable = True
@@ -961,10 +965,13 @@ def parse_func(name: str, return_type: str, params_str: str) -> FuncApi:
 
 
 def parse_enum(name: str, lines: List[str], start_index: int) -> Tuple[EnumApi, int]:
-	end_re = re.compile(r".*\}")
+	end_re = re.compile(r"^\}")
 	entry_re = re.compile(r"^\s+WGPU([^_]+)_([\w_]+) *= *([^,]+),?")
 	api = EnumApi(name=name)
 	i = start_index
+	# Skip the opening brace if it's on its own line (next-line brace style)
+	if i < len(lines) and lines[i].strip() == "{":
+		i += 1
 	while i < len(lines) and not end_re.search(lines[i]):
 		match = entry_re.search(lines[i])
 		if match:
@@ -980,12 +987,32 @@ def parse_enum(name: str, lines: List[str], start_index: int) -> Tuple[EnumApi, 
 
 def parse_struct(name: str, lines: List[str], start_index: int) -> Tuple[StructApi, int]:
 	end_re = re.compile(r".*\}")
+	open_re = re.compile(r".*\{")
 	field_re = re.compile(r"^\s*(.+) (\w+);$")
 	api = StructApi(name=name)
 	count_fields: List[int] = []
 	i = start_index
-	while i < len(lines) and not end_re.search(lines[i]):
-		match = field_re.search(lines[i])
+	# Skip the opening brace if it's on its own line (next-line brace style)
+	if i < len(lines) and lines[i].strip() == "{":
+		i += 1
+	depth = 0
+	while i < len(lines):
+		line = lines[i]
+		if end_re.search(line):
+			if depth > 0:
+				depth -= 1
+				i += 1
+				continue
+			else:
+				break
+		if open_re.search(line):
+			depth += 1
+			i += 1
+			continue
+		if depth > 0:
+			i += 1
+			continue
+		match = field_re.search(line)
 		if match:
 			field_type = match.group(1)
 			field_name = match.group(2)
@@ -1039,10 +1066,10 @@ def parse_struct(name: str, lines: List[str], start_index: int) -> Tuple[StructA
 
 def parse_header(api: WebGpuApi, header_content: str) -> None:
 	lines = header_content.split("\n")
-	struct_re = re.compile(r"typedef +struct +WGPU(\w+) *\{")
+	struct_re = re.compile(r"typedef +struct +WGPU(\w+) *(?:\{|$)")
 	handle_re = re.compile(r"typedef +struct .*\* *WGPU(\w+)\s+WGPU_OBJECT_ATTRIBUTE;")
 	func_re = re.compile(r"(?:WGPU_EXPORT +)?([\w *]+) +wgpu(\w+)\s*\(([^)]*)\)\s*(?:WGPU_FUNCTION_ATTRIBUTE)?;")
-	enum_re = re.compile(r"typedef +enum +WGPU(\w+) *\{")
+	enum_re = re.compile(r"typedef +enum +WGPU(\w+) *(?:\{|$)")
 	flag_enum_re = re.compile(r"typedef +WGPUFlags +WGPU(\w+)\s*;")
 	flat_value_re = re.compile(r"static +const +WGPU(\w+) +WGPU(\w+)_(\w+) *= *(\w+)( /\*(.*)\*/)?;")
 	callback_re = re.compile(r"typedef +void +\(\*WGPU(\w+)Callback\)\((.*)\)\s*(?:WGPU_FUNCTION_ATTRIBUTE)?;")
